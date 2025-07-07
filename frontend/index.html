@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GymRank - Competitive Lifting Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            border: "#e5e5e5",
+            input: "#f5f5f5",
+            ring: "#000000",
+            background: "#ffffff",
+            foreground: "#000000",
+            primary: {
+              DEFAULT: "#000000",
+              foreground: "#ffffff",
+            },
+            secondary: {
+              DEFAULT: "#f5f5f5",
+              foreground: "#000000",
+            },
+            destructive: {
+              DEFAULT: "#000000",
+              foreground: "#ffffff",
+            },
+            muted: {
+              DEFAULT: "#f9f9f9",
+              foreground: "#666666",
+            },
+            accent: {
+              DEFAULT: "#f0f0f0",
+              foreground: "#000000",
+            },
+            card: {
+              DEFAULT: "#ffffff",
+              foreground: "#000000",
+            },
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Flat box design - remove all rounded corners and shadows */
+    * {
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    
+    /* Custom dropdown styles */
+    .custom-dropdown {
+      position: relative;
+    }
+    
+    .dropdown-content {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid #e5e5e5;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+    
+    .dropdown-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .dropdown-item:hover {
+      background: #f5f5f5;
+    }
+    
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body class="bg-background text-foreground min-h-screen">
+  <!-- Navigation Header -->
+  <nav class="bg-card border-b border-border sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <h1 class="text-2xl font-bold">🏋️ GymRank</h1>
+        </div>
+        <div class="flex items-center space-x-1">
+          <button onclick="showSection('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-md font-medium transition-colors hover:bg-muted">
+            Home
+          </button>
+          <button onclick="showSection('videos')" id="nav-videos" class="nav-btn px-4 py-2 rounded-md font-medium transition-colors hover:bg-muted">
+            Videos
+          </button>
+          <button onclick="showSection('leaderboard')" id="nav-leaderboard" class="nav-btn px-4 py-2 rounded-md font-medium transition-colors hover:bg-muted">
+            Leaderboard
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mx-auto px-4 py-8">
+    <!-- Home Section -->
+    <div id="home-section" class="section">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-2">Welcome to GymRank</h2>
+        <p class="text-muted-foreground">Competitive lifting platform inspired by Bakugan rankings</p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-card border border-border rounded-lg p-6">
+          <h3 class="font-semibold text-lg mb-2">Total Lifters</h3>
+          <p class="text-3xl font-bold text-primary" id="total-users">-</p>
+        </div>
+        <div class="bg-card border border-border rounded-lg p-6">
+          <h3 class="font-semibold text-lg mb-2">Total PRs</h3>
+          <p class="text-3xl font-bold text-primary" id="total-prs">-</p>
+        </div>
+        <div class="bg-card border border-border rounded-lg p-6">
+          <h3 class="font-semibold text-lg mb-2">Top ELO</h3>
+          <p class="text-3xl font-bold text-primary" id="top-elo">-</p>
+        </div>
+      </div>
+
+      <!-- Action Center -->
+      <div class="bg-card border border-border rounded-lg p-6">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Get Started</h2>
+        
+        <!-- Tab Buttons -->
+        <div class="flex space-x-1 mb-6 bg-muted p-1">
+          <button onclick="showTab('register')" id="tab-register" class="tab-btn flex-1 px-4 py-2 font-medium transition-colors">
+            Join Competition
+          </button>
+          <button onclick="showTab('pr')" id="tab-pr" class="tab-btn flex-1 px-4 py-2 font-medium transition-colors">
+            Submit PR
+          </button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div id="tab-register-content" class="tab-content">
+          <div class="text-center mb-4">
+            <h3 class="text-lg font-semibold mb-2">🏆 Join the Competition</h3>
+            <p class="text-muted-foreground text-sm">Create your account and start competing</p>
+          </div>
+          <form id="register-form" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-2">Username</label>
+              <input type="text" id="username" class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Enter your username">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Country Flag</label>
+              <div class="custom-dropdown">
+                <input 
+                  type="text" 
+                  id="flag-search" 
+                  class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" 
+                  placeholder="Search for your country..."
+                  autocomplete="off"
+                  onclick="showCountryDropdown()"
+                  oninput="filterCountries()"
+                >
+                <input type="hidden" id="flag" name="flag">
+                <div id="country-dropdown" class="dropdown-content hidden"></div>
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-primary text-primary-foreground py-3 px-4 rounded-md hover:bg-primary/90 transition-colors font-medium">
+              Register Now
+            </button>
+          </form>
+        </div>
+
+        <div id="tab-pr-content" class="tab-content hidden">
+          <div class="text-center mb-4">
+            <h3 class="text-lg font-semibold mb-2">💪 Submit Your PR</h3>
+            <p class="text-muted-foreground text-sm">Log your personal records and optionally share video proof</p>
+          </div>
+          <form id="combined-pr-form" class="space-y-4" enctype="multipart/form-data">
+            <div>
+              <label class="block text-sm font-medium mb-2">Username</label>
+              <input type="text" id="pr-username" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" placeholder="Your username">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Lift Type</label>
+              <select id="lift-type" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring">
+                <option value="bench">Bench Press</option>
+                <option value="deadlift">Deadlift</option>
+                <option value="squat">Squat</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Weight (kg)</label>
+              <input type="number" id="weight" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" placeholder="Enter weight in kg" step="0.5">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Video Proof (Optional)</label>
+              <input type="file" id="video-file" accept="video/*" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring">
+              <p class="text-sm text-muted-foreground mt-1">Optional: Upload video proof • MP4, WebM, MOV, AVI • Max 30 seconds</p>
+            </div>
+            <button type="submit" class="w-full bg-primary text-primary-foreground py-3 px-4 hover:bg-secondary hover:text-secondary-foreground transition-colors font-medium">
+              Submit PR
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Videos Section -->
+    <div id="videos-section" class="section hidden">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-2">📹 PR Videos</h2>
+        <p class="text-muted-foreground">Watch incredible lifts from our community</p>
+      </div>
+      
+      <div class="bg-card border border-border rounded-lg p-6">
+        <div id="videos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div class="flex justify-center items-center py-8 col-span-full">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaderboard Section -->
+    <div id="leaderboard-section" class="section hidden">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-2">🏆 Leaderboard</h2>
+        <p class="text-muted-foreground">Top lifters ranked by ELO rating</p>
+      </div>
+      
+      <div class="bg-card border border-border rounded-lg p-6">
+        <div id="leaderboard" class="space-y-3">
+          <div class="flex justify-center items-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:5000';
+
+    // Navigation functionality
+    function showSection(sectionName) {
+      // Hide all sections
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      
+      // Remove active state from all nav buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-primary', 'text-primary-foreground');
+        btn.classList.add('text-foreground');
+      });
+      
+      // Show selected section
+      document.getElementById(`${sectionName}-section`).classList.remove('hidden');
+      
+      // Add active state to clicked nav button
+      const activeBtn = document.getElementById(`nav-${sectionName}`);
+      activeBtn.classList.add('bg-primary', 'text-primary-foreground');
+      activeBtn.classList.remove('text-foreground');
+      
+      // Load data for specific sections
+      if (sectionName === 'videos') {
+        loadVideos();
+      } else if (sectionName === 'leaderboard') {
+        loadLeaderboard();
+      } else if (sectionName === 'home') {
+        loadLeaderboard(); // For stats
+      }
+    }
+
+    // Tab functionality for the action center
+    function showTab(tabName) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+      });
+      
+      // Remove active state from all tab buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-background', 'text-foreground', 'shadow-sm');
+        btn.classList.add('text-muted-foreground');
+      });
+      
+      // Show selected tab content
+      document.getElementById(`tab-${tabName}-content`).classList.remove('hidden');
+      
+      // Add active state to clicked tab button
+      const activeBtn = document.getElementById(`tab-${tabName}`);
+      activeBtn.classList.add('bg-background', 'text-foreground', 'shadow-sm');
+      activeBtn.classList.remove('text-muted-foreground');
+    }
+
+    // Country data with all countries
+    const countries = [
+      { code: "🇦🇫", name: "Afghanistan" },
+      { code: "🇦🇱", name: "Albania" },
+      { code: "🇩🇿", name: "Algeria" },
+      { code: "🇦🇩", name: "Andorra" },
+      { code: "🇦🇴", name: "Angola" },
+      { code: "🇦🇬", name: "Antigua and Barbuda" },
+      { code: "🇦🇷", name: "Argentina" },
+      { code: "🇦🇲", name: "Armenia" },
+      { code: "🇦🇺", name: "Australia" },
+      { code: "🇦🇹", name: "Austria" },
+      { code: "🇦🇿", name: "Azerbaijan" },
+      { code: "🇧🇸", name: "Bahamas" },
+      { code: "🇧🇭", name: "Bahrain" },
+      { code: "🇧🇩", name: "Bangladesh" },
+      { code: "🇧🇧", name: "Barbados" },
+      { code: "🇧🇾", name: "Belarus" },
+      { code: "🇧🇪", name: "Belgium" },
+      { code: "🇧🇿", name: "Belize" },
+      { code: "🇧🇯", name: "Benin" },
+      { code: "🇧🇹", name: "Bhutan" },
+      { code: "🇧🇴", name: "Bolivia" },
+      { code: "🇧🇦", name: "Bosnia and Herzegovina" },
+      { code: "🇧🇼", name: "Botswana" },
+      { code: "🇧🇷", name: "Brazil" },
+      { code: "🇧🇳", name: "Brunei" },
+      { code: "🇧🇬", name: "Bulgaria" },
+      { code: "🇧🇫", name: "Burkina Faso" },
+      { code: "🇧🇮", name: "Burundi" },
+      { code: "🇰🇭", name: "Cambodia" },
+      { code: "🇨🇲", name: "Cameroon" },
+      { code: "🇨🇦", name: "Canada" },
+      { code: "🇨🇻", name: "Cape Verde" },
+      { code: "🇨🇫", name: "Central African Republic" },
+      { code: "🇹🇩", name: "Chad" },
+      { code: "🇨🇱", name: "Chile" },
+      { code: "🇨🇳", name: "China" },
+      { code: "🇨🇴", name: "Colombia" },
+      { code: "🇰🇲", name: "Comoros" },
+      { code: "🇨🇬", name: "Congo" },
+      { code: "🇨🇩", name: "Democratic Republic of the Congo" },
+      { code: "🇨🇷", name: "Costa Rica" },
+      { code: "🇭🇷", name: "Croatia" },
+      { code: "🇨🇺", name: "Cuba" },
+      { code: "🇨🇾", name: "Cyprus" },
+      { code: "🇨🇿", name: "Czech Republic" },
+      { code: "🇩🇰", name: "Denmark" },
+      { code: "🇩🇯", name: "Djibouti" },
+      { code: "🇩🇲", name: "Dominica" },
+      { code: "🇩🇴", name: "Dominican Republic" },
+      { code: "🇪🇨", name: "Ecuador" },
+      { code: "🇪🇬", name: "Egypt" },
+      { code: "🇸🇻", name: "El Salvador" },
+      { code: "🇬🇶", name: "Equatorial Guinea" },
+      { code: "🇪🇷", name: "Eritrea" },
+      { code: "🇪🇪", name: "Estonia" },
+      { code: "🇪🇹", name: "Ethiopia" },
+      { code: "🇫🇯", name: "Fiji" },
+      { code: "🇫🇮", name: "Finland" },
+      { code: "🇫🇷", name: "France" },
+      { code: "🇬🇦", name: "Gabon" },
+      { code: "🇬🇲", name: "Gambia" },
+      { code: "🇬🇪", name: "Georgia" },
+      { code: "🇩🇪", name: "Germany" },
+      { code: "🇬🇭", name: "Ghana" },
+      { code: "🇬🇷", name: "Greece" },
+      { code: "🇬🇩", name: "Grenada" },
+      { code: "🇬🇹", name: "Guatemala" },
+      { code: "🇬🇳", name: "Guinea" },
+      { code: "🇬🇼", name: "Guinea-Bissau" },
+      { code: "🇬🇾", name: "Guyana" },
+      { code: "🇭🇹", name: "Haiti" },
+      { code: "🇭🇳", name: "Honduras" },
+      { code: "🇭🇺", name: "Hungary" },
+      { code: "🇮🇸", name: "Iceland" },
+      { code: "🇮🇳", name: "India" },
+      { code: "🇮🇩", name: "Indonesia" },
+      { code: "🇮🇷", name: "Iran" },
+      { code: "🇮🇶", name: "Iraq" },
+      { code: "🇮🇪", name: "Ireland" },
+      { code: "🇮🇱", name: "Israel" },
+      { code: "🇮🇹", name: "Italy" },
+      { code: "🇯🇲", name: "Jamaica" },
+      { code: "🇯🇵", name: "Japan" },
+      { code: "🇯🇴", name: "Jordan" },
+      { code: "🇰🇿", name: "Kazakhstan" },
+      { code: "🇰🇪", name: "Kenya" },
+      { code: "🇰🇮", name: "Kiribati" },
+      { code: "🇰🇵", name: "North Korea" },
+      { code: "🇰🇷", name: "South Korea" },
+      { code: "🇰🇼", name: "Kuwait" },
+      { code: "🇰🇬", name: "Kyrgyzstan" },
+      { code: "🇱🇦", name: "Laos" },
+      { code: "🇱🇻", name: "Latvia" },
+      { code: "🇱🇧", name: "Lebanon" },
+      { code: "🇱🇸", name: "Lesotho" },
+      { code: "🇱🇷", name: "Liberia" },
+      { code: "🇱🇾", name: "Libya" },
+      { code: "🇱🇮", name: "Liechtenstein" },
+      { code: "🇱🇹", name: "Lithuania" },
+      { code: "🇱🇺", name: "Luxembourg" },
+      { code: "🇲🇰", name: "North Macedonia" },
+      { code: "🇲🇬", name: "Madagascar" },
+      { code: "🇲🇼", name: "Malawi" },
+      { code: "🇲🇾", name: "Malaysia" },
+      { code: "🇲🇻", name: "Maldives" },
+      { code: "🇲🇱", name: "Mali" },
+      { code: "🇲🇹", name: "Malta" },
+      { code: "🇲🇭", name: "Marshall Islands" },
+      { code: "🇲🇷", name: "Mauritania" },
+      { code: "🇲🇺", name: "Mauritius" },
+      { code: "🇲🇽", name: "Mexico" },
+      { code: "🇫🇲", name: "Micronesia" },
+      { code: "🇲🇩", name: "Moldova" },
+      { code: "🇲🇨", name: "Monaco" },
+      { code: "🇲🇳", name: "Mongolia" },
+      { code: "🇲🇪", name: "Montenegro" },
+      { code: "🇲🇦", name: "Morocco" },
+      { code: "🇲🇿", name: "Mozambique" },
+      { code: "🇲🇲", name: "Myanmar" },
+      { code: "🇳🇦", name: "Namibia" },
+      { code: "🇳🇷", name: "Nauru" },
+      { code: "🇳🇵", name: "Nepal" },
+      { code: "🇳🇱", name: "Netherlands" },
+      { code: "🇳🇿", name: "New Zealand" },
+      { code: "🇳🇮", name: "Nicaragua" },
+      { code: "🇳🇪", name: "Niger" },
+      { code: "🇳🇬", name: "Nigeria" },
+      { code: "🇳🇴", name: "Norway" },
+      { code: "🇴🇲", name: "Oman" },
+      { code: "🇵🇰", name: "Pakistan" },
+      { code: "🇵🇼", name: "Palau" },
+      { code: "🇵🇸", name: "Palestine" },
+      { code: "🇵🇦", name: "Panama" },
+      { code: "🇵🇬", name: "Papua New Guinea" },
+      { code: "🇵🇾", name: "Paraguay" },
+      { code: "🇵🇪", name: "Peru" },
+      { code: "🇵🇭", name: "Philippines" },
+      { code: "🇵🇱", name: "Poland" },
+      { code: "🇵🇹", name: "Portugal" },
+      { code: "🇶🇦", name: "Qatar" },
+      { code: "🇷🇴", name: "Romania" },
+      { code: "🇷🇺", name: "Russia" },
+      { code: "🇷🇼", name: "Rwanda" },
+      { code: "🇰🇳", name: "Saint Kitts and Nevis" },
+      { code: "🇱🇨", name: "Saint Lucia" },
+      { code: "🇻🇨", name: "Saint Vincent and the Grenadines" },
+      { code: "🇼🇸", name: "Samoa" },
+      { code: "🇸🇲", name: "San Marino" },
+      { code: "🇸🇹", name: "Sao Tome and Principe" },
+      { code: "🇸🇦", name: "Saudi Arabia" },
+      { code: "🇸🇳", name: "Senegal" },
+      { code: "🇷🇸", name: "Serbia" },
+      { code: "🇸🇨", name: "Seychelles" },
+      { code: "🇸🇱", name: "Sierra Leone" },
+      { code: "🇸🇬", name: "Singapore" },
+      { code: "🇸🇰", name: "Slovakia" },
+      { code: "🇸🇮", name: "Slovenia" },
+      { code: "🇸🇧", name: "Solomon Islands" },
+      { code: "🇸🇴", name: "Somalia" },
+      { code: "🇿🇦", name: "South Africa" },
+      { code: "🇸🇸", name: "South Sudan" },
+      { code: "🇪🇸", name: "Spain" },
+      { code: "🇱🇰", name: "Sri Lanka" },
+      { code: "🇸🇩", name: "Sudan" },
+      { code: "🇸🇷", name: "Suriname" },
+      { code: "🇸🇿", name: "Eswatini" },
+      { code: "🇸🇪", name: "Sweden" },
+      { code: "🇨🇭", name: "Switzerland" },
+      { code: "🇸🇾", name: "Syria" },
+      { code: "🇹🇼", name: "Taiwan" },
+      { code: "🇹🇯", name: "Tajikistan" },
+      { code: "🇹🇿", name: "Tanzania" },
+      { code: "🇹🇭", name: "Thailand" },
+      { code: "🇹🇱", name: "Timor-Leste" },
+      { code: "🇹🇬", name: "Togo" },
+      { code: "🇹🇴", name: "Tonga" },
+      { code: "🇹🇹", name: "Trinidad and Tobago" },
+      { code: "🇹🇳", name: "Tunisia" },
+      { code: "🇹🇷", name: "Turkey" },
+      { code: "🇹🇲", name: "Turkmenistan" },
+      { code: "🇹🇻", name: "Tuvalu" },
+      { code: "🇺🇬", name: "Uganda" },
+      { code: "🇺🇦", name: "Ukraine" },
+      { code: "🇦🇪", name: "United Arab Emirates" },
+      { code: "🇬🇧", name: "United Kingdom" },
+      { code: "🇺🇸", name: "United States" },
+      { code: "🇺🇾", name: "Uruguay" },
+      { code: "🇺🇿", name: "Uzbekistan" },
+      { code: "🇻🇺", name: "Vanuatu" },
+      { code: "🇻🇦", name: "Vatican City" },
+      { code: "🇻🇪", name: "Venezuela" },
+      { code: "🇻🇳", name: "Vietnam" },
+      { code: "🇾🇪", name: "Yemen" },
+      { code: "🇿🇲", name: "Zambia" },
+      { code: "🇿🇼", name: "Zimbabwe" }
+    ];
+
+    // Country dropdown functionality
+    function showCountryDropdown() {
+      const dropdown = document.getElementById('country-dropdown');
+      dropdown.classList.remove('hidden');
+      filterCountries();
+    }
+
+    function filterCountries() {
+      const searchTerm = document.getElementById('flag-search').value.toLowerCase();
+      const dropdown = document.getElementById('country-dropdown');
+      
+      const filteredCountries = countries.filter(country => 
+        country.name.toLowerCase().includes(searchTerm)
+      );
+      
+      dropdown.innerHTML = filteredCountries.map(country => 
+        `<div class="dropdown-item" onclick="selectCountry('${country.code}', '${country.name}')">
+          ${country.code} ${country.name}
+        </div>`
+      ).join('');
+    }
+
+    function selectCountry(code, name) {
+      document.getElementById('flag-search').value = `${code} ${name}`;
+      document.getElementById('flag').value = code;
+      document.getElementById('country-dropdown').classList.add('hidden');
+    }
+
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+      const dropdown = document.getElementById('country-dropdown');
+      const searchInput = document.getElementById('flag-search');
+      
+      if (!dropdown.contains(event.target) && event.target !== searchInput) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    // Initialize with home section and register tab
+    document.addEventListener('DOMContentLoaded', () => {
+      showSection('home');
+      showTab('register');
+    });
+
+    // Load leaderboard
+    function loadLeaderboard() {
+      fetch(`${API_BASE}/api/leaderboard`)
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById('leaderboard');
+          if (data.length === 0) {
+            list.innerHTML = '<p class="text-muted-foreground text-center py-8">No users yet. Be the first to register!</p>';
+            return;
+          }
+          
+          list.innerHTML = data.map((user, index) => {
+            const rankColors = ['text-yellow-500', 'text-gray-400', 'text-orange-500'];
+            const rankColor = rankColors[index] || 'text-muted-foreground';
+            const rank = index + 1;
+            
+            return `
+              <div class="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                <div class="flex items-center space-x-3">
+                  <span class="text-2xl font-bold ${rankColor}">#${rank}</span>
+                  <span class="text-2xl">${user.flag}</span>
+                  <span class="font-semibold">${user.username}</span>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold">${user.elo.toFixed(0)} ELO</div>
+                  <div class="text-sm text-muted-foreground">
+                    ${rank === 1 ? 'Champion' : rank === 2 ? 'Elite' : rank === 3 ? 'Titan' : 'Brawler'}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+          
+          // Update stats
+          document.getElementById('total-users').textContent = data.length;
+          document.getElementById('top-elo').textContent = data[0] ? data[0].elo.toFixed(0) : '0';
+        })
+        .catch(err => {
+          document.getElementById('leaderboard').innerHTML = 
+            '<div class="text-center py-8 text-destructive">Error loading leaderboard. Make sure the backend is running.</div>';
+        });
+    }
+
+    // Register form
+    document.getElementById('register-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const flag = document.getElementById('flag').value;
+      
+      fetch(`${API_BASE}/api/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, flag })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('Registration successful!');
+        document.getElementById('register-form').reset();
+        loadLeaderboard();
+      })
+      .catch(err => alert('Registration failed. Username might already exist.'));
+    });
+
+    // PR form
+    document.getElementById('pr-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('pr-username').value;
+      const lift_type = document.getElementById('lift-type').value;
+      const weight = parseFloat(document.getElementById('weight').value);
+      
+      fetch(`${API_BASE}/api/submit_pr`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, lift_type, weight })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('PR submitted successfully!');
+        document.getElementById('pr-form').reset();
+        loadLeaderboard();
+      })
+      .catch(err => alert('PR submission failed. Make sure you are registered.'));
+    });
+
+    // Load videos
+    function loadVideos() {
+      fetch(`${API_BASE}/api/videos`)
+        .then(res => res.json())
+        .then(data => {
+          const grid = document.getElementById('videos-grid');
+          if (data.length === 0) {
+            grid.innerHTML = '<p class="text-muted-foreground text-center py-8 col-span-full">No videos yet. Upload the first one!</p>';
+            return;
+          }
+          
+          grid.innerHTML = data.map(video => {
+            const liftEmoji = {
+              'bench': '🏋️',
+              'deadlift': '🏋️‍♂️',
+              'squat': '🦵'
+            };
+            
+            return `
+              <div class="relative group cursor-pointer bg-black rounded-lg overflow-hidden aspect-square">
+                <video 
+                  class="w-full h-full object-cover"
+                  poster=""
+                  preload="metadata"
+                  onmouseover="this.play()"
+                  onmouseout="this.pause()"
+                  muted
+                  loop
+                >
+                  <source src="${API_BASE}${video.video_url}" type="video/mp4">
+                </video>
+                
+                <!-- Overlay -->
+                <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div class="absolute top-2 left-2 flex items-center space-x-1">
+                    <span class="text-white text-sm">${video.flag}</span>
+                    <span class="text-white text-sm font-medium">${video.username}</span>
+                  </div>
+                  <div class="absolute bottom-2 left-2 text-white">
+                    <div class="flex items-center space-x-1">
+                      <span>${liftEmoji[video.lift_type] || '🏋️'}</span>
+                      <span class="text-sm">${video.lift_type}</span>
+                    </div>
+                    <div class="text-lg font-bold">${video.weight}kg</div>
+                  </div>
+                  <div class="absolute top-2 right-2 text-white text-sm">
+                    ${video.elo.toFixed(0)} ELO
+                  </div>
+                </div>
+                
+                <!-- Play icon -->
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div class="bg-white bg-opacity-80 rounded-full p-3">
+                    <svg class="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        })
+        .catch(err => {
+          document.getElementById('videos-grid').innerHTML = 
+            '<div class="text-center py-8 text-destructive col-span-full">Error loading videos.</div>';
+        });
+    }
+
+    // Combined PR form (with optional video)
+    document.getElementById('combined-pr-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('pr-username').value;
+      const lift_type = document.getElementById('lift-type').value;
+      const weight = parseFloat(document.getElementById('weight').value);
+      const videoFile = document.getElementById('video-file').files[0];
+      
+      // Show loading state
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = videoFile ? 'Uploading...' : 'Submitting...';
+      submitBtn.disabled = true;
+      
+      if (videoFile) {
+        // Submit with video
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('lift_type', lift_type);
+        formData.append('weight', weight);
+        formData.append('video', videoFile);
+        
+        fetch(`${API_BASE}/api/upload_video`, {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            alert('Upload failed: ' + data.error);
+          } else {
+            alert('PR with video uploaded successfully!');
+            document.getElementById('combined-pr-form').reset();
+            loadVideos();
+            loadLeaderboard();
+          }
+        })
+        .catch(err => {
+          alert('Upload failed. Please try again.');
+        })
+        .finally(() => {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        });
+      } else {
+        // Submit without video
+        fetch(`${API_BASE}/api/submit_pr`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, lift_type, weight })
+        })
+        .then(res => res.json())
+        .then(data => {
+          alert('PR submitted successfully!');
+          document.getElementById('combined-pr-form').reset();
+          loadLeaderboard();
+        })
+        .catch(err => alert('PR submission failed. Make sure you are registered.'))
+        .finally(() => {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        });
+      }
+    });
+
+    // Load initial data on page load
+    // Data loading is now handled by showSection() function
+  </script>
+</body>
+</html>

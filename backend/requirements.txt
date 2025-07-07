@@ -1,0 +1,8 @@
+flask
+gunicorn
+python-dotenv
+psycopg2-binary
+flask-cors
+werkzeug
+pillow
+ffmpeg-python
