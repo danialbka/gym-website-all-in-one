@@ -101,6 +101,18 @@
           <button onclick="showSection('leaderboard')" id="nav-leaderboard" class="nav-btn px-4 py-2 rounded-md font-medium transition-colors hover:bg-muted">
             Leaderboard
           </button>
+          <div id="user-info" class="hidden ml-4 px-3 py-1 bg-muted text-sm font-medium">
+            <span id="logged-in-user"></span>
+            <button onclick="logout()" class="ml-2 text-destructive hover:underline">Logout</button>
+          </div>
+          <div id="auth-buttons" class="flex items-center space-x-2">
+            <a href="login.html" class="px-4 py-2 text-foreground hover:bg-muted transition-colors font-medium">
+              Login
+            </a>
+            <a href="register.html" class="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
+              Register
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -130,84 +142,52 @@
         </div>
       </div>
 
-      <!-- Action Center -->
-      <div class="bg-card border border-border rounded-lg p-6">
-        <h2 class="text-2xl font-semibold mb-6 text-center">Get Started</h2>
+      <!-- PR Submission Section (Only for logged-in users) -->
+      <div id="pr-section" class="bg-card border border-border rounded-lg p-6 hidden">
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-semibold mb-2">💪 Submit Your PR</h2>
+          <p class="text-muted-foreground">Log your personal records and optionally share video proof</p>
+        </div>
         
-        <!-- Tab Buttons -->
-        <div class="flex space-x-1 mb-6 bg-muted p-1">
-          <button onclick="showTab('register')" id="tab-register" class="tab-btn flex-1 px-4 py-2 font-medium transition-colors">
-            Join Competition
-          </button>
-          <button onclick="showTab('pr')" id="tab-pr" class="tab-btn flex-1 px-4 py-2 font-medium transition-colors">
+        <form id="combined-pr-form" class="space-y-4" enctype="multipart/form-data">
+          <div>
+            <label class="block text-sm font-medium mb-2">Username</label>
+            <input type="text" id="pr-username" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" placeholder="Your username" readonly>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">Lift Type</label>
+            <select id="lift-type" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring">
+              <option value="bench">Bench Press</option>
+              <option value="deadlift">Deadlift</option>
+              <option value="squat">Squat</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">Weight (kg)</label>
+            <input type="number" id="weight" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" placeholder="Enter weight in kg" step="0.5" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">Video Proof (Optional)</label>
+            <input type="file" id="video-file" accept="video/*" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring">
+            <p class="text-sm text-muted-foreground mt-1">Optional: Upload video proof • MP4, WebM, MOV, AVI • Max 30 seconds</p>
+          </div>
+          <button type="submit" class="w-full bg-primary text-primary-foreground py-3 px-4 hover:bg-primary/90 transition-colors font-medium">
             Submit PR
           </button>
-        </div>
+        </form>
+      </div>
 
-        <!-- Tab Contents -->
-        <div id="tab-register-content" class="tab-content">
-          <div class="text-center mb-4">
-            <h3 class="text-lg font-semibold mb-2">🏆 Join the Competition</h3>
-            <p class="text-muted-foreground text-sm">Create your account and start competing</p>
-          </div>
-          <form id="register-form" class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium mb-2">Username</label>
-              <input type="text" id="username" class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Enter your username">
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-2">Country Flag</label>
-              <div class="custom-dropdown">
-                <input 
-                  type="text" 
-                  id="flag-search" 
-                  class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" 
-                  placeholder="Search for your country..."
-                  autocomplete="off"
-                  onclick="showCountryDropdown()"
-                  oninput="filterCountries()"
-                >
-                <input type="hidden" id="flag" name="flag">
-                <div id="country-dropdown" class="dropdown-content hidden"></div>
-              </div>
-            </div>
-            <button type="submit" class="w-full bg-primary text-primary-foreground py-3 px-4 rounded-md hover:bg-primary/90 transition-colors font-medium">
-              Register Now
-            </button>
-          </form>
-        </div>
-
-        <div id="tab-pr-content" class="tab-content hidden">
-          <div class="text-center mb-4">
-            <h3 class="text-lg font-semibold mb-2">💪 Submit Your PR</h3>
-            <p class="text-muted-foreground text-sm">Log your personal records and optionally share video proof</p>
-          </div>
-          <form id="combined-pr-form" class="space-y-4" enctype="multipart/form-data">
-            <div>
-              <label class="block text-sm font-medium mb-2">Username</label>
-              <input type="text" id="pr-username" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" placeholder="Your username">
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-2">Lift Type</label>
-              <select id="lift-type" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring">
-                <option value="bench">Bench Press</option>
-                <option value="deadlift">Deadlift</option>
-                <option value="squat">Squat</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-2">Weight (kg)</label>
-              <input type="number" id="weight" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" placeholder="Enter weight in kg" step="0.5">
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-2">Video Proof (Optional)</label>
-              <input type="file" id="video-file" accept="video/*" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring">
-              <p class="text-sm text-muted-foreground mt-1">Optional: Upload video proof • MP4, WebM, MOV, AVI • Max 30 seconds</p>
-            </div>
-            <button type="submit" class="w-full bg-primary text-primary-foreground py-3 px-4 hover:bg-secondary hover:text-secondary-foreground transition-colors font-medium">
-              Submit PR
-            </button>
-          </form>
+      <!-- Welcome Message for Non-logged-in Users -->
+      <div id="welcome-section" class="bg-card border border-border rounded-lg p-8 text-center">
+        <h2 class="text-2xl font-semibold mb-4">Welcome to GymRank!</h2>
+        <p class="text-muted-foreground mb-6">Join the competitive lifting platform inspired by Bakugan rankings</p>
+        <div class="flex justify-center space-x-4">
+          <a href="register.html" class="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
+            Get Started
+          </a>
+          <a href="login.html" class="px-6 py-3 border border-border hover:bg-muted transition-colors font-medium">
+            Sign In
+          </a>
         </div>
       </div>
     </div>
@@ -279,270 +259,35 @@
       }
     }
 
-    // Tab functionality for the action center
-    function showTab(tabName) {
-      // Hide all tab contents
-      document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
-      });
-      
-      // Remove active state from all tab buttons
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-background', 'text-foreground', 'shadow-sm');
-        btn.classList.add('text-muted-foreground');
-      });
-      
-      // Show selected tab content
-      document.getElementById(`tab-${tabName}-content`).classList.remove('hidden');
-      
-      // Add active state to clicked tab button
-      const activeBtn = document.getElementById(`tab-${tabName}`);
-      activeBtn.classList.add('bg-background', 'text-foreground', 'shadow-sm');
-      activeBtn.classList.remove('text-muted-foreground');
-    }
 
-    // Country data with all countries
-    const countries = [
-      { code: "🇦🇫", name: "Afghanistan" },
-      { code: "🇦🇱", name: "Albania" },
-      { code: "🇩🇿", name: "Algeria" },
-      { code: "🇦🇩", name: "Andorra" },
-      { code: "🇦🇴", name: "Angola" },
-      { code: "🇦🇬", name: "Antigua and Barbuda" },
-      { code: "🇦🇷", name: "Argentina" },
-      { code: "🇦🇲", name: "Armenia" },
-      { code: "🇦🇺", name: "Australia" },
-      { code: "🇦🇹", name: "Austria" },
-      { code: "🇦🇿", name: "Azerbaijan" },
-      { code: "🇧🇸", name: "Bahamas" },
-      { code: "🇧🇭", name: "Bahrain" },
-      { code: "🇧🇩", name: "Bangladesh" },
-      { code: "🇧🇧", name: "Barbados" },
-      { code: "🇧🇾", name: "Belarus" },
-      { code: "🇧🇪", name: "Belgium" },
-      { code: "🇧🇿", name: "Belize" },
-      { code: "🇧🇯", name: "Benin" },
-      { code: "🇧🇹", name: "Bhutan" },
-      { code: "🇧🇴", name: "Bolivia" },
-      { code: "🇧🇦", name: "Bosnia and Herzegovina" },
-      { code: "🇧🇼", name: "Botswana" },
-      { code: "🇧🇷", name: "Brazil" },
-      { code: "🇧🇳", name: "Brunei" },
-      { code: "🇧🇬", name: "Bulgaria" },
-      { code: "🇧🇫", name: "Burkina Faso" },
-      { code: "🇧🇮", name: "Burundi" },
-      { code: "🇰🇭", name: "Cambodia" },
-      { code: "🇨🇲", name: "Cameroon" },
-      { code: "🇨🇦", name: "Canada" },
-      { code: "🇨🇻", name: "Cape Verde" },
-      { code: "🇨🇫", name: "Central African Republic" },
-      { code: "🇹🇩", name: "Chad" },
-      { code: "🇨🇱", name: "Chile" },
-      { code: "🇨🇳", name: "China" },
-      { code: "🇨🇴", name: "Colombia" },
-      { code: "🇰🇲", name: "Comoros" },
-      { code: "🇨🇬", name: "Congo" },
-      { code: "🇨🇩", name: "Democratic Republic of the Congo" },
-      { code: "🇨🇷", name: "Costa Rica" },
-      { code: "🇭🇷", name: "Croatia" },
-      { code: "🇨🇺", name: "Cuba" },
-      { code: "🇨🇾", name: "Cyprus" },
-      { code: "🇨🇿", name: "Czech Republic" },
-      { code: "🇩🇰", name: "Denmark" },
-      { code: "🇩🇯", name: "Djibouti" },
-      { code: "🇩🇲", name: "Dominica" },
-      { code: "🇩🇴", name: "Dominican Republic" },
-      { code: "🇪🇨", name: "Ecuador" },
-      { code: "🇪🇬", name: "Egypt" },
-      { code: "🇸🇻", name: "El Salvador" },
-      { code: "🇬🇶", name: "Equatorial Guinea" },
-      { code: "🇪🇷", name: "Eritrea" },
-      { code: "🇪🇪", name: "Estonia" },
-      { code: "🇪🇹", name: "Ethiopia" },
-      { code: "🇫🇯", name: "Fiji" },
-      { code: "🇫🇮", name: "Finland" },
-      { code: "🇫🇷", name: "France" },
-      { code: "🇬🇦", name: "Gabon" },
-      { code: "🇬🇲", name: "Gambia" },
-      { code: "🇬🇪", name: "Georgia" },
-      { code: "🇩🇪", name: "Germany" },
-      { code: "🇬🇭", name: "Ghana" },
-      { code: "🇬🇷", name: "Greece" },
-      { code: "🇬🇩", name: "Grenada" },
-      { code: "🇬🇹", name: "Guatemala" },
-      { code: "🇬🇳", name: "Guinea" },
-      { code: "🇬🇼", name: "Guinea-Bissau" },
-      { code: "🇬🇾", name: "Guyana" },
-      { code: "🇭🇹", name: "Haiti" },
-      { code: "🇭🇳", name: "Honduras" },
-      { code: "🇭🇺", name: "Hungary" },
-      { code: "🇮🇸", name: "Iceland" },
-      { code: "🇮🇳", name: "India" },
-      { code: "🇮🇩", name: "Indonesia" },
-      { code: "🇮🇷", name: "Iran" },
-      { code: "🇮🇶", name: "Iraq" },
-      { code: "🇮🇪", name: "Ireland" },
-      { code: "🇮🇱", name: "Israel" },
-      { code: "🇮🇹", name: "Italy" },
-      { code: "🇯🇲", name: "Jamaica" },
-      { code: "🇯🇵", name: "Japan" },
-      { code: "🇯🇴", name: "Jordan" },
-      { code: "🇰🇿", name: "Kazakhstan" },
-      { code: "🇰🇪", name: "Kenya" },
-      { code: "🇰🇮", name: "Kiribati" },
-      { code: "🇰🇵", name: "North Korea" },
-      { code: "🇰🇷", name: "South Korea" },
-      { code: "🇰🇼", name: "Kuwait" },
-      { code: "🇰🇬", name: "Kyrgyzstan" },
-      { code: "🇱🇦", name: "Laos" },
-      { code: "🇱🇻", name: "Latvia" },
-      { code: "🇱🇧", name: "Lebanon" },
-      { code: "🇱🇸", name: "Lesotho" },
-      { code: "🇱🇷", name: "Liberia" },
-      { code: "🇱🇾", name: "Libya" },
-      { code: "🇱🇮", name: "Liechtenstein" },
-      { code: "🇱🇹", name: "Lithuania" },
-      { code: "🇱🇺", name: "Luxembourg" },
-      { code: "🇲🇰", name: "North Macedonia" },
-      { code: "🇲🇬", name: "Madagascar" },
-      { code: "🇲🇼", name: "Malawi" },
-      { code: "🇲🇾", name: "Malaysia" },
-      { code: "🇲🇻", name: "Maldives" },
-      { code: "🇲🇱", name: "Mali" },
-      { code: "🇲🇹", name: "Malta" },
-      { code: "🇲🇭", name: "Marshall Islands" },
-      { code: "🇲🇷", name: "Mauritania" },
-      { code: "🇲🇺", name: "Mauritius" },
-      { code: "🇲🇽", name: "Mexico" },
-      { code: "🇫🇲", name: "Micronesia" },
-      { code: "🇲🇩", name: "Moldova" },
-      { code: "🇲🇨", name: "Monaco" },
-      { code: "🇲🇳", name: "Mongolia" },
-      { code: "🇲🇪", name: "Montenegro" },
-      { code: "🇲🇦", name: "Morocco" },
-      { code: "🇲🇿", name: "Mozambique" },
-      { code: "🇲🇲", name: "Myanmar" },
-      { code: "🇳🇦", name: "Namibia" },
-      { code: "🇳🇷", name: "Nauru" },
-      { code: "🇳🇵", name: "Nepal" },
-      { code: "🇳🇱", name: "Netherlands" },
-      { code: "🇳🇿", name: "New Zealand" },
-      { code: "🇳🇮", name: "Nicaragua" },
-      { code: "🇳🇪", name: "Niger" },
-      { code: "🇳🇬", name: "Nigeria" },
-      { code: "🇳🇴", name: "Norway" },
-      { code: "🇴🇲", name: "Oman" },
-      { code: "🇵🇰", name: "Pakistan" },
-      { code: "🇵🇼", name: "Palau" },
-      { code: "🇵🇸", name: "Palestine" },
-      { code: "🇵🇦", name: "Panama" },
-      { code: "🇵🇬", name: "Papua New Guinea" },
-      { code: "🇵🇾", name: "Paraguay" },
-      { code: "🇵🇪", name: "Peru" },
-      { code: "🇵🇭", name: "Philippines" },
-      { code: "🇵🇱", name: "Poland" },
-      { code: "🇵🇹", name: "Portugal" },
-      { code: "🇶🇦", name: "Qatar" },
-      { code: "🇷🇴", name: "Romania" },
-      { code: "🇷🇺", name: "Russia" },
-      { code: "🇷🇼", name: "Rwanda" },
-      { code: "🇰🇳", name: "Saint Kitts and Nevis" },
-      { code: "🇱🇨", name: "Saint Lucia" },
-      { code: "🇻🇨", name: "Saint Vincent and the Grenadines" },
-      { code: "🇼🇸", name: "Samoa" },
-      { code: "🇸🇲", name: "San Marino" },
-      { code: "🇸🇹", name: "Sao Tome and Principe" },
-      { code: "🇸🇦", name: "Saudi Arabia" },
-      { code: "🇸🇳", name: "Senegal" },
-      { code: "🇷🇸", name: "Serbia" },
-      { code: "🇸🇨", name: "Seychelles" },
-      { code: "🇸🇱", name: "Sierra Leone" },
-      { code: "🇸🇬", name: "Singapore" },
-      { code: "🇸🇰", name: "Slovakia" },
-      { code: "🇸🇮", name: "Slovenia" },
-      { code: "🇸🇧", name: "Solomon Islands" },
-      { code: "🇸🇴", name: "Somalia" },
-      { code: "🇿🇦", name: "South Africa" },
-      { code: "🇸🇸", name: "South Sudan" },
-      { code: "🇪🇸", name: "Spain" },
-      { code: "🇱🇰", name: "Sri Lanka" },
-      { code: "🇸🇩", name: "Sudan" },
-      { code: "🇸🇷", name: "Suriname" },
-      { code: "🇸🇿", name: "Eswatini" },
-      { code: "🇸🇪", name: "Sweden" },
-      { code: "🇨🇭", name: "Switzerland" },
-      { code: "🇸🇾", name: "Syria" },
-      { code: "🇹🇼", name: "Taiwan" },
-      { code: "🇹🇯", name: "Tajikistan" },
-      { code: "🇹🇿", name: "Tanzania" },
-      { code: "🇹🇭", name: "Thailand" },
-      { code: "🇹🇱", name: "Timor-Leste" },
-      { code: "🇹🇬", name: "Togo" },
-      { code: "🇹🇴", name: "Tonga" },
-      { code: "🇹🇹", name: "Trinidad and Tobago" },
-      { code: "🇹🇳", name: "Tunisia" },
-      { code: "🇹🇷", name: "Turkey" },
-      { code: "🇹🇲", name: "Turkmenistan" },
-      { code: "🇹🇻", name: "Tuvalu" },
-      { code: "🇺🇬", name: "Uganda" },
-      { code: "🇺🇦", name: "Ukraine" },
-      { code: "🇦🇪", name: "United Arab Emirates" },
-      { code: "🇬🇧", name: "United Kingdom" },
-      { code: "🇺🇸", name: "United States" },
-      { code: "🇺🇾", name: "Uruguay" },
-      { code: "🇺🇿", name: "Uzbekistan" },
-      { code: "🇻🇺", name: "Vanuatu" },
-      { code: "🇻🇦", name: "Vatican City" },
-      { code: "🇻🇪", name: "Venezuela" },
-      { code: "🇻🇳", name: "Vietnam" },
-      { code: "🇾🇪", name: "Yemen" },
-      { code: "🇿🇲", name: "Zambia" },
-      { code: "🇿🇼", name: "Zimbabwe" }
-    ];
-
-    // Country dropdown functionality
-    function showCountryDropdown() {
-      const dropdown = document.getElementById('country-dropdown');
-      dropdown.classList.remove('hidden');
-      filterCountries();
-    }
-
-    function filterCountries() {
-      const searchTerm = document.getElementById('flag-search').value.toLowerCase();
-      const dropdown = document.getElementById('country-dropdown');
-      
-      const filteredCountries = countries.filter(country => 
-        country.name.toLowerCase().includes(searchTerm)
-      );
-      
-      dropdown.innerHTML = filteredCountries.map(country => 
-        `<div class="dropdown-item" onclick="selectCountry('${country.code}', '${country.name}')">
-          ${country.code} ${country.name}
-        </div>`
-      ).join('');
-    }
-
-    function selectCountry(code, name) {
-      document.getElementById('flag-search').value = `${code} ${name}`;
-      document.getElementById('flag').value = code;
-      document.getElementById('country-dropdown').classList.add('hidden');
-    }
-
-    // Hide dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-      const dropdown = document.getElementById('country-dropdown');
-      const searchInput = document.getElementById('flag-search');
-      
-      if (!dropdown.contains(event.target) && event.target !== searchInput) {
-        dropdown.classList.add('hidden');
-      }
-    });
-
-    // Initialize with home section and register tab
-    document.addEventListener('DOMContentLoaded', () => {
+    // Load initial data and check session on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeEventListeners();
+      checkUserSession();
       showSection('home');
-      showTab('register');
+      loadLeaderboard();
     });
+
+    // Initialize all event listeners
+    function initializeEventListeners() {
+      const combinedPrForm = document.getElementById('combined-pr-form');
+      if (combinedPrForm) {
+        combinedPrForm.addEventListener('submit', handleCombinedPR);
+      }
+    }
+
+    // Check for saved user session on page load
+    function checkUserSession() {
+      const savedUser = localStorage.getItem('gymrank_user');
+      if (savedUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          updateUIForLoggedInUser();
+        } catch (e) {
+          localStorage.removeItem('gymrank_user');
+        }
+      }
+    }
 
     // Load leaderboard
     function loadLeaderboard() {
@@ -587,46 +332,7 @@
         });
     }
 
-    // Register form
-    document.getElementById('register-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value;
-      const flag = document.getElementById('flag').value;
-      
-      fetch(`${API_BASE}/api/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, flag })
-      })
-      .then(res => res.json())
-      .then(data => {
-        alert('Registration successful!');
-        document.getElementById('register-form').reset();
-        loadLeaderboard();
-      })
-      .catch(err => alert('Registration failed. Username might already exist.'));
-    });
 
-    // PR form
-    document.getElementById('pr-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const username = document.getElementById('pr-username').value;
-      const lift_type = document.getElementById('lift-type').value;
-      const weight = parseFloat(document.getElementById('weight').value);
-      
-      fetch(`${API_BASE}/api/submit_pr`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, lift_type, weight })
-      })
-      .then(res => res.json())
-      .then(data => {
-        alert('PR submitted successfully!');
-        document.getElementById('pr-form').reset();
-        loadLeaderboard();
-      })
-      .catch(err => alert('PR submission failed. Make sure you are registered.'));
-    });
 
     // Load videos
     function loadVideos() {
@@ -696,8 +402,91 @@
         });
     }
 
-    // Combined PR form (with optional video)
-    document.getElementById('combined-pr-form').addEventListener('submit', (e) => {
+
+    // User session management
+    let currentUser = null;
+
+
+    // Auto-fill username when logged in
+    function updateUIForLoggedInUser() {
+      if (currentUser) {
+        // Show user info in nav, hide auth buttons
+        document.getElementById('user-info').classList.remove('hidden');
+        document.getElementById('logged-in-user').textContent = `${currentUser.flag} ${currentUser.display_name || currentUser.username}`;
+        document.getElementById('auth-buttons').classList.add('hidden');
+        
+        // Show PR section, hide welcome section
+        document.getElementById('pr-section').classList.remove('hidden');
+        document.getElementById('welcome-section').classList.add('hidden');
+        
+        // Auto-fill username in PR form
+        const prUsernameField = document.getElementById('pr-username');
+        if (prUsernameField) {
+          prUsernameField.value = currentUser.username;
+        }
+      } else {
+        // Show auth buttons, hide user info
+        document.getElementById('user-info').classList.add('hidden');
+        document.getElementById('auth-buttons').classList.remove('hidden');
+        
+        // Hide PR section, show welcome section
+        document.getElementById('pr-section').classList.add('hidden');
+        document.getElementById('welcome-section').classList.remove('hidden');
+      }
+    }
+
+    // Logout function
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('gymrank_user');
+      
+      // Update UI
+      updateUIForLoggedInUser();
+      
+      // Clear username field
+      const prUsernameField = document.getElementById('pr-username');
+      if (prUsernameField) {
+        prUsernameField.value = '';
+      }
+      
+      alert('Logged out successfully!');
+    }
+
+    // Check for saved user session on page load
+    function checkUserSession() {
+      const savedUser = localStorage.getItem('gymrank_user');
+      if (savedUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          updateUIForLoggedInUser();
+        } catch (e) {
+          localStorage.removeItem('gymrank_user');
+        }
+      }
+    }
+
+    // Load initial data and check session on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize all event listeners once DOM is ready
+      initializeEventListeners();
+      
+      checkUserSession();
+      showSection('home');
+      loadLeaderboard();
+    });
+
+    // Initialize all event listeners
+    function initializeEventListeners() {
+      // Only add listeners if elements exist
+      const combinedPrForm = document.getElementById('combined-pr-form');
+      
+      if (combinedPrForm) {
+        combinedPrForm.addEventListener('submit', handleCombinedPR);
+      }
+    }
+
+
+    function handleCombinedPR(e) {
       e.preventDefault();
       
       const username = document.getElementById('pr-username').value;
@@ -750,9 +539,13 @@
         })
         .then(res => res.json())
         .then(data => {
-          alert('PR submitted successfully!');
-          document.getElementById('combined-pr-form').reset();
-          loadLeaderboard();
+          if (data.error) {
+            alert('PR submission failed: ' + data.error);
+          } else {
+            alert('PR submitted successfully!');
+            document.getElementById('combined-pr-form').reset();
+            loadLeaderboard();
+          }
         })
         .catch(err => alert('PR submission failed. Make sure you are registered.'))
         .finally(() => {
@@ -760,10 +553,7 @@
           submitBtn.disabled = false;
         });
       }
-    });
-
-    // Load initial data on page load
-    // Data loading is now handled by showSection() function
+    }
   </script>
 </body>
 </html>

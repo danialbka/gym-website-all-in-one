@@ -4,23 +4,91 @@ from services.supabase import get_db_connection, calculate_elo
 import os
 import uuid
 import ffmpeg
+import bcrypt
+from datetime import datetime
 
 api_blueprint = Blueprint('api', __name__)
 
 @api_blueprint.route('/api/register', methods=['POST'])
 def register_user():
     data = request.json
-    username = data['username']
-    flag = data['flag']
+    username = data.get('username')
+    password = data.get('password')
+    email = data.get('email')
+    display_name = data.get('display_name', username)
+    flag = data.get('flag')
+    
+    # Validate required fields
+    if not all([username, password, flag]):
+        return jsonify({'error': 'Username, password, and flag are required'}), 400
+    
+    # Hash password
+    password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute("INSERT INTO users (username, flag) VALUES (%s, %s) RETURNING *", 
-                       (username, flag))
+            # Check if user already exists
+            cur.execute("SELECT username FROM users WHERE username = %s", (username,))
+            if cur.fetchone():
+                return jsonify({'error': 'Username already exists'}), 400
+            
+            # Check if email already exists (if provided)
+            if email:
+                cur.execute("SELECT email FROM users WHERE email = %s", (email,))
+                if cur.fetchone():
+                    return jsonify({'error': 'Email already exists'}), 400
+            
+            cur.execute("""
+                INSERT INTO users (username, password_hash, email, display_name, flag) 
+                VALUES (%s, %s, %s, %s, %s) RETURNING username, email, display_name, flag, elo, created_at
+            """, (username, password_hash, email, display_name, flag))
+            
             user = cur.fetchone()
             conn.commit()
             return jsonify(dict(user)), 201
+    except Exception as e:
+        return jsonify({'error': 'Registration failed'}), 500
+    finally:
+        conn.close()
+
+@api_blueprint.route('/api/login', methods=['POST'])
+def login_user():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    
+    if not all([username, password]):
+        return jsonify({'error': 'Username and password are required'}), 400
+    
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT username, password_hash, email, display_name, flag, elo, is_active, created_at 
+                FROM users WHERE username = %s AND is_active = TRUE
+            """, (username,))
+            user = cur.fetchone()
+            
+            if not user:
+                return jsonify({'error': 'Invalid username or password'}), 401
+            
+            # Verify password
+            if not bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
+                return jsonify({'error': 'Invalid username or password'}), 401
+            
+            # Update last login
+            cur.execute("UPDATE users SET last_login = %s WHERE username = %s", 
+                       (datetime.now(), username))
+            conn.commit()
+            
+            # Return user data without password hash
+            user_data = dict(user)
+            del user_data['password_hash']
+            return jsonify(user_data), 200
+            
+    except Exception as e:
+        return jsonify({'error': 'Login failed'}), 500
     finally:
         conn.close()
 
