@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - GymRank</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            border: "#e5e5e5",
+            input: "#f5f5f5",
+            ring: "#000000",
+            background: "#ffffff",
+            foreground: "#000000",
+            primary: {
+              DEFAULT: "#000000",
+              foreground: "#ffffff",
+            },
+            secondary: {
+              DEFAULT: "#f5f5f5",
+              foreground: "#000000",
+            },
+            destructive: {
+              DEFAULT: "#000000",
+              foreground: "#ffffff",
+            },
+            muted: {
+              DEFAULT: "#f9f9f9",
+              foreground: "#666666",
+            },
+            accent: {
+              DEFAULT: "#f0f0f0",
+              foreground: "#000000",
+            },
+            card: {
+              DEFAULT: "#ffffff",
+              foreground: "#000000",
+            },
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Flat box design - remove all rounded corners and shadows */
+    * {
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+  </style>
+</head>
+<body class="bg-background text-foreground min-h-screen">
+  <!-- Navigation Header -->
+  <nav class="bg-card border-b border-border">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <h1 class="text-2xl font-bold">🏋️ GymRank</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="index.html" class="text-muted-foreground hover:text-foreground transition-colors">
+            Home
+          </a>
+          <a href="register.html" class="text-muted-foreground hover:text-foreground transition-colors">
+            Register
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mx-auto px-4 py-16">
+    <div class="max-w-md mx-auto">
+      <!-- Login Card -->
+      <div class="bg-card border border-border p-8">
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-bold mb-2">Welcome Back</h2>
+          <p class="text-muted-foreground">Sign in to your GymRank account</p>
+        </div>
+
+        <form id="login-form" class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium mb-2">Username</label>
+            <input 
+              type="text" 
+              id="username" 
+              class="w-full px-4 py-3 border border-input bg-input focus:outline-none focus:border-ring" 
+              placeholder="Enter your username"
+              required
+            >
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-2">Password</label>
+            <input 
+              type="password" 
+              id="password" 
+              class="w-full px-4 py-3 border border-input bg-input focus:outline-none focus:border-ring" 
+              placeholder="Enter your password"
+              required
+            >
+          </div>
+
+          <button 
+            type="submit" 
+            class="w-full bg-primary text-primary-foreground py-3 px-4 hover:bg-primary/90 transition-colors font-medium"
+          >
+            Sign In
+          </button>
+        </form>
+
+        <div class="mt-6 text-center">
+          <p class="text-muted-foreground">
+            Don't have an account? 
+            <a href="register.html" class="text-foreground hover:underline font-medium">
+              Sign up here
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:5000';
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      if (!username || !password) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          alert('Login failed: ' + data.error);
+        } else {
+          // Store user session
+          localStorage.setItem('gymrank_user', JSON.stringify(data));
+          alert('Login successful!');
+          
+          // Redirect to main app
+          window.location.href = 'index.html';
+        }
+      } catch (error) {
+        alert('Login failed. Please try again.');
+        console.error('Login error:', error);
+      }
+    });
+
+    // Check if user is already logged in
+    const savedUser = localStorage.getItem('gymrank_user');
+    if (savedUser) {
+      // User is already logged in, redirect to main app
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GymRank - Competitive Lifting Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            border: "#e5e5e5",
+            input: "#f5f5f5",
+            ring: "#000000",
+            background: "#ffffff",
+            foreground: "#000000",
+            primary: {
+              DEFAULT: "#000000",
+              foreground: "#ffffff",
+            },
+            secondary: {
+              DEFAULT: "#f5f5f5",
+              foreground: "#000000",
+            },
+            destructive: {
+              DEFAULT: "#000000",
+              foreground: "#ffffff",
+            },
+            muted: {
+              DEFAULT: "#f9f9f9",
+              foreground: "#666666",
+            },
+            accent: {
+              DEFAULT: "#f0f0f0",
+              foreground: "#000000",
+            },
+            card: {
+              DEFAULT: "#ffffff",
+              foreground: "#000000",
+            },
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Flat box design - remove all rounded corners and shadows */
+    * {
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    
+    /* Custom dropdown styles */
+    .custom-dropdown {
+      position: relative;
+    }
+    
+    .dropdown-content {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid #e5e5e5;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+    
+    .dropdown-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .dropdown-item:hover {
+      background: #f5f5f5;
+    }
+    
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body class="bg-background text-foreground min-h-screen">
+  <!-- Navigation Header -->
+  <nav class="bg-card border-b border-border sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <h1 class="text-2xl font-bold">🏋️ GymRank</h1>
+        </div>
+        <div class="flex items-center space-x-1">
+          <button onclick="showSection('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-md font-medium transition-colors hover:bg-muted">
+            Home
+          </button>
+          <button onclick="showSection('videos')" id="nav-videos" class="nav-btn px-4 py-2 rounded-md font-medium transition-colors hover:bg-muted">
+            Videos
+          </button>
+          <button onclick="showSection('leaderboard')" id="nav-leaderboard" class="nav-btn px-4 py-2 rounded-md font-medium transition-colors hover:bg-muted">
+            Leaderboard
+          </button>
+          <div id="user-info" class="hidden ml-4 px-3 py-1 bg-muted text-sm font-medium">
+            <span id="logged-in-user"></span>
+            <button onclick="logout()" class="ml-2 text-destructive hover:underline">Logout</button>
+          </div>
+          <div id="auth-buttons" class="flex items-center space-x-2">
+            <a href="login.html" class="px-4 py-2 text-foreground hover:bg-muted transition-colors font-medium">
+              Login
+            </a>
+            <a href="register.html" class="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
+              Register
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mx-auto px-4 py-8">
+    <!-- Home Section -->
+    <div id="home-section" class="section">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-2">Welcome to GymRank</h2>
+        <p class="text-muted-foreground">Competitive lifting platform inspired by Bakugan rankings</p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-card border border-border rounded-lg p-6">
+          <h3 class="font-semibold text-lg mb-2">Total Lifters</h3>
+          <p class="text-3xl font-bold text-primary" id="total-users">-</p>
+        </div>
+        <div class="bg-card border border-border rounded-lg p-6">
+          <h3 class="font-semibold text-lg mb-2">Total PRs</h3>
+          <p class="text-3xl font-bold text-primary" id="total-prs">-</p>
+        </div>
+        <div class="bg-card border border-border rounded-lg p-6">
+          <h3 class="font-semibold text-lg mb-2">Top ELO</h3>
+          <p class="text-3xl font-bold text-primary" id="top-elo">-</p>
+        </div>
+      </div>
+
+      <!-- PR Submission Section (Only for logged-in users) -->
+      <div id="pr-section" class="bg-card border border-border rounded-lg p-6 hidden">
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-semibold mb-2">💪 Submit Your PR</h2>
+          <p class="text-muted-foreground">Log your personal records and optionally share video proof</p>
+        </div>
+        
+        <form id="combined-pr-form" class="space-y-4" enctype="multipart/form-data">
+          <div>
+            <label class="block text-sm font-medium mb-2">Username</label>
+            <input type="text" id="pr-username" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" placeholder="Your username" readonly>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">Lift Type</label>
+            <select id="lift-type" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring">
+              <option value="bench">Bench Press</option>
+              <option value="deadlift">Deadlift</option>
+              <option value="squat">Squat</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">Weight (kg)</label>
+            <input type="number" id="weight" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" placeholder="Enter weight in kg" step="0.5" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">Video Proof (Optional)</label>
+            <input type="file" id="video-file" accept="video/*" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring">
+            <p class="text-sm text-muted-foreground mt-1">Optional: Upload video proof • MP4, WebM, MOV, AVI • Max 30 seconds</p>
+          </div>
+          <button type="submit" class="w-full bg-primary text-primary-foreground py-3 px-4 hover:bg-primary/90 transition-colors font-medium">
+            Submit PR
+          </button>
+        </form>
+      </div>
+
+      <!-- Welcome Message for Non-logged-in Users -->
+      <div id="welcome-section" class="bg-card border border-border rounded-lg p-8 text-center">
+        <h2 class="text-2xl font-semibold mb-4">Welcome to GymRank!</h2>
+        <p class="text-muted-foreground mb-6">Join the competitive lifting platform inspired by Bakugan rankings</p>
+        <div class="flex justify-center space-x-4">
+          <a href="register.html" class="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
+            Get Started
+          </a>
+          <a href="login.html" class="px-6 py-3 border border-border hover:bg-muted transition-colors font-medium">
+            Sign In
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Videos Section -->
+    <div id="videos-section" class="section hidden">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-2">📹 PR Videos</h2>
+        <p class="text-muted-foreground">Watch incredible lifts from our community</p>
+      </div>
+      
+      <div class="bg-card border border-border rounded-lg p-6">
+        <div id="videos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div class="flex justify-center items-center py-8 col-span-full">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaderboard Section -->
+    <div id="leaderboard-section" class="section hidden">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-2">🏆 Leaderboard</h2>
+        <p class="text-muted-foreground">Top lifters ranked by ELO rating</p>
+      </div>
+      
+      <div class="bg-card border border-border rounded-lg p-6">
+        <div id="leaderboard" class="space-y-3">
+          <div class="flex justify-center items-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:5000';
+
+    // Navigation functionality
+    function showSection(sectionName) {
+      // Hide all sections
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      
+      // Remove active state from all nav buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-primary', 'text-primary-foreground');
+        btn.classList.add('text-foreground');
+      });
+      
+      // Show selected section
+      document.getElementById(`${sectionName}-section`).classList.remove('hidden');
+      
+      // Add active state to clicked nav button
+      const activeBtn = document.getElementById(`nav-${sectionName}`);
+      activeBtn.classList.add('bg-primary', 'text-primary-foreground');
+      activeBtn.classList.remove('text-foreground');
+      
+      // Load data for specific sections
+      if (sectionName === 'videos') {
+        loadVideos();
+      } else if (sectionName === 'leaderboard') {
+        loadLeaderboard();
+      } else if (sectionName === 'home') {
+        loadLeaderboard(); // For stats
+      }
+    }
+
+
+    // Load initial data and check session on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeEventListeners();
+      checkUserSession();
+      showSection('home');
+      loadLeaderboard();
+    });
+
+    // Initialize all event listeners
+    function initializeEventListeners() {
+      const combinedPrForm = document.getElementById('combined-pr-form');
+      if (combinedPrForm) {
+        combinedPrForm.addEventListener('submit', handleCombinedPR);
+      }
+    }
+
+    // Check for saved user session on page load
+    function checkUserSession() {
+      const savedUser = localStorage.getItem('gymrank_user');
+      if (savedUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          updateUIForLoggedInUser();
+        } catch (e) {
+          localStorage.removeItem('gymrank_user');
+        }
+      }
+    }
+
+    // Load leaderboard
+    function loadLeaderboard() {
+      fetch(`${API_BASE}/api/leaderboard`)
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById('leaderboard');
+          if (data.length === 0) {
+            list.innerHTML = '<p class="text-muted-foreground text-center py-8">No users yet. Be the first to register!</p>';
+            return;
+          }
+          
+          list.innerHTML = data.map((user, index) => {
+            const rankColors = ['text-yellow-500', 'text-gray-400', 'text-orange-500'];
+            const rankColor = rankColors[index] || 'text-muted-foreground';
+            const rank = index + 1;
+            
+            return `
+              <div class="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                <div class="flex items-center space-x-3">
+                  <span class="text-2xl font-bold ${rankColor}">#${rank}</span>
+                  <span class="text-2xl">${user.flag}</span>
+                  <span class="font-semibold">${user.username}</span>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold">${user.elo.toFixed(0)} ELO</div>
+                  <div class="text-sm text-muted-foreground">
+                    ${rank === 1 ? 'Champion' : rank === 2 ? 'Elite' : rank === 3 ? 'Titan' : 'Brawler'}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+          
+          // Update stats
+          document.getElementById('total-users').textContent = data.length;
+          document.getElementById('top-elo').textContent = data[0] ? data[0].elo.toFixed(0) : '0';
+        })
+        .catch(err => {
+          document.getElementById('leaderboard').innerHTML = 
+            '<div class="text-center py-8 text-destructive">Error loading leaderboard. Make sure the backend is running.</div>';
+        });
+    }
+
+
+
+    // Load videos
+    function loadVideos() {
+      fetch(`${API_BASE}/api/videos`)
+        .then(res => res.json())
+        .then(data => {
+          const grid = document.getElementById('videos-grid');
+          if (data.length === 0) {
+            grid.innerHTML = '<p class="text-muted-foreground text-center py-8 col-span-full">No videos yet. Upload the first one!</p>';
+            return;
+          }
+          
+          grid.innerHTML = data.map(video => {
+            const liftEmoji = {
+              'bench': '🏋️',
+              'deadlift': '🏋️‍♂️',
+              'squat': '🦵'
+            };
+            
+            return `
+              <div class="relative group cursor-pointer bg-black rounded-lg overflow-hidden aspect-square">
+                <video 
+                  class="w-full h-full object-cover"
+                  poster=""
+                  preload="metadata"
+                  onmouseover="this.play()"
+                  onmouseout="this.pause()"
+                  muted
+                  loop
+                >
+                  <source src="${API_BASE}${video.video_url}" type="video/mp4">
+                </video>
+                
+                <!-- Overlay -->
+                <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div class="absolute top-2 left-2 flex items-center space-x-1">
+                    <span class="text-white text-sm">${video.flag}</span>
+                    <span class="text-white text-sm font-medium">${video.username}</span>
+                  </div>
+                  <div class="absolute bottom-2 left-2 text-white">
+                    <div class="flex items-center space-x-1">
+                      <span>${liftEmoji[video.lift_type] || '🏋️'}</span>
+                      <span class="text-sm">${video.lift_type}</span>
+                    </div>
+                    <div class="text-lg font-bold">${video.weight}kg</div>
+                  </div>
+                  <div class="absolute top-2 right-2 text-white text-sm">
+                    ${video.elo.toFixed(0)} ELO
+                  </div>
+                </div>
+                
+                <!-- Play icon -->
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div class="bg-white bg-opacity-80 rounded-full p-3">
+                    <svg class="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        })
+        .catch(err => {
+          document.getElementById('videos-grid').innerHTML = 
+            '<div class="text-center py-8 text-destructive col-span-full">Error loading videos.</div>';
+        });
+    }
+
+
+    // User session management
+    let currentUser = null;
+
+
+    // Auto-fill username when logged in
+    function updateUIForLoggedInUser() {
+      if (currentUser) {
+        // Show user info in nav, hide auth buttons
+        document.getElementById('user-info').classList.remove('hidden');
+        document.getElementById('logged-in-user').textContent = `${currentUser.flag} ${currentUser.display_name || currentUser.username}`;
+        document.getElementById('auth-buttons').classList.add('hidden');
+        
+        // Show PR section, hide welcome section
+        document.getElementById('pr-section').classList.remove('hidden');
+        document.getElementById('welcome-section').classList.add('hidden');
+        
+        // Auto-fill username in PR form
+        const prUsernameField = document.getElementById('pr-username');
+        if (prUsernameField) {
+          prUsernameField.value = currentUser.username;
+        }
+      } else {
+        // Show auth buttons, hide user info
+        document.getElementById('user-info').classList.add('hidden');
+        document.getElementById('auth-buttons').classList.remove('hidden');
+        
+        // Hide PR section, show welcome section
+        document.getElementById('pr-section').classList.add('hidden');
+        document.getElementById('welcome-section').classList.remove('hidden');
+      }
+    }
+
+    // Logout function
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('gymrank_user');
+      
+      // Update UI
+      updateUIForLoggedInUser();
+      
+      // Clear username field
+      const prUsernameField = document.getElementById('pr-username');
+      if (prUsernameField) {
+        prUsernameField.value = '';
+      }
+      
+      alert('Logged out successfully!');
+    }
+
+    // Check for saved user session on page load
+    function checkUserSession() {
+      const savedUser = localStorage.getItem('gymrank_user');
+      if (savedUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          updateUIForLoggedInUser();
+        } catch (e) {
+          localStorage.removeItem('gymrank_user');
+        }
+      }
+    }
+
+    // Load initial data and check session on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize all event listeners once DOM is ready
+      initializeEventListeners();
+      
+      checkUserSession();
+      showSection('home');
+      loadLeaderboard();
+    });
+
+    // Initialize all event listeners
+    function initializeEventListeners() {
+      // Only add listeners if elements exist
+      const combinedPrForm = document.getElementById('combined-pr-form');
+      
+      if (combinedPrForm) {
+        combinedPrForm.addEventListener('submit', handleCombinedPR);
+      }
+    }
+
+
+    function handleCombinedPR(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('pr-username').value;
+      const lift_type = document.getElementById('lift-type').value;
+      const weight = parseFloat(document.getElementById('weight').value);
+      const videoFile = document.getElementById('video-file').files[0];
+      
+      // Show loading state
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = videoFile ? 'Uploading...' : 'Submitting...';
+      submitBtn.disabled = true;
+      
+      if (videoFile) {
+        // Submit with video
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('lift_type', lift_type);
+        formData.append('weight', weight);
+        formData.append('video', videoFile);
+        
+        fetch(`${API_BASE}/api/upload_video`, {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            alert('Upload failed: ' + data.error);
+          } else {
+            alert('PR with video uploaded successfully!');
+            document.getElementById('combined-pr-form').reset();
+            loadVideos();
+            loadLeaderboard();
+          }
+        })
+        .catch(err => {
+          alert('Upload failed. Please try again.');
+        })
+        .finally(() => {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        });
+      } else {
+        // Submit without video
+        fetch(`${API_BASE}/api/submit_pr`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, lift_type, weight })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            alert('PR submission failed: ' + data.error);
+          } else {
+            alert('PR submitted successfully!');
+            document.getElementById('combined-pr-form').reset();
+            loadLeaderboard();
+          }
+        })
+        .catch(err => alert('PR submission failed. Make sure you are registered.'))
+        .finally(() => {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        });
+      }
+    }
+  </script>
+</body>
+</html>

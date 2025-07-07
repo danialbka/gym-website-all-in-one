@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: gymrank-api
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SUPABASE_URL
+        value: your-supabase-url
+      - key: SUPABASE_SERVICE_KEY
+        value: your-service-key
