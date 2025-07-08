@@ -92,6 +92,20 @@
           </div>
 
           <div>
+            <label class="block text-sm font-medium mb-2">Gender</label>
+            <select 
+              id="gender" 
+              class="w-full px-4 py-3 border border-input bg-input focus:outline-none focus:border-ring"
+              required
+            >
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+            <p class="text-sm text-muted-foreground mt-1">Required for DOTS score calculation</p>
+          </div>
+
+          <div>
             <label class="block text-sm font-medium mb-2">Country</label>
             <div class="custom-dropdown">
               <input 
@@ -374,9 +388,10 @@
       const displayName = document.getElementById('display-name').value;
       const team = document.getElementById('team').value;
       const flag = document.getElementById('flag').value;
+      const gender = document.getElementById('gender').value;
       
-      if (!username || !password || !flag) {
-        alert('Username, password, and country are required');
+      if (!username || !password || !flag || !gender) {
+        alert('Username, password, country, and gender are required');
         return;
       }
       
@@ -385,7 +400,7 @@
         return;
       }
 
-      const registrationData = { username, password, flag, team };
+      const registrationData = { username, password, flag, team, gender };
       if (email) registrationData.email = email;
       if (displayName) registrationData.display_name = displayName;
 

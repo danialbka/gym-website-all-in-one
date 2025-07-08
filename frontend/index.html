@@ -66,7 +66,7 @@
           <p class="text-3xl font-bold text-primary" id="total-prs">-</p>
         </div>
         <div class="bg-card border border-border rounded-lg p-6">
-          <h3 class="font-semibold text-lg mb-2">Top ELO</h3>
+          <h3 class="font-semibold text-lg mb-2">Top DOTS</h3>
           <p class="text-3xl font-bold text-primary" id="top-elo">-</p>
         </div>
       </div>
@@ -137,7 +137,22 @@
     <div id="leaderboard-section" class="section hidden">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold mb-2">🏆 Leaderboard</h2>
-        <p class="text-muted-foreground">Top lifters ranked by ELO rating</p>
+        <p class="text-muted-foreground">Top lifters ranked by DOTS score (Bodyweight adjusted)</p>
+      </div>
+      
+      <!-- Gender Filter Buttons -->
+      <div class="flex justify-center mb-6">
+        <div class="bg-muted border border-border rounded-lg p-1 flex space-x-1">
+          <button onclick="loadLeaderboard(''); setActiveFilter('all')" id="filter-all" class="filter-btn px-4 py-2 rounded font-medium transition-colors bg-primary text-primary-foreground">
+            All
+          </button>
+          <button onclick="loadLeaderboard('male'); setActiveFilter('male')" id="filter-male" class="filter-btn px-4 py-2 rounded font-medium transition-colors hover:bg-accent">
+            ♂️ Men
+          </button>
+          <button onclick="loadLeaderboard('female'); setActiveFilter('female')" id="filter-female" class="filter-btn px-4 py-2 rounded font-medium transition-colors hover:bg-accent">
+            ♀️ Women
+          </button>
+        </div>
       </div>
       
       <div class="bg-card border border-border rounded-lg p-6">
@@ -198,6 +213,33 @@
                   class="w-full px-3 py-2 border border-input bg-input focus:outline-none focus:border-ring"
                   placeholder="Enter your team/gym name"
                 >
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">Weight (kg)</label>
+                <input 
+                  type="number" 
+                  id="profile-weight" 
+                  class="w-full px-3 py-2 border border-input bg-input focus:outline-none focus:border-ring"
+                  placeholder="Enter your weight in kg"
+                  step="0.1"
+                  min="0"
+                >
+                <p class="text-xs text-muted-foreground mt-1">Your current body weight</p>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">Gender</label>
+                <select 
+                  id="profile-gender" 
+                  class="w-full px-3 py-2 border border-input bg-input focus:outline-none focus:border-ring"
+                  required
+                >
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+                <p class="text-xs text-muted-foreground mt-1">Required for DOTS score calculation</p>
               </div>
               
               <button 
@@ -296,13 +338,15 @@
     }
 
     // Load leaderboard
-    function loadLeaderboard() {
-      fetch(`${API_BASE}/api/leaderboard`)
+    function loadLeaderboard(gender = '') {
+      const url = gender ? `${API_BASE}/api/leaderboard?gender=${gender}` : `${API_BASE}/api/leaderboard`;
+      
+      fetch(url)
         .then(res => res.json())
         .then(data => {
           const list = document.getElementById('leaderboard');
           if (data.length === 0) {
-            list.innerHTML = '<p class="text-muted-foreground text-center py-8">No users yet. Be the first to register!</p>';
+            list.innerHTML = '<p class="text-muted-foreground text-center py-8">No qualified lifters yet. Complete all three lifts (bench, squat, deadlift) with bodyweight recorded!</p>';
             return;
           }
           
@@ -310,6 +354,7 @@
             const rankColors = ['text-yellow-500', 'text-gray-400', 'text-orange-500'];
             const rankColor = rankColors[index] || 'text-muted-foreground';
             const rank = index + 1;
+            const genderEmoji = user.gender === 'male' ? '♂️' : '♀️';
             
             return `
               <div class="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
@@ -317,12 +362,19 @@
                   <span class="text-2xl font-bold ${rankColor}">#${rank}</span>
                   <span class="text-2xl">${user.flag}</span>
                   <div class="flex flex-col">
-                    <span class="font-semibold">${user.username}</span>
+                    <div class="flex items-center space-x-1">
+                      <span class="font-semibold">${user.username}</span>
+                      <span class="text-lg">${genderEmoji}</span>
+                    </div>
                     <span class="text-sm text-muted-foreground">${user.team || 'Independent'}</span>
+                    <span class="text-xs text-muted-foreground">
+                      B: ${user.bench}kg | S: ${user.squat}kg | D: ${user.deadlift}kg | BW: ${user.weight}kg
+                    </span>
                   </div>
                 </div>
                 <div class="text-right">
-                  <div class="text-lg font-bold">${user.elo.toFixed(0)} ELO</div>
+                  <div class="text-lg font-bold text-primary">${user.dots_score} DOTS</div>
+                  <div class="text-sm font-medium">${user.total_lifted}kg Total</div>
                   <div class="text-sm text-muted-foreground">
                     ${rank === 1 ? 'Champion' : rank === 2 ? 'Elite' : rank === 3 ? 'Titan' : 'Brawler'}
                   </div>
@@ -333,7 +385,7 @@
           
           // Update stats
           document.getElementById('total-users').textContent = data.length;
-          document.getElementById('top-elo').textContent = data[0] ? data[0].elo.toFixed(0) : '0';
+          document.getElementById('top-elo').textContent = data[0] ? data[0].dots_score : '0';
         })
         .catch(err => {
           document.getElementById('leaderboard').innerHTML = 
@@ -341,7 +393,21 @@
         });
     }
 
-
+    // Set active filter button
+    function setActiveFilter(filter) {
+      // Remove active styles from all filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-primary', 'text-primary-foreground');
+        btn.classList.add('hover:bg-accent');
+      });
+      
+      // Add active styles to selected button
+      const activeBtn = document.getElementById(`filter-${filter}`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-primary', 'text-primary-foreground');
+        activeBtn.classList.remove('hover:bg-accent');
+      }
+    }
 
     // Load videos
     function loadVideos() {
@@ -362,44 +428,53 @@
             };
             
             return `
-              <div class="relative group cursor-pointer bg-black rounded-lg overflow-hidden aspect-square">
+              <div class="relative group bg-black rounded-lg overflow-hidden aspect-square">
                 <video 
                   class="w-full h-full object-cover"
-                  poster=""
                   preload="metadata"
-                  onmouseover="this.play()"
-                  onmouseout="this.pause()"
-                  muted
-                  loop
+                  onerror="console.error('Video error:', this.src)"
+                  onloadstart="console.log('Video loading:', this.src)"
+                  controls
                 >
                   <source src="${API_BASE}${video.video_url}" type="video/mp4">
+                  <p class="text-white text-center">Your browser doesn't support video playback.</p>
                 </video>
                 
-                <!-- Overlay -->
-                <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <!-- Info Overlay - shows on hover, doesn't block controls -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-0 group-hover:opacity-80 transition-opacity duration-500 delay-150 pointer-events-none z-20">
+                  <!-- Top info -->
                   <div class="absolute top-2 left-2">
-                    <div class="flex items-center space-x-1">
+                    <div class="flex items-center space-x-1 mb-1">
                       <span class="text-white text-sm">${video.flag}</span>
                       <span class="text-white text-sm font-medium">${video.username}</span>
                     </div>
                     <div class="text-white text-xs opacity-75">${video.team || 'Independent'}</div>
                   </div>
+                  
+                  <!-- Top right info -->
+                  <div class="absolute top-2 right-2 text-white text-xs">
+                    ${video.dots_score ? video.dots_score + ' DOTS' : video.elo.toFixed(0) + ' ELO'}
+                  </div>
+                  
+                  <!-- Bottom info -->
                   <div class="absolute bottom-2 left-2 text-white">
-                    <div class="flex items-center space-x-1">
-                      <span>${liftEmoji[video.lift_type] || '🏋️'}</span>
-                      <span class="text-sm">${video.lift_type}</span>
+                    <div class="flex items-center space-x-2 mb-1">
+                      <span class="text-xl">${liftEmoji[video.lift_type] || '🏋️'}</span>
+                      <span class="text-sm capitalize">${video.lift_type}</span>
                     </div>
                     <div class="text-lg font-bold">${video.weight}kg</div>
                   </div>
-                  <div class="absolute top-2 right-2 text-white text-sm">
-                    ${video.elo.toFixed(0)} ELO
+                  
+                  <!-- Date -->
+                  <div class="absolute bottom-2 right-2 text-white text-xs opacity-75">
+                    ${new Date(video.created_at).toLocaleDateString()}
                   </div>
                 </div>
                 
-                <!-- Play icon -->
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <div class="bg-white bg-opacity-80 rounded-full p-3">
-                    <svg class="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 24 24">
+                <!-- Play icon overlay when paused -->
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-150 pointer-events-none z-30">
+                  <div class="bg-white bg-opacity-90 rounded-full p-4 shadow-lg">
+                    <svg class="w-8 h-8 text-black" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8 5v14l11-7z"/>
                     </svg>
                   </div>
@@ -498,6 +573,8 @@
       // Load profile settings
       document.getElementById('profile-username').value = currentUser.username;
       document.getElementById('profile-team').value = currentUser.team || 'Independent';
+      document.getElementById('profile-weight').value = currentUser.weight || '';
+      document.getElementById('profile-gender').value = currentUser.gender || '';
       
       // Load user posts
       fetch(`${API_BASE}/api/user/${currentUser.username}/posts`)
@@ -753,9 +830,11 @@
       
       const newUsername = document.getElementById('profile-username').value;
       const team = document.getElementById('profile-team').value;
+      const weight = document.getElementById('profile-weight').value;
+      const gender = document.getElementById('profile-gender').value;
       
-      if (!newUsername || !team) {
-        alert('Username and team are required');
+      if (!newUsername || !team || !gender) {
+        alert('Username, team, and gender are required');
         return;
       }
       
@@ -770,7 +849,9 @@
         body: JSON.stringify({
           username: currentUser.username,
           new_username: newUsername,
-          team: team
+          team: team,
+          weight: weight ? parseFloat(weight) : null,
+          gender: gender
         })
       })
       .then(res => res.json())
