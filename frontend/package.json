@@ -1,0 +1,17 @@
+{
+  "name": "gymrank-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for GymRank - Competitive Lifting Platform",
+  "main": "index.html",
+  "scripts": {
+    "build-css": "npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css",
+    "watch-css": "npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch",
+    "build": "npm run build-css"
+  },
+  "keywords": ["tailwindcss", "gymrank", "frontend"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

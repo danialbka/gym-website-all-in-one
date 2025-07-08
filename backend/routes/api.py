@@ -17,6 +17,7 @@ def register_user():
     email = data.get('email')
     display_name = data.get('display_name', username)
     flag = data.get('flag')
+    team = data.get('team', 'Independent')
     
     # Validate required fields
     if not all([username, password, flag]):
@@ -40,9 +41,9 @@ def register_user():
                     return jsonify({'error': 'Email already exists'}), 400
             
             cur.execute("""
-                INSERT INTO users (username, password_hash, email, display_name, flag) 
-                VALUES (%s, %s, %s, %s, %s) RETURNING username, email, display_name, flag, elo, created_at
-            """, (username, password_hash, email, display_name, flag))
+                INSERT INTO users (username, password_hash, email, display_name, flag, team) 
+                VALUES (%s, %s, %s, %s, %s, %s) RETURNING username, email, display_name, flag, team, elo, created_at
+            """, (username, password_hash, email, display_name, flag, team))
             
             user = cur.fetchone()
             conn.commit()
@@ -65,7 +66,7 @@ def login_user():
     try:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT username, password_hash, email, display_name, flag, elo, is_active, created_at 
+                SELECT username, password_hash, email, display_name, flag, team, elo, is_active, created_at 
                 FROM users WHERE username = %s AND is_active = TRUE
             """, (username,))
             user = cur.fetchone()
@@ -201,7 +202,7 @@ def get_videos():
     try:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT p.*, u.flag, u.elo 
+                SELECT p.*, u.flag, u.team, u.elo 
                 FROM prs p 
                 JOIN users u ON p.username = u.username 
                 WHERE p.video_url IS NOT NULL 
@@ -217,3 +218,186 @@ def uploaded_file(filename):
     from flask import send_from_directory
     upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads')
     return send_from_directory(upload_dir, filename)
+
+@api_blueprint.route('/api/team_leaderboard', methods=['GET'])
+def team_leaderboard():
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT 
+                    team,
+                    COUNT(DISTINCT username) as member_count,
+                    AVG(elo) as avg_elo,
+                    MAX(elo) as top_elo,
+                    SUM(elo) as total_elo
+                FROM users 
+                WHERE team IS NOT NULL AND team != '' 
+                GROUP BY team 
+                ORDER BY avg_elo DESC
+            """)
+            teams = cur.fetchall()
+            return jsonify([dict(team) for team in teams])
+    finally:
+        conn.close()
+
+@api_blueprint.route('/api/team_members/<team_name>', methods=['GET'])
+def team_members(team_name):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT username, display_name, flag, elo, team
+                FROM users 
+                WHERE team = %s 
+                ORDER BY elo DESC
+            """, (team_name,))
+            members = cur.fetchall()
+            return jsonify([dict(member) for member in members])
+    finally:
+        conn.close()
+
+@api_blueprint.route('/api/profile/update', methods=['PUT'])
+def update_profile():
+    data = request.json
+    username = data.get('username')
+    new_username = data.get('new_username')
+    team = data.get('team')
+    
+    if not all([username, new_username, team]):
+        return jsonify({'error': 'Username, new username and team are required'}), 400
+    
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            # Check if new username already exists (if changing username)
+            if username != new_username:
+                cur.execute("SELECT username FROM users WHERE username = %s", (new_username,))
+                if cur.fetchone():
+                    return jsonify({'error': 'Username already exists'}), 400
+            
+            # Update the profile
+            cur.execute("""
+                UPDATE users 
+                SET username = %s, team = %s 
+                WHERE username = %s
+                RETURNING username, display_name, email, flag, team, elo, created_at
+            """, (new_username, team, username))
+            
+            user = cur.fetchone()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Update all PRs to use new username if username changed
+            if username != new_username:
+                cur.execute("UPDATE prs SET username = %s WHERE username = %s", (new_username, username))
+            
+            conn.commit()
+            
+            # Recalculate ELO for the user
+            calculate_elo(new_username)
+            
+            return jsonify(dict(user)), 200
+    except Exception as e:
+        return jsonify({'error': 'Profile update failed'}), 500
+    finally:
+        conn.close()
+
+@api_blueprint.route('/api/user/<username>/posts', methods=['GET'])
+def get_user_posts(username):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT p.*, u.flag, u.team, u.elo 
+                FROM prs p 
+                JOIN users u ON p.username = u.username 
+                WHERE p.username = %s 
+                ORDER BY p.created_at DESC
+            """, (username,))
+            posts = cur.fetchall()
+            return jsonify([dict(post) for post in posts])
+    finally:
+        conn.close()
+
+@api_blueprint.route('/api/posts/<int:post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    data = request.json
+    username = data.get('username')
+    
+    if not username:
+        return jsonify({'error': 'Username is required'}), 400
+    
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            # Check if post exists and belongs to user
+            cur.execute("""
+                SELECT id, video_url FROM prs 
+                WHERE id = %s AND username = %s
+            """, (post_id, username))
+            post = cur.fetchone()
+            
+            if not post:
+                return jsonify({'error': 'Post not found or not authorized'}), 404
+            
+            # Delete the video file if it exists
+            if post['video_url']:
+                video_path = os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)), 
+                    'uploads', 
+                    os.path.basename(post['video_url'])
+                )
+                if os.path.exists(video_path):
+                    os.remove(video_path)
+            
+            # Delete the post
+            cur.execute("DELETE FROM prs WHERE id = %s", (post_id,))
+            conn.commit()
+            
+            # Recalculate ELO
+            calculate_elo(username)
+            
+            return jsonify({'message': 'Post deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': 'Failed to delete post'}), 500
+    finally:
+        conn.close()
+
+@api_blueprint.route('/api/posts/<int:post_id>', methods=['PUT'])
+def edit_post(post_id):
+    data = request.json
+    username = data.get('username')
+    lift_type = data.get('lift_type')
+    weight = data.get('weight')
+    
+    if not all([username, lift_type, weight]):
+        return jsonify({'error': 'Username, lift type and weight are required'}), 400
+    
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            # Check if post exists and belongs to user
+            cur.execute("SELECT id FROM prs WHERE id = %s AND username = %s", (post_id, username))
+            if not cur.fetchone():
+                return jsonify({'error': 'Post not found or not authorized'}), 404
+            
+            # Update the post
+            cur.execute("""
+                UPDATE prs 
+                SET lift_type = %s, weight = %s 
+                WHERE id = %s
+                RETURNING id, username, lift_type, weight, video_url, created_at
+            """, (lift_type, float(weight), post_id))
+            
+            post = cur.fetchone()
+            conn.commit()
+            
+            # Recalculate ELO
+            calculate_elo(username)
+            
+            return jsonify(dict(post)), 200
+    except Exception as e:
+        return jsonify({'error': 'Failed to update post'}), 500
+    finally:
+        conn.close()

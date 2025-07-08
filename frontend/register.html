@@ -4,84 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register - GymRank</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            border: "#e5e5e5",
-            input: "#f5f5f5",
-            ring: "#000000",
-            background: "#ffffff",
-            foreground: "#000000",
-            primary: {
-              DEFAULT: "#000000",
-              foreground: "#ffffff",
-            },
-            secondary: {
-              DEFAULT: "#f5f5f5",
-              foreground: "#000000",
-            },
-            destructive: {
-              DEFAULT: "#000000",
-              foreground: "#ffffff",
-            },
-            muted: {
-              DEFAULT: "#f9f9f9",
-              foreground: "#666666",
-            },
-            accent: {
-              DEFAULT: "#f0f0f0",
-              foreground: "#000000",
-            },
-            card: {
-              DEFAULT: "#ffffff",
-              foreground: "#000000",
-            },
-          },
-        }
-      }
-    }
-  </script>
-  <style>
-    /* Flat box design - remove all rounded corners and shadows */
-    * {
-      border-radius: 0 !important;
-      box-shadow: none !important;
-    }
-    
-    /* Custom dropdown styles */
-    .custom-dropdown {
-      position: relative;
-    }
-    
-    .dropdown-content {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: white;
-      border: 2px solid #e5e5e5;
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 1000;
-    }
-    
-    .dropdown-item {
-      padding: 8px 12px;
-      cursor: pointer;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .dropdown-item:hover {
-      background: #f5f5f5;
-    }
-    
-    .dropdown-item:last-child {
-      border-bottom: none;
-    }
-  </style>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏋️</text></svg>">
+  <link href="./src/output.css" rel="stylesheet">
 </head>
 <body class="bg-background text-foreground min-h-screen">
   <!-- Navigation Header -->
@@ -154,6 +78,17 @@
               class="w-full px-4 py-3 border border-input bg-input focus:outline-none focus:border-ring" 
               placeholder="How you want to be displayed"
             >
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Team/Gym</label>
+            <input 
+              type="text" 
+              id="team" 
+              class="w-full px-4 py-3 border border-input bg-input focus:outline-none focus:border-ring"
+              placeholder="Enter your team/gym name"
+            >
+            <p class="text-sm text-muted-foreground mt-1">Enter your team/gym affiliation</p>
           </div>
 
           <div>
@@ -437,6 +372,7 @@
       const password = document.getElementById('password').value;
       const email = document.getElementById('email').value;
       const displayName = document.getElementById('display-name').value;
+      const team = document.getElementById('team').value;
       const flag = document.getElementById('flag').value;
       
       if (!username || !password || !flag) {
@@ -449,7 +385,7 @@
         return;
       }
 
-      const registrationData = { username, password, flag };
+      const registrationData = { username, password, flag, team };
       if (email) registrationData.email = email;
       if (displayName) registrationData.display_name = displayName;
 
