@@ -440,8 +440,8 @@
                   <p class="text-white text-center">Your browser doesn't support video playback.</p>
                 </video>
                 
-                <!-- Info Overlay - shows on hover, doesn't block controls -->
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-0 group-hover:opacity-80 transition-opacity duration-500 delay-150 pointer-events-none z-20">
+                <!-- Info Overlay - hides on hover, doesn't block controls -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80 group-hover:opacity-0 transition-opacity duration-500 delay-150 pointer-events-none z-20">
                   <!-- Top info -->
                   <div class="absolute top-2 left-2">
                     <div class="flex items-center space-x-1 mb-1">
@@ -471,14 +471,7 @@
                   </div>
                 </div>
                 
-                <!-- Play icon overlay when paused -->
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-150 pointer-events-none z-30">
-                  <div class="bg-white bg-opacity-90 rounded-full p-4 shadow-lg">
-                    <svg class="w-8 h-8 text-black" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </div>
-                </div>
+                
               </div>
             `;
           }).join('');
