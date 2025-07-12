@@ -138,7 +138,7 @@ def login_user():
     try:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT username, password_hash, email, display_name, flag, team, elo, is_active, created_at 
+                SELECT username, password_hash, email, display_name, flag, team, weight, gender, elo, is_active, created_at 
                 FROM users WHERE username = %s AND is_active = TRUE
             """, (username,))
             user = cur.fetchone()
