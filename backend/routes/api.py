@@ -556,6 +556,7 @@ def get_user_profile(username):
                 lift_type = pr['lift_type']
                 current_prs[lift_type] = weight
                 total_lifted += weight
+                print(f"Processing PR: {lift_type} = {weight}kg, running total = {total_lifted}kg")
             
             if user_dict['weight'] and user_dict['gender'] and all(current_prs.values()):
                 from ..services.dots_calculator import calculate_dots_score
@@ -579,5 +580,43 @@ def get_user_profile(username):
             
     except Exception as e:
         return jsonify({'error': f'Failed to get user profile: {str(e)}'}), 500
+    finally:
+        conn.close()
+
+@api_blueprint.route('/api/user/<username>/progress', methods=['GET'])
+def get_user_progress(username):
+    """Get user's progress data for charts"""
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            # Check if user exists
+            cur.execute("SELECT username FROM users WHERE username = %s AND is_active = TRUE", (username,))
+            if not cur.fetchone():
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Get progress data for each lift type
+            progress_data = {}
+            
+            for lift_type in ['bench', 'squat', 'deadlift']:
+                cur.execute("""
+                    SELECT weight, created_at
+                    FROM prs 
+                    WHERE username = %s AND lift_type = %s
+                    ORDER BY created_at ASC
+                """, (username, lift_type))
+                
+                records = cur.fetchall()
+                progress_data[lift_type] = [
+                    {
+                        'weight': record['weight'],
+                        'date': record['created_at'].isoformat() if record['created_at'] else None
+                    }
+                    for record in records
+                ]
+            
+            return jsonify(progress_data)
+            
+    except Exception as e:
+        return jsonify({'error': f'Failed to get user progress: {str(e)}'}), 500
     finally:
         conn.close()

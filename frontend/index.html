@@ -257,6 +257,75 @@
         <p class="text-muted-foreground">Manage your posts and profile settings</p>
       </div>
       
+      <!-- Progress Charts -->
+      <div class="mb-8">
+        <div class="bg-card border border-border rounded-lg p-6">
+          <h3 class="text-xl font-bold mb-6">📈 Progress Charts</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Bench Press Chart -->
+            <div class="bg-muted rounded-lg p-4">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                  <span class="text-2xl">🏋️</span>
+                  <div>
+                    <h4 class="font-semibold">Bench Press</h4>
+                    <p class="text-sm text-muted-foreground" id="bench-current">Current: --kg</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-muted-foreground">Trend</div>
+                  <div id="bench-trend" class="text-sm font-semibold">--</div>
+                </div>
+              </div>
+              <div class="h-32 relative">
+                <canvas id="bench-chart" class="w-full h-full"></canvas>
+              </div>
+            </div>
+            
+            <!-- Squat Chart -->
+            <div class="bg-muted rounded-lg p-4">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                  <span class="text-2xl">🦵</span>
+                  <div>
+                    <h4 class="font-semibold">Squat</h4>
+                    <p class="text-sm text-muted-foreground" id="squat-current">Current: --kg</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-muted-foreground">Trend</div>
+                  <div id="squat-trend" class="text-sm font-semibold">--</div>
+                </div>
+              </div>
+              <div class="h-32 relative">
+                <canvas id="squat-chart" class="w-full h-full"></canvas>
+              </div>
+            </div>
+            
+            <!-- Deadlift Chart -->
+            <div class="bg-muted rounded-lg p-4">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                  <span class="text-2xl">🏋️‍♂️</span>
+                  <div>
+                    <h4 class="font-semibold">Deadlift</h4>
+                    <p class="text-sm text-muted-foreground" id="deadlift-current">Current: --kg</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-muted-foreground">Trend</div>
+                  <div id="deadlift-trend" class="text-sm font-semibold">--</div>
+                </div>
+              </div>
+              <div class="h-32 relative">
+                <canvas id="deadlift-chart" class="w-full h-full"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Profile Settings -->
         <div class="lg:col-span-1">
@@ -676,7 +745,149 @@
           closeUserProfileModal();
         }
       });
+      
+      // Redraw charts on window resize
+      window.addEventListener('resize', function() {
+        if (currentUser && document.getElementById('profile-section').classList.contains('section') && !document.getElementById('profile-section').classList.contains('hidden')) {
+          setTimeout(loadProgressCharts, 100);
+        }
+      });
     });
+
+    // Progress Chart Functions
+    function drawProgressChart(canvasId, data, liftType) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas || !data || data.length === 0) return;
+      
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * 2; // For retina displays
+      canvas.height = rect.height * 2;
+      ctx.scale(2, 2);
+      
+      const width = rect.width;
+      const height = rect.height;
+      const padding = 20;
+      const chartWidth = width - (padding * 2);
+      const chartHeight = height - (padding * 2);
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height);
+      
+      if (data.length === 0) {
+        ctx.fillStyle = '#9CA3AF';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data yet', width / 2, height / 2);
+        return;
+      }
+      
+      // Find min and max values
+      const weights = data.map(d => d.weight);
+      const minWeight = Math.min(...weights);
+      const maxWeight = Math.max(...weights);
+      const weightRange = maxWeight - minWeight || 1;
+      
+      // Draw grid lines
+      ctx.strokeStyle = '#E5E7EB';
+      ctx.lineWidth = 1;
+      
+      // Horizontal grid lines
+      for (let i = 0; i <= 4; i++) {
+        const y = padding + (chartHeight * i / 4);
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(width - padding, y);
+        ctx.stroke();
+      }
+      
+      // Draw line chart
+      if (data.length > 1) {
+        ctx.strokeStyle = '#8B5CF6'; // Purple color
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        
+        data.forEach((point, index) => {
+          const x = padding + (chartWidth * index / (data.length - 1));
+          const y = padding + chartHeight - ((point.weight - minWeight) / weightRange * chartHeight);
+          
+          if (index === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        
+        ctx.stroke();
+      }
+      
+      // Draw points
+      ctx.fillStyle = '#8B5CF6';
+      data.forEach((point, index) => {
+        const x = padding + (chartWidth * index / Math.max(data.length - 1, 1));
+        const y = padding + chartHeight - ((point.weight - minWeight) / weightRange * chartHeight);
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+      
+      // Draw weight labels on hover points
+      ctx.fillStyle = '#374151';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      
+      if (data.length <= 5) {
+        data.forEach((point, index) => {
+          const x = padding + (chartWidth * index / Math.max(data.length - 1, 1));
+          const y = padding + chartHeight - ((point.weight - minWeight) / weightRange * chartHeight);
+          
+          ctx.fillText(point.weight + 'kg', x, y - 8);
+        });
+      }
+    }
+
+    function calculateTrend(data) {
+      if (!data || data.length < 2) return '→';
+      
+      const recent = data.slice(-3); // Last 3 entries
+      const firstWeight = recent[0].weight;
+      const lastWeight = recent[recent.length - 1].weight;
+      
+      if (lastWeight > firstWeight) return '↗️ +' + (lastWeight - firstWeight).toFixed(1) + 'kg';
+      if (lastWeight < firstWeight) return '↘️ -' + (firstWeight - lastWeight).toFixed(1) + 'kg';
+      return '→ Stable';
+    }
+
+    function loadProgressCharts() {
+      if (!currentUser) return;
+      
+      fetch(`${API_BASE}/api/user/${currentUser.username}/progress`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            console.error('Error loading progress data:', data.error);
+            return;
+          }
+          
+          // Update current weights and trends
+          const lifts = ['bench', 'squat', 'deadlift'];
+          lifts.forEach(lift => {
+            const liftData = data[lift] || [];
+            const currentWeight = liftData.length > 0 ? liftData[liftData.length - 1].weight : 0;
+            const trend = calculateTrend(liftData);
+            
+            document.getElementById(`${lift}-current`).textContent = `Current: ${currentWeight}kg`;
+            document.getElementById(`${lift}-trend`).textContent = trend;
+            
+            // Draw chart
+            drawProgressChart(`${lift}-chart`, liftData, lift);
+          });
+        })
+        .catch(err => {
+          console.error('Error loading progress charts:', err);
+        });
+    }
 
     // Load videos
     function loadVideos() {
@@ -834,6 +1045,9 @@
       document.getElementById('profile-team').value = currentUser.team || 'Independent';
       document.getElementById('profile-weight').value = currentUser.weight || '';
       document.getElementById('profile-gender').value = currentUser.gender || '';
+      
+      // Load progress charts
+      loadProgressCharts();
       
       // Load user posts
       fetch(`${API_BASE}/api/user/${currentUser.username}/posts`)
