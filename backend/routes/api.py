@@ -498,3 +498,84 @@ def edit_post(post_id):
         return jsonify({'error': 'Failed to update post'}), 500
     finally:
         conn.close()
+
+@api_blueprint.route('/api/user/<username>', methods=['GET'])
+def get_user_profile(username):
+    """Get detailed user profile including PRs and videos"""
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            # Get user basic info
+            cur.execute("""
+                SELECT username, display_name, email, flag, team, weight, gender, elo, created_at 
+                FROM users WHERE username = %s AND is_active = TRUE
+            """, (username,))
+            user = cur.fetchone()
+            
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            user_dict = dict(user)
+            
+            # Get user's PRs (get the record with max weight for each lift type)
+            cur.execute("""
+                SELECT DISTINCT ON (lift_type) lift_type, weight as max_weight, video_url, created_at
+                FROM prs 
+                WHERE username = %s 
+                ORDER BY lift_type, weight DESC, created_at DESC
+            """, (username,))
+            prs = cur.fetchall()
+            
+            # Get all user's PR history
+            cur.execute("""
+                SELECT id, lift_type, weight, video_url, created_at
+                FROM prs 
+                WHERE username = %s 
+                ORDER BY created_at DESC
+                LIMIT 20
+            """, (username,))
+            history = cur.fetchall()
+            
+            # Get user's videos
+            cur.execute("""
+                SELECT id, lift_type, weight, video_url, created_at
+                FROM prs 
+                WHERE username = %s AND video_url IS NOT NULL AND video_url != ''
+                ORDER BY created_at DESC
+                LIMIT 10
+            """, (username,))
+            videos = cur.fetchall()
+            
+            # Calculate DOTS score if user has all required data
+            dots_score = None
+            total_lifted = 0
+            current_prs = {'bench': 0, 'squat': 0, 'deadlift': 0}
+            
+            for pr in prs:
+                current_prs[pr['lift_type']] = pr['max_weight']
+                total_lifted += pr['max_weight']
+            
+            if user_dict['weight'] and user_dict['gender'] and all(current_prs.values()):
+                from ..services.dots_calculator import calculate_dots_score
+                dots_score = calculate_dots_score(
+                    user_dict['weight'], 
+                    user_dict['gender'], 
+                    current_prs['bench'], 
+                    current_prs['squat'], 
+                    current_prs['deadlift']
+                )
+            
+            return jsonify({
+                'user': user_dict,
+                'prs': [dict(pr) for pr in prs],
+                'history': [dict(record) for record in history],
+                'videos': [dict(video) for video in videos],
+                'dots_score': dots_score,
+                'total_lifted': total_lifted,
+                'current_prs': current_prs
+            })
+            
+    except Exception as e:
+        return jsonify({'error': f'Failed to get user profile: {str(e)}'}), 500
+    finally:
+        conn.close()
