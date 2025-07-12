@@ -92,9 +92,9 @@
             <input type="number" id="weight" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" placeholder="Enter weight in kg" step="0.5" required>
           </div>
           <div>
-            <label class="block text-sm font-medium mb-2">Video Proof (Required)</label>
-            <input type="file" id="video-file" accept="video/*" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" required>
-            <p class="text-sm text-muted-foreground mt-1">Required: Upload video proof • MP4, WebM, MOV, AVI • Max 30 seconds</p>
+            <label class="block text-sm font-medium mb-2">Instagram Video Link (Required)</label>
+            <input type="url" id="instagram-url" class="w-full px-3 py-2 border-2 border-border bg-input focus:outline-none focus:border-ring" placeholder="https://www.instagram.com/reel/..." required>
+            <p class="text-sm text-muted-foreground mt-1">Required: Instagram reel or video link • Must be a valid Instagram URL</p>
           </div>
           <button type="submit" class="w-full bg-primary text-primary-foreground py-3 px-4 hover:bg-primary/90 transition-colors font-medium">
             Submit PR
@@ -427,51 +427,59 @@
               'squat': '🦵'
             };
             
+            // Convert Instagram URL to embed URL
+            const getInstagramEmbedUrl = (url) => {
+              if (url.includes('/reel/')) {
+                return url + 'embed/';
+              } else if (url.includes('/p/')) {
+                return url + 'embed/';
+              }
+              return url;
+            };
+            
             return `
-              <div class="relative group bg-black rounded-lg overflow-hidden aspect-square">
-                <video 
-                  class="w-full h-full object-cover"
-                  preload="metadata"
-                  onerror="console.error('Video error:', this.src)"
-                  onloadstart="console.log('Video loading:', this.src)"
-                  controls
-                >
-                  <source src="${API_BASE}${video.video_url}" type="video/mp4">
-                  <p class="text-white text-center">Your browser doesn't support video playback.</p>
-                </video>
-                
-                <!-- Info Overlay - hides on hover, doesn't block controls -->
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80 group-hover:opacity-0 transition-opacity duration-500 delay-150 pointer-events-none z-20">
-                  <!-- Top info -->
-                  <div class="absolute top-2 left-2">
-                    <div class="flex items-center space-x-1 mb-1">
-                      <span class="text-white text-sm">${video.flag}</span>
-                      <span class="text-white text-sm font-medium">${video.username}</span>
-                    </div>
-                    <div class="text-white text-xs opacity-75">${video.team || 'Independent'}</div>
-                  </div>
+              <div class="relative group bg-card border border-border rounded-lg overflow-hidden">
+                <div class="relative">
+                  <iframe 
+                    src="${getInstagramEmbedUrl(video.video_url)}"
+                    class="w-full h-96 border-0"
+                    allowtransparency="true"
+                    allow="encrypted-media"
+                    title="Instagram post"
+                  ></iframe>
                   
-                  <!-- Top right info -->
-                  <div class="absolute top-2 right-2 text-white text-xs">
-                    ${video.dots_score ? video.dots_score + ' DOTS' : video.elo.toFixed(0) + ' ELO'}
+                  <!-- Info Overlay -->
+                  <div class="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-3">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <div class="flex items-center space-x-1 mb-1">
+                          <span class="text-white text-sm">${video.flag}</span>
+                          <span class="text-white text-sm font-medium">${video.username}</span>
+                        </div>
+                        <div class="text-white text-xs opacity-75">${video.team || 'Independent'}</div>
+                      </div>
+                      <div class="text-white text-xs">
+                        ${video.dots_score ? video.dots_score + ' DOTS' : video.elo.toFixed(0) + ' ELO'}
+                      </div>
+                    </div>
                   </div>
                   
                   <!-- Bottom info -->
-                  <div class="absolute bottom-2 left-2 text-white">
-                    <div class="flex items-center space-x-2 mb-1">
-                      <span class="text-xl">${liftEmoji[video.lift_type] || '🏋️'}</span>
-                      <span class="text-sm capitalize">${video.lift_type}</span>
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                    <div class="flex justify-between items-end">
+                      <div>
+                        <div class="flex items-center space-x-2 mb-1">
+                          <span class="text-xl">${liftEmoji[video.lift_type] || '🏋️'}</span>
+                          <span class="text-white text-sm capitalize">${video.lift_type}</span>
+                        </div>
+                        <div class="text-white text-lg font-bold">${video.weight}kg</div>
+                      </div>
+                      <div class="text-white text-xs opacity-75">
+                        ${new Date(video.created_at).toLocaleDateString()}
+                      </div>
                     </div>
-                    <div class="text-lg font-bold">${video.weight}kg</div>
-                  </div>
-                  
-                  <!-- Date -->
-                  <div class="absolute bottom-2 right-2 text-white text-xs opacity-75">
-                    ${new Date(video.created_at).toLocaleDateString()}
                   </div>
                 </div>
-                
-                
               </div>
             `;
           }).join('');
@@ -607,14 +615,14 @@
                   </div>
                 </div>
                 ${post.video_url ? `
-                  <div class="aspect-video bg-black rounded mb-3">
-                    <video 
-                      class="w-full h-full object-cover rounded"
-                      controls
-                      preload="metadata"
-                    >
-                      <source src="${API_BASE}${post.video_url}" type="video/mp4">
-                    </video>
+                  <div class="mb-3">
+                    <iframe 
+                      src="${post.video_url.includes('/reel/') || post.video_url.includes('/p/') ? post.video_url + 'embed/' : post.video_url}"
+                      class="w-full h-96 border-0 rounded"
+                      allowtransparency="true"
+                      allow="encrypted-media"
+                      title="Instagram post"
+                    ></iframe>
                   </div>
                 ` : ''}
                 <div class="text-sm text-muted-foreground">
@@ -880,37 +888,42 @@
       const username = currentUser.username;
       const lift_type = document.getElementById('lift-type').value;
       const weight = parseFloat(document.getElementById('weight').value);
-      const videoFile = document.getElementById('video-file').files[0];
+      const instagramUrl = document.getElementById('instagram-url').value;
       
-      // Validate that video is required
-      if (!videoFile) {
-        alert('Video proof is required to submit a PR.');
+      // Validate that Instagram URL is required and valid
+      if (!instagramUrl) {
+        alert('Instagram video link is required to submit a PR.');
+        return;
+      }
+      
+      if (!instagramUrl.includes('instagram.com')) {
+        alert('Please enter a valid Instagram URL.');
         return;
       }
       
       // Show loading state
       const submitBtn = e.target.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
-      submitBtn.textContent = 'Uploading...';
+      submitBtn.textContent = 'Submitting...';
       submitBtn.disabled = true;
       
-      // Submit with video (now required)
+      // Submit with Instagram URL
       const formData = new FormData();
       formData.append('username', username);
       formData.append('lift_type', lift_type);
       formData.append('weight', weight);
-      formData.append('video', videoFile);
+      formData.append('instagram_url', instagramUrl);
       
-      fetch(`${API_BASE}/api/upload_video`, {
+      fetch(`${API_BASE}/api/submit_pr`, {
         method: 'POST',
         body: formData
       })
       .then(res => res.json())
       .then(data => {
         if (data.error) {
-          alert('Upload failed: ' + data.error);
+          alert('Submission failed: ' + data.error);
         } else {
-          alert('PR with video uploaded successfully!');
+          alert('PR with Instagram video submitted successfully!');
           document.getElementById('combined-pr-form').reset();
           loadVideos();
           loadLeaderboard();
