@@ -552,8 +552,10 @@ def get_user_profile(username):
             current_prs = {'bench': 0, 'squat': 0, 'deadlift': 0}
             
             for pr in prs:
-                current_prs[pr['lift_type']] = pr['max_weight']
-                total_lifted += pr['max_weight']
+                weight = pr['max_weight']
+                lift_type = pr['lift_type']
+                current_prs[lift_type] = weight
+                total_lifted += weight
             
             if user_dict['weight'] and user_dict['gender'] and all(current_prs.values()):
                 from ..services.dots_calculator import calculate_dots_score
