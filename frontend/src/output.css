@@ -653,6 +653,9 @@
   .opacity-75 {
     opacity: 75%;
   }
+  .opacity-80 {
+    opacity: 80%;
+  }
   .shadow-lg {
     --tw-shadow: var(--shadow-lg);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
@@ -692,6 +695,13 @@
   .duration-500 {
     --tw-duration: 500ms;
     transition-duration: 500ms;
+  }
+  .group-hover\:opacity-0 {
+    &:is(:where(.group):hover *) {
+      @media (hover: hover) {
+        opacity: 0%;
+      }
+    }
   }
   .group-hover\:opacity-80 {
     &:is(:where(.group):hover *) {

@@ -165,27 +165,6 @@ def login_user():
     finally:
         conn.close()
 
-@api_blueprint.route('/api/submit_pr', methods=['POST'])
-def submit_pr():
-    data = request.json
-    username = data['username']
-    lift_type = data['lift_type']  # bench, deadlift, squat
-    weight = float(data['weight'])
-
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            # Add the PR
-            cur.execute("INSERT INTO prs (username, lift_type, weight) VALUES (%s, %s, %s)",
-                       (username, lift_type, weight))
-            conn.commit()
-
-            # Update ELO
-            calculate_elo(username)
-            
-            return jsonify({'message': 'PR submitted and ELO updated'}), 200
-    finally:
-        conn.close()
 
 @api_blueprint.route('/api/leaderboard', methods=['GET'])
 def leaderboard():
@@ -253,50 +232,28 @@ def validate_video_file(file_path):
         print(f"Error validating video file: {e}")
         return False
 
-@api_blueprint.route('/api/upload_video', methods=['POST'])
-def upload_video():
-    if 'video' not in request.files:
-        return jsonify({'error': 'No video file provided'}), 400
-    
-    video_file = request.files['video']
+@api_blueprint.route('/api/submit_pr', methods=['POST'])
+def submit_pr():
     username = request.form.get('username')
     lift_type = request.form.get('lift_type')
     weight = request.form.get('weight')
+    instagram_url = request.form.get('instagram_url')
     
-    if not all([username, lift_type, weight]):
+    if not all([username, lift_type, weight, instagram_url]):
         return jsonify({'error': 'Missing required fields'}), 400
     
-    if video_file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
-    
-    # Validate file extension
-    allowed_extensions = {'.mp4', '.webm', '.mov', '.avi'}
-    file_ext = os.path.splitext(video_file.filename)[1].lower()
-    if file_ext not in allowed_extensions:
-        return jsonify({'error': 'Invalid file format. Use MP4, WebM, MOV, or AVI'}), 400
-    
-    # Generate unique filename
-    filename = f"{uuid.uuid4()}{file_ext}"
-    upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads')
-    file_path = os.path.join(upload_dir, filename)
-    
-    # Save file temporarily to check duration
-    video_file.save(file_path)
-    
-    # Validate video file
-    if not validate_video_file(file_path):
-        os.remove(file_path)
-        return jsonify({'error': 'Video file too large (max 50MB)'}), 400
+    # Validate Instagram URL
+    if 'instagram.com' not in instagram_url:
+        return jsonify({'error': 'Invalid Instagram URL'}), 400
     
     # Save to database
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            video_url = f"/uploads/{filename}"
             cur.execute("""
                 INSERT INTO prs (username, lift_type, weight, video_url) 
                 VALUES (%s, %s, %s, %s) RETURNING id
-            """, (username, lift_type, float(weight), video_url))
+            """, (username, lift_type, float(weight), instagram_url))
             
             pr_id = cur.fetchone()['id']
             conn.commit()
@@ -305,12 +262,11 @@ def upload_video():
             calculate_elo(username)
             
             return jsonify({
-                'message': 'Video uploaded successfully',
+                'message': 'PR submitted successfully',
                 'pr_id': pr_id,
-                'video_url': video_url
+                'instagram_url': instagram_url
             }), 201
     except Exception as e:
-        os.remove(file_path)  # Clean up file on database error
         return jsonify({'error': 'Database error'}), 500
     finally:
         conn.close()
