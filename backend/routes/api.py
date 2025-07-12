@@ -169,6 +169,7 @@ def login_user():
 @api_blueprint.route('/api/leaderboard', methods=['GET'])
 def leaderboard():
     gender_filter = request.args.get('gender')  # Optional filter for gender
+    country_filter = request.args.get('country')  # Optional filter for country (flag)
     
     conn = get_db_connection()
     try:
@@ -179,13 +180,17 @@ def leaderboard():
                 FROM users 
                 WHERE weight IS NOT NULL AND weight > 0 AND gender IS NOT NULL
             """
-            params = ()
+            params = []
             
             if gender_filter in ['male', 'female']:
                 query += " AND gender = %s"
-                params = (gender_filter,)
+                params.append(gender_filter)
             
-            cur.execute(query, params)
+            if country_filter:
+                query += " AND flag = %s"
+                params.append(country_filter)
+            
+            cur.execute(query, tuple(params))
             users = cur.fetchall()
             
             # Calculate DOTS scores for each user

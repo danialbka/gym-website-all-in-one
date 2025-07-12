@@ -150,18 +150,58 @@
         <p class="text-muted-foreground">Top lifters ranked by DOTS score (Bodyweight adjusted)</p>
       </div>
       
-      <!-- Gender Filter Buttons -->
-      <div class="flex justify-center mb-6">
+      <!-- Filter Controls -->
+      <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-6">
+        <!-- Gender Filter Buttons -->
         <div class="bg-muted border border-border rounded-lg p-1 flex space-x-1">
-          <button onclick="loadLeaderboard(''); setActiveFilter('all')" id="filter-all" class="filter-btn px-4 py-2 rounded font-medium transition-colors bg-primary text-primary-foreground">
+          <button onclick="setActiveFilter('all'); loadLeaderboard('', currentCountryFilter);" id="filter-all" class="filter-btn px-4 py-2 rounded font-medium transition-colors bg-primary text-primary-foreground">
             All
           </button>
-          <button onclick="loadLeaderboard('male'); setActiveFilter('male')" id="filter-male" class="filter-btn px-4 py-2 rounded font-medium transition-colors hover:bg-accent">
+          <button onclick="setActiveFilter('male'); loadLeaderboard('male', currentCountryFilter);" id="filter-male" class="filter-btn px-4 py-2 rounded font-medium transition-colors hover:bg-accent">
             ♂️ Men
           </button>
-          <button onclick="loadLeaderboard('female'); setActiveFilter('female')" id="filter-female" class="filter-btn px-4 py-2 rounded font-medium transition-colors hover:bg-accent">
+          <button onclick="setActiveFilter('female'); loadLeaderboard('female', currentCountryFilter);" id="filter-female" class="filter-btn px-4 py-2 rounded font-medium transition-colors hover:bg-accent">
             ♀️ Women
           </button>
+        </div>
+        
+        <!-- Country Filter Dropdown -->
+        <div class="flex items-center space-x-2">
+          <label for="country-filter" class="text-sm font-medium text-muted-foreground">Country:</label>
+          <select id="country-filter" onchange="filterByCountry(this.value)" class="bg-card border border-border rounded px-3 py-2 text-sm min-w-[150px] focus:outline-none focus:ring-2 focus:ring-primary">
+            <option value="">All Countries</option>
+            <option value="🇺🇸">🇺🇸 United States</option>
+            <option value="🇬🇧">🇬🇧 United Kingdom</option>
+            <option value="🇨🇦">🇨🇦 Canada</option>
+            <option value="🇦🇺">🇦🇺 Australia</option>
+            <option value="🇩🇪">🇩🇪 Germany</option>
+            <option value="🇫🇷">🇫🇷 France</option>
+            <option value="🇯🇵">🇯🇵 Japan</option>
+            <option value="🇰🇷">🇰🇷 South Korea</option>
+            <option value="🇨🇳">🇨🇳 China</option>
+            <option value="🇮🇳">🇮🇳 India</option>
+            <option value="🇧🇷">🇧🇷 Brazil</option>
+            <option value="🇲🇽">🇲🇽 Mexico</option>
+            <option value="🇷🇺">🇷🇺 Russia</option>
+            <option value="🇮🇹">🇮🇹 Italy</option>
+            <option value="🇪🇸">🇪🇸 Spain</option>
+            <option value="🇳🇱">🇳🇱 Netherlands</option>
+            <option value="🇸🇪">🇸🇪 Sweden</option>
+            <option value="🇳🇴">🇳🇴 Norway</option>
+            <option value="🇩🇰">🇩🇰 Denmark</option>
+            <option value="🇫🇮">🇫🇮 Finland</option>
+            <option value="🇸🇬">🇸🇬 Singapore</option>
+            <option value="🇭🇰">🇭🇰 Hong Kong</option>
+            <option value="🇹🇼">🇹🇼 Taiwan</option>
+            <option value="🇹🇭">🇹🇭 Thailand</option>
+            <option value="🇲🇾">🇲🇾 Malaysia</option>
+            <option value="🇮🇩">🇮🇩 Indonesia</option>
+            <option value="🇵🇭">🇵🇭 Philippines</option>
+            <option value="🇻🇳">🇻🇳 Vietnam</option>
+            <option value="🇿🇦">🇿🇦 South Africa</option>
+            <option value="🇳🇬">🇳🇬 Nigeria</option>
+            <option value="🇪🇬">🇪🇬 Egypt</option>
+          </select>
         </div>
       </div>
       
@@ -378,8 +418,11 @@
     }
 
     // Load leaderboard
-    function loadLeaderboard(gender = '') {
-      const url = gender ? `${API_BASE}/api/leaderboard?gender=${gender}` : `${API_BASE}/api/leaderboard`;
+    function loadLeaderboard(gender = '', country = '') {
+      const params = new URLSearchParams();
+      if (gender) params.append('gender', gender);
+      if (country) params.append('country', country);
+      const url = `${API_BASE}/api/leaderboard${params.toString() ? '?' + params.toString() : ''}`;
       
       fetch(url)
         .then(res => res.json())
@@ -435,6 +478,9 @@
 
     // Set active filter button
     function setActiveFilter(filter) {
+      // Update current gender filter
+      currentGenderFilter = filter === 'all' ? '' : filter;
+      
       // Remove active styles from all filter buttons
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('bg-primary', 'text-primary-foreground');
@@ -447,6 +493,12 @@
         activeBtn.classList.add('bg-primary', 'text-primary-foreground');
         activeBtn.classList.remove('hover:bg-accent');
       }
+    }
+
+    // Filter leaderboard by country
+    function filterByCountry(country) {
+      currentCountryFilter = country;
+      loadLeaderboard(currentGenderFilter, currentCountryFilter);
     }
 
     // Load videos
@@ -776,6 +828,8 @@
 
     // User session management
     let currentUser = null;
+    let currentGenderFilter = '';
+    let currentCountryFilter = '';
 
 
     // Auto-fill username when logged in
