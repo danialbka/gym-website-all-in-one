@@ -480,73 +480,6 @@
     </div>
   </div>
 
-  <!-- User Profile Modal -->
-  <div id="user-profile-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-    <div class="bg-card border border-border rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold" id="modal-user-title">User Profile</h2>
-        <button onclick="closeUserProfileModal()" class="text-muted-foreground hover:text-foreground transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-      
-      <!-- User Info Header -->
-      <div class="bg-muted rounded-lg p-4 mb-6">
-        <div class="flex items-center space-x-4">
-          <span id="modal-user-flag" class="text-4xl"></span>
-          <div class="flex-1">
-            <div class="flex items-center space-x-2">
-              <h3 id="modal-user-username" class="text-xl font-bold"></h3>
-              <span id="modal-user-gender" class="text-lg"></span>
-            </div>
-            <p id="modal-user-team" class="text-muted-foreground"></p>
-            <div class="flex items-center space-x-4 mt-2">
-              <span id="modal-user-dots" class="bg-orange-500 text-white px-3 py-1 rounded font-semibold"></span>
-              <span id="modal-user-total" class="text-sm text-muted-foreground"></span>
-              <span id="modal-user-bodyweight" class="text-sm text-muted-foreground"></span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- PR Records -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-card border border-border rounded-lg p-4 text-center">
-          <div class="text-2xl mb-2">🏋️</div>
-          <div class="text-sm text-muted-foreground">Bench Press</div>
-          <div id="modal-user-bench" class="text-2xl font-bold text-primary"></div>
-        </div>
-        <div class="bg-card border border-border rounded-lg p-4 text-center">
-          <div class="text-2xl mb-2">🦵</div>
-          <div class="text-sm text-muted-foreground">Squat</div>
-          <div id="modal-user-squat" class="text-2xl font-bold text-primary"></div>
-        </div>
-        <div class="bg-card border border-border rounded-lg p-4 text-center">
-          <div class="text-2xl mb-2">🏋️‍♂️</div>
-          <div class="text-sm text-muted-foreground">Deadlift</div>
-          <div id="modal-user-deadlift" class="text-2xl font-bold text-primary"></div>
-        </div>
-      </div>
-      
-      <!-- Videos Section -->
-      <div class="mb-6">
-        <h4 class="text-lg font-semibold mb-4">📹 PR Videos</h4>
-        <div id="modal-user-videos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- Videos will be loaded here -->
-        </div>
-      </div>
-      
-      <!-- PR History -->
-      <div>
-        <h4 class="text-lg font-semibold mb-4">📈 PR History</h4>
-        <div id="modal-user-history" class="space-y-3">
-          <!-- PR history will be loaded here -->
-        </div>
-      </div>
-    </div>
-  </div>
 
   <script>
     const API_BASE = 'http://localhost:5000';
@@ -664,7 +597,7 @@
             const genderEmoji = user.gender === 'male' ? '♂️' : '♀️';
             
             return `
-              <div onclick="openUserProfileModal('${user.username}')" class="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+              <div onclick="window.location.href='profile.html?username=${user.username}'" class="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
                 <div class="flex items-center space-x-3">
                   <span class="text-2xl font-bold ${rankColor}">#${rank}</span>
                   <span class="text-2xl">${user.flag}</span>
@@ -725,113 +658,8 @@
       loadLeaderboard(currentGenderFilter, currentCountryFilter);
     }
 
-    // Open user profile modal
-    function openUserProfileModal(username) {
-      fetch(`${API_BASE}/api/user/${username}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.error) {
-            alert('Error loading user profile: ' + data.error);
-            return;
-          }
-          
-          // Populate modal with user data
-          const user = data.user;
-          const prs = data.current_prs;
-          const genderEmoji = user.gender === 'male' ? '♂️' : '♀️';
-          
-          document.getElementById('modal-user-title').textContent = `${user.username}'s Profile`;
-          document.getElementById('modal-user-flag').textContent = user.flag;
-          document.getElementById('modal-user-username').textContent = user.username;
-          document.getElementById('modal-user-gender').textContent = genderEmoji;
-          document.getElementById('modal-user-team').textContent = user.team || 'Independent';
-          document.getElementById('modal-user-dots').textContent = data.dots_score ? `${data.dots_score} DOTS` : 'N/A';
-          document.getElementById('modal-user-total').textContent = `${data.total_lifted}kg Total`;
-          document.getElementById('modal-user-bodyweight').textContent = `${user.weight}kg BW`;
-          
-          // Populate PR records
-          document.getElementById('modal-user-bench').textContent = prs.bench ? `${prs.bench}kg` : 'N/A';
-          document.getElementById('modal-user-squat').textContent = prs.squat ? `${prs.squat}kg` : 'N/A';
-          document.getElementById('modal-user-deadlift').textContent = prs.deadlift ? `${prs.deadlift}kg` : 'N/A';
-          
-          // Populate videos
-          const videosContainer = document.getElementById('modal-user-videos');
-          if (data.videos.length === 0) {
-            videosContainer.innerHTML = '<p class="text-muted-foreground text-center py-4 col-span-full">No videos available</p>';
-          } else {
-            videosContainer.innerHTML = data.videos.map(video => {
-              const liftEmoji = video.lift_type === 'bench' ? '🏋️' : video.lift_type === 'squat' ? '🦵' : '🏋️‍♂️';
-              return `
-                <div class="border border-border rounded-lg p-3 bg-card">
-                  <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center space-x-2">
-                      <span class="text-lg">${liftEmoji}</span>
-                      <div>
-                        <div class="font-semibold">${video.weight}kg</div>
-                        <div class="text-xs text-muted-foreground capitalize">${video.lift_type}</div>
-                      </div>
-                    </div>
-                    <a href="${video.video_url}" target="_blank" rel="noopener noreferrer" 
-                       class="text-purple-600 hover:text-purple-800 font-medium underline text-xs">
-                      View →
-                    </a>
-                  </div>
-                  <div class="text-xs text-muted-foreground">
-                    ${new Date(video.created_at).toLocaleDateString()}
-                  </div>
-                </div>
-              `;
-            }).join('');
-          }
-          
-          // Populate PR history
-          const historyContainer = document.getElementById('modal-user-history');
-          if (data.history.length === 0) {
-            historyContainer.innerHTML = '<p class="text-muted-foreground text-center py-4">No PR history available</p>';
-          } else {
-            historyContainer.innerHTML = data.history.map(record => {
-              const liftEmoji = record.lift_type === 'bench' ? '🏋️' : record.lift_type === 'squat' ? '🦵' : '🏋️‍♂️';
-              return `
-                <div class="flex items-center justify-between p-3 border border-border rounded-lg">
-                  <div class="flex items-center space-x-3">
-                    <span class="text-xl">${liftEmoji}</span>
-                    <div>
-                      <div class="font-semibold">${record.weight}kg ${record.lift_type}</div>
-                      <div class="text-xs text-muted-foreground">${new Date(record.created_at).toLocaleDateString()}</div>
-                    </div>
-                  </div>
-                  ${record.video_url ? `
-                    <a href="${record.video_url}" target="_blank" rel="noopener noreferrer" 
-                       class="text-purple-600 hover:text-purple-800 font-medium underline text-sm">
-                      Video →
-                    </a>
-                  ` : ''}
-                </div>
-              `;
-            }).join('');
-          }
-          
-          // Show modal
-          document.getElementById('user-profile-modal').classList.remove('hidden');
-        })
-        .catch(err => {
-          console.error('Error loading user profile:', err);
-          alert('Failed to load user profile');
-        });
-    }
-
-    // Close user profile modal
-    function closeUserProfileModal() {
-      document.getElementById('user-profile-modal').classList.add('hidden');
-    }
-
-    // Close modal when clicking outside
+    // Additional initialization
     document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('user-profile-modal').addEventListener('click', function(e) {
-        if (e.target === this) {
-          closeUserProfileModal();
-        }
-      });
       
       // Redraw charts on window resize
       window.addEventListener('resize', function() {
@@ -1010,7 +838,7 @@
                   <div>
                     <div class="flex items-center space-x-2 mb-1">
                       <span class="text-sm">${video.flag}</span>
-                      <span onclick="openUserProfileModal('${video.username}')" class="text-sm font-bold text-purple-600 hover:text-purple-800 cursor-pointer underline decoration-dotted hover:decoration-solid transition-all">${video.username}</span>
+                      <a href="profile.html?username=${video.username}" class="text-sm font-bold text-purple-600 hover:text-purple-800 cursor-pointer underline decoration-dotted hover:decoration-solid transition-all">${video.username}</a>
                       <span class="text-xs text-muted-foreground bg-orange-500 text-white px-2 py-1 rounded">
                         ${video.dots_score ? video.dots_score + ' DOTS' : video.elo.toFixed(0) + ' ELO'}
                       </span>
