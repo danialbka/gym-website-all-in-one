@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - GymRank</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏋️</text></svg>">
+  <link href="./src/output.css" rel="stylesheet">
+</head>
+<body class="min-h-screen">
+  <!-- Navigation Header -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <h1 class="navbar-brand">🏋️ GymRank</h1>
+        </div>
+        <div class="flex items-center gap-4">
+          <a href="index.html" class="nav-link">
+            Home
+          </a>
+          <a href="login.html" class="nav-link">
+            Login
+          </a>
+          <button id="theme-toggle" onclick="toggleTheme()" class="btn btn-ghost btn-icon" title="Toggle dark mode">
+            <span id="theme-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-16">
+    <div class="max-w-md mx-auto">
+      <!-- Registration Card -->
+      <div class="card">
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-bold mb-2">Join the Competition</h2>
+          <p style="color: var(--text-secondary)">Create your GymRank account and start competing</p>
+        </div>
+
+        <form id="register-form" class="space-y-6">
+          <div>
+            <label class="form-label">Username</label>
+            <input 
+              type="text" 
+              id="username" 
+              class="form-input" 
+              placeholder="Choose a username"
+              required
+            >
+          </div>
+          
+          <div>
+            <label class="form-label">Password</label>
+            <input 
+              type="password" 
+              id="password" 
+              class="form-input" 
+              placeholder="Create a password"
+              required
+            >
+            <p class="text-sm mt-1" style="color: var(--text-secondary)">Must be at least 6 characters</p>
+          </div>
+
+          <div>
+            <label class="form-label">Email (Optional)</label>
+            <input 
+              type="email" 
+              id="email" 
+              class="form-input" 
+              placeholder="your@email.com"
+            >
+          </div>
+
+          <div>
+            <label class="form-label">Display Name (Optional)</label>
+            <input 
+              type="text" 
+              id="display-name" 
+              class="form-input" 
+              placeholder="How you want to be displayed"
+            >
+          </div>
+
+          <div>
+            <label class="form-label">Team/Gym</label>
+            <input 
+              type="text" 
+              id="team" 
+              class="form-input"
+              placeholder="Enter your team/gym name"
+            >
+            <p class="text-sm mt-1" style="color: var(--text-secondary)">Enter your team/gym affiliation</p>
+          </div>
+
+          <div>
+            <label class="form-label">Gender</label>
+            <select 
+              id="gender" 
+              class="form-input"
+              required
+            >
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+            <p class="text-sm mt-1" style="color: var(--text-secondary)">Required for DOTS score calculation</p>
+          </div>
+
+          <div>
+            <label class="form-label">Country</label>
+            <div class="custom-dropdown">
+              <input 
+                type="text" 
+                id="flag-search" 
+                class="form-input" 
+                placeholder="Search for your country..."
+                autocomplete="off"
+                onclick="showCountryDropdown()"
+                oninput="filterCountries()"
+                required
+              >
+              <input type="hidden" id="flag" name="flag">
+              <div id="country-dropdown" class="dropdown-content hidden"></div>
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn btn-primary w-full btn-lg"
+          >
+            Create Account
+          </button>
+        </form>
+
+        <div class="mt-6 text-center">
+          <p style="color: var(--text-secondary)">
+            Already have an account? 
+            <a href="login.html" class="font-medium hover:underline" style="color: var(--primary-color)">
+              Sign in here
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:5000';
+
+    // Country data with all countries
+    const countries = [
+      { code: "🇦🇫", name: "Afghanistan" },
+      { code: "🇦🇱", name: "Albania" },
+      { code: "🇩🇿", name: "Algeria" },
+      { code: "🇦🇩", name: "Andorra" },
+      { code: "🇦🇴", name: "Angola" },
+      { code: "🇦🇬", name: "Antigua and Barbuda" },
+      { code: "🇦🇷", name: "Argentina" },
+      { code: "🇦🇲", name: "Armenia" },
+      { code: "🇦🇺", name: "Australia" },
+      { code: "🇦🇹", name: "Austria" },
+      { code: "🇦🇿", name: "Azerbaijan" },
+      { code: "🇧🇸", name: "Bahamas" },
+      { code: "🇧🇭", name: "Bahrain" },
+      { code: "🇧🇩", name: "Bangladesh" },
+      { code: "🇧🇧", name: "Barbados" },
+      { code: "🇧🇾", name: "Belarus" },
+      { code: "🇧🇪", name: "Belgium" },
+      { code: "🇧🇿", name: "Belize" },
+      { code: "🇧🇯", name: "Benin" },
+      { code: "🇧🇹", name: "Bhutan" },
+      { code: "🇧🇴", name: "Bolivia" },
+      { code: "🇧🇦", name: "Bosnia and Herzegovina" },
+      { code: "🇧🇼", name: "Botswana" },
+      { code: "🇧🇷", name: "Brazil" },
+      { code: "🇧🇳", name: "Brunei" },
+      { code: "🇧🇬", name: "Bulgaria" },
+      { code: "🇧🇫", name: "Burkina Faso" },
+      { code: "🇧🇮", name: "Burundi" },
+      { code: "🇰🇭", name: "Cambodia" },
+      { code: "🇨🇲", name: "Cameroon" },
+      { code: "🇨🇦", name: "Canada" },
+      { code: "🇨🇻", name: "Cape Verde" },
+      { code: "🇨🇫", name: "Central African Republic" },
+      { code: "🇹🇩", name: "Chad" },
+      { code: "🇨🇱", name: "Chile" },
+      { code: "🇨🇳", name: "China" },
+      { code: "🇨🇴", name: "Colombia" },
+      { code: "🇰🇲", name: "Comoros" },
+      { code: "🇨🇬", name: "Congo" },
+      { code: "🇨🇩", name: "Democratic Republic of the Congo" },
+      { code: "🇨🇷", name: "Costa Rica" },
+      { code: "🇭🇷", name: "Croatia" },
+      { code: "🇨🇺", name: "Cuba" },
+      { code: "🇨🇾", name: "Cyprus" },
+      { code: "🇨🇿", name: "Czech Republic" },
+      { code: "🇩🇰", name: "Denmark" },
+      { code: "🇩🇯", name: "Djibouti" },
+      { code: "🇩🇲", name: "Dominica" },
+      { code: "🇩🇴", name: "Dominican Republic" },
+      { code: "🇪🇨", name: "Ecuador" },
+      { code: "🇪🇬", name: "Egypt" },
+      { code: "🇸🇻", name: "El Salvador" },
+      { code: "🇬🇶", name: "Equatorial Guinea" },
+      { code: "🇪🇷", name: "Eritrea" },
+      { code: "🇪🇪", name: "Estonia" },
+      { code: "🇪🇹", name: "Ethiopia" },
+      { code: "🇫🇯", name: "Fiji" },
+      { code: "🇫🇮", name: "Finland" },
+      { code: "🇫🇷", name: "France" },
+      { code: "🇬🇦", name: "Gabon" },
+      { code: "🇬🇲", name: "Gambia" },
+      { code: "🇬🇪", name: "Georgia" },
+      { code: "🇩🇪", name: "Germany" },
+      { code: "🇬🇭", name: "Ghana" },
+      { code: "🇬🇷", name: "Greece" },
+      { code: "🇬🇩", name: "Grenada" },
+      { code: "🇬🇹", name: "Guatemala" },
+      { code: "🇬🇳", name: "Guinea" },
+      { code: "🇬🇼", name: "Guinea-Bissau" },
+      { code: "🇬🇾", name: "Guyana" },
+      { code: "🇭🇹", name: "Haiti" },
+      { code: "🇭🇳", name: "Honduras" },
+      { code: "🇭🇺", name: "Hungary" },
+      { code: "🇮🇸", name: "Iceland" },
+      { code: "🇮🇳", name: "India" },
+      { code: "🇮🇩", name: "Indonesia" },
+      { code: "🇮🇷", name: "Iran" },
+      { code: "🇮🇶", name: "Iraq" },
+      { code: "🇮🇪", name: "Ireland" },
+      { code: "🇮🇱", name: "Israel" },
+      { code: "🇮🇹", name: "Italy" },
+      { code: "🇨🇮", name: "Ivory Coast" },
+      { code: "🇯🇲", name: "Jamaica" },
+      { code: "🇯🇵", name: "Japan" },
+      { code: "🇯🇴", name: "Jordan" },
+      { code: "🇰🇿", name: "Kazakhstan" },
+      { code: "🇰🇪", name: "Kenya" },
+      { code: "🇰🇮", name: "Kiribati" },
+      { code: "🇰🇼", name: "Kuwait" },
+      { code: "🇰🇬", name: "Kyrgyzstan" },
+      { code: "🇱🇦", name: "Laos" },
+      { code: "🇱🇻", name: "Latvia" },
+      { code: "🇱🇧", name: "Lebanon" },
+      { code: "🇱🇸", name: "Lesotho" },
+      { code: "🇱🇷", name: "Liberia" },
+      { code: "🇱🇾", name: "Libya" },
+      { code: "🇱🇮", name: "Liechtenstein" },
+      { code: "🇱🇹", name: "Lithuania" },
+      { code: "🇱🇺", name: "Luxembourg" },
+      { code: "🇲🇰", name: "Macedonia" },
+      { code: "🇲🇬", name: "Madagascar" },
+      { code: "🇲🇼", name: "Malawi" },
+      { code: "🇲🇾", name: "Malaysia" },
+      { code: "🇲🇻", name: "Maldives" },
+      { code: "🇲🇱", name: "Mali" },
+      { code: "🇲🇹", name: "Malta" },
+      { code: "🇲🇭", name: "Marshall Islands" },
+      { code: "🇲🇷", name: "Mauritania" },
+      { code: "🇲🇺", name: "Mauritius" },
+      { code: "🇲🇽", name: "Mexico" },
+      { code: "🇫🇲", name: "Micronesia" },
+      { code: "🇲🇩", name: "Moldova" },
+      { code: "🇲🇨", name: "Monaco" },
+      { code: "🇲🇳", name: "Mongolia" },
+      { code: "🇲🇪", name: "Montenegro" },
+      { code: "🇲🇦", name: "Morocco" },
+      { code: "🇲🇿", name: "Mozambique" },
+      { code: "🇲🇲", name: "Myanmar" },
+      { code: "🇳🇦", name: "Namibia" },
+      { code: "🇳🇷", name: "Nauru" },
+      { code: "🇳🇵", name: "Nepal" },
+      { code: "🇳🇱", name: "Netherlands" },
+      { code: "🇳🇿", name: "New Zealand" },
+      { code: "🇳🇮", name: "Nicaragua" },
+      { code: "🇳🇪", name: "Niger" },
+      { code: "🇳🇬", name: "Nigeria" },
+      { code: "🇰🇵", name: "North Korea" },
+      { code: "🇳🇴", name: "Norway" },
+      { code: "🇴🇲", name: "Oman" },
+      { code: "🇵🇰", name: "Pakistan" },
+      { code: "🇵🇼", name: "Palau" },
+      { code: "🇵🇸", name: "Palestine" },
+      { code: "🇵🇦", name: "Panama" },
+      { code: "🇵🇬", name: "Papua New Guinea" },
+      { code: "🇵🇾", name: "Paraguay" },
+      { code: "🇵🇪", name: "Peru" },
+      { code: "🇵🇭", name: "Philippines" },
+      { code: "🇵🇱", name: "Poland" },
+      { code: "🇵🇹", name: "Portugal" },
+      { code: "🇶🇦", name: "Qatar" },
+      { code: "🇷🇴", name: "Romania" },
+      { code: "🇷🇺", name: "Russia" },
+      { code: "🇷🇼", name: "Rwanda" },
+      { code: "🇼🇸", name: "Samoa" },
+      { code: "🇸🇲", name: "San Marino" },
+      { code: "🇸🇹", name: "Sao Tome and Principe" },
+      { code: "🇸🇦", name: "Saudi Arabia" },
+      { code: "🇸🇳", name: "Senegal" },
+      { code: "🇷🇸", name: "Serbia" },
+      { code: "🇸🇨", name: "Seychelles" },
+      { code: "🇸🇱", name: "Sierra Leone" },
+      { code: "🇸🇬", name: "Singapore" },
+      { code: "🇸🇰", name: "Slovakia" },
+      { code: "🇸🇮", name: "Slovenia" },
+      { code: "🇸🇧", name: "Solomon Islands" },
+      { code: "🇸🇴", name: "Somalia" },
+      { code: "🇿🇦", name: "South Africa" },
+      { code: "🇰🇷", name: "South Korea" },
+      { code: "🇸🇸", name: "South Sudan" },
+      { code: "🇪🇸", name: "Spain" },
+      { code: "🇱🇰", name: "Sri Lanka" },
+      { code: "🇸🇩", name: "Sudan" },
+      { code: "🇸🇷", name: "Suriname" },
+      { code: "🇸🇿", name: "Swaziland" },
+      { code: "🇸🇪", name: "Sweden" },
+      { code: "🇨🇭", name: "Switzerland" },
+      { code: "🇸🇾", name: "Syria" },
+      { code: "🇹🇼", name: "Taiwan" },
+      { code: "🇹🇯", name: "Tajikistan" },
+      { code: "🇹🇿", name: "Tanzania" },
+      { code: "🇹🇭", name: "Thailand" },
+      { code: "🇹🇱", name: "Timor-Leste" },
+      { code: "🇹🇬", name: "Togo" },
+      { code: "🇹🇴", name: "Tonga" },
+      { code: "🇹🇹", name: "Trinidad and Tobago" },
+      { code: "🇹🇳", name: "Tunisia" },
+      { code: "🇹🇷", name: "Turkey" },
+      { code: "🇹🇲", name: "Turkmenistan" },
+      { code: "🇹🇻", name: "Tuvalu" },
+      { code: "🇺🇬", name: "Uganda" },
+      { code: "🇺🇦", name: "Ukraine" },
+      { code: "🇦🇪", name: "United Arab Emirates" },
+      { code: "🇬🇧", name: "United Kingdom" },
+      { code: "🇺🇸", name: "United States" },
+      { code: "🇺🇾", name: "Uruguay" },
+      { code: "🇺🇿", name: "Uzbekistan" },
+      { code: "🇻🇺", name: "Vanuatu" },
+      { code: "🇻🇦", name: "Vatican City" },
+      { code: "🇻🇪", name: "Venezuela" },
+      { code: "🇻🇳", name: "Vietnam" },
+      { code: "🇾🇪", name: "Yemen" },
+      { code: "🇿🇲", name: "Zambia" },
+      { code: "🇿🇼", name: "Zimbabwe" }
+    ];
+
+    // Country dropdown functionality
+    function showCountryDropdown() {
+      const dropdown = document.getElementById('country-dropdown');
+      filterCountries();
+      dropdown.classList.remove('hidden');
+    }
+
+    function filterCountries() {
+      const searchTerm = document.getElementById('flag-search').value.toLowerCase();
+      const dropdown = document.getElementById('country-dropdown');
+      
+      const filteredCountries = countries.filter(country => 
+        country.name.toLowerCase().includes(searchTerm)
+      );
+      
+      dropdown.innerHTML = filteredCountries.map(country => 
+        `<div class="dropdown-item" onclick="selectCountry('${country.code}', '${country.name}')">
+          ${country.code} ${country.name}
+        </div>`
+      ).join('');
+    }
+
+    function selectCountry(code, name) {
+      document.getElementById('flag-search').value = `${code} ${name}`;
+      document.getElementById('flag').value = code;
+      document.getElementById('country-dropdown').classList.add('hidden');
+    }
+
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.custom-dropdown')) {
+        document.getElementById('country-dropdown').classList.add('hidden');
+      }
+    });
+
+    // Registration form handler
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const email = document.getElementById('email').value;
+      const displayName = document.getElementById('display-name').value;
+      const team = document.getElementById('team').value;
+      const flag = document.getElementById('flag').value;
+      const gender = document.getElementById('gender').value;
+      
+      if (!username || !password || !flag || !gender) {
+        alert('Username, password, country, and gender are required');
+        return;
+      }
+      
+      if (password.length < 6) {
+        alert('Password must be at least 6 characters long');
+        return;
+      }
+
+      const registrationData = { username, password, flag, team, gender };
+      if (email) registrationData.email = email;
+      if (displayName) registrationData.display_name = displayName;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(registrationData)
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          alert('Registration failed: ' + data.error);
+        } else {
+          alert('Registration successful! You can now login.');
+          
+          // Redirect to login page
+          window.location.href = 'login.html';
+        }
+      } catch (error) {
+        alert('Registration failed. Please try again.');
+        console.error('Registration error:', error);
+      }
+    });
+
+    // Theme management
+    function toggleTheme() {
+      const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      
+      localStorage.setItem('gymrank-theme', newTheme);
+      
+      // Update theme icon
+      const themeIcon = document.getElementById('theme-icon');
+      themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    function initializeTheme() {
+      const savedTheme = localStorage.getItem('gymrank-theme') || 'light';
+      
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      
+      // Update theme icon
+      const themeIcon = document.getElementById('theme-icon');
+      themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    // Initialize theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeTheme();
+    });
+
+    // Check if user is already logged in
+    const savedUser = localStorage.getItem('gymrank_user');
+    if (savedUser) {
+      // User is already logged in, redirect to main app
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>
