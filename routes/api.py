@@ -559,13 +559,10 @@ def get_user_profile(username):
                 print(f"Processing PR: {lift_type} = {weight}kg, running total = {total_lifted}kg")
             
             if user_dict['weight'] and user_dict['gender'] and all(current_prs.values()):
-                from ..services.dots_calculator import calculate_dots_score
                 dots_score = calculate_dots_score(
+                    total_lifted, 
                     user_dict['weight'], 
-                    user_dict['gender'], 
-                    current_prs['bench'], 
-                    current_prs['squat'], 
-                    current_prs['deadlift']
+                    user_dict['gender']
                 )
             
             return jsonify({

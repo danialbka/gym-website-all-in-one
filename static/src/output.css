@@ -42,9 +42,6 @@
 .flex-1 {
   flex: 1;
 }
-.shrink-0 {
-  flex-shrink: 0;
-}
 .transform {
   transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
 }
@@ -68,11 +65,6 @@
 }
 .justify-center {
   justify-content: center;
-}
-.truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .border {
   border-style: var(--tw-border-style);
@@ -390,6 +382,19 @@ body {
   background-color: var(--primary-light);
   border-color: var(--primary-color);
   font-weight: 600;
+}
+.dark .nav-link {
+  color: var(--primary-color);
+  background-color: transparent;
+}
+.dark .nav-link.active {
+  color: white;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.dark .nav-link:hover {
+  color: white;
+  background-color: var(--primary-color);
 }
 .modal {
   position: fixed;

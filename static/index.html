@@ -751,6 +751,9 @@
       document.getElementById('profile-weight').value = currentUser.weight || '';
       document.getElementById('profile-gender').value = currentUser.gender || '';
       
+      // Load progress charts
+      loadProgressCharts();
+      
       // Load user posts
       fetch(`${API_BASE}/api/user/${currentUser.username}/posts`)
         .then(res => res.json())
@@ -807,6 +810,104 @@
           document.getElementById('user-posts').innerHTML = 
             '<div class="text-center py-8" style="color: var(--error)">Error loading posts.</div>';
         });
+    }
+
+    // Load progress charts
+    function loadProgressCharts() {
+      if (!currentUser) return;
+      
+      fetch(`${API_BASE}/api/user/${currentUser.username}/progress`)
+        .then(res => res.json())
+        .then(data => {
+          // Render charts for each lift type
+          renderProgressChart('bench', data.bench);
+          renderProgressChart('squat', data.squat);
+          renderProgressChart('deadlift', data.deadlift);
+        })
+        .catch(err => {
+          console.error('Error loading progress data:', err);
+        });
+    }
+
+    // Render progress chart
+    function renderProgressChart(liftType, progressData) {
+      const canvas = document.getElementById(`${liftType}-chart`);
+      if (!canvas) return;
+      
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * devicePixelRatio;
+      canvas.height = rect.height * devicePixelRatio;
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+      
+      const width = rect.width;
+      const height = rect.height;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height);
+      
+      if (!progressData || progressData.length === 0) {
+        // Show "No data" message
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary');
+        ctx.font = '12px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data yet', width / 2, height / 2);
+        
+        // Update current weight display
+        document.getElementById(`${liftType}-current`).textContent = 'Current: --kg';
+        document.getElementById(`${liftType}-trend`).textContent = '--';
+        return;
+      }
+      
+      // Prepare data
+      const weights = progressData.map(d => d.weight);
+      const minWeight = Math.min(...weights);
+      const maxWeight = Math.max(...weights);
+      const weightRange = maxWeight - minWeight || 1;
+      
+      const padding = 20;
+      const chartWidth = width - 2 * padding;
+      const chartHeight = height - 2 * padding;
+      
+      // Calculate trend
+      const currentWeight = weights[weights.length - 1];
+      const previousWeight = weights.length > 1 ? weights[weights.length - 2] : currentWeight;
+      const trend = currentWeight > previousWeight ? '+' + (currentWeight - previousWeight).toFixed(1) + 'kg' : 
+                   currentWeight < previousWeight ? (currentWeight - previousWeight).toFixed(1) + 'kg' : 
+                   '0kg';
+      
+      // Update current weight and trend displays
+      document.getElementById(`${liftType}-current`).textContent = `Current: ${currentWeight}kg`;
+      document.getElementById(`${liftType}-trend`).textContent = trend;
+      
+      // Draw chart
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
+      ctx.lineWidth = 2;
+      
+      // Draw line
+      ctx.beginPath();
+      progressData.forEach((point, index) => {
+        const x = padding + (index / (progressData.length - 1 || 1)) * chartWidth;
+        const y = padding + (1 - (point.weight - minWeight) / weightRange) * chartHeight;
+        
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      ctx.stroke();
+      
+      // Draw points
+      progressData.forEach((point, index) => {
+        const x = padding + (index / (progressData.length - 1 || 1)) * chartWidth;
+        const y = padding + (1 - (point.weight - minWeight) / weightRange) * chartHeight;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, 2 * Math.PI);
+        ctx.fill();
+      });
     }
 
     // Edit post function
@@ -1001,6 +1102,9 @@
           document.getElementById('combined-pr-form').reset();
           loadVideos();
           loadLeaderboard();
+          if (currentUser) {
+            loadProgressCharts();
+          }
         }
       })
       .catch(err => {

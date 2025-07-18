@@ -339,6 +339,23 @@ body {
   font-weight: 600;
 }
 
+/* Dark mode specific navbar styles */
+.dark .nav-link {
+  color: var(--primary-color);
+  background-color: transparent;
+}
+
+.dark .nav-link.active {
+  color: white;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.dark .nav-link:hover {
+  color: white;
+  background-color: var(--primary-color);
+}
+
 /* Modal styles */
 .modal {
   position: fixed;
