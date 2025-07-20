@@ -6,6 +6,7 @@
   <title>GymRank - Competitive Lifting Platform</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏋️</text></svg>">
   <link href="./src/output.css" rel="stylesheet">
+  <script src="./src/device-detection.js"></script>
 </head>
 <body class="min-h-screen">
   <!-- Navigation Header -->
@@ -397,17 +398,6 @@
   </div>
 
   <script>
-    // Mobile device detection and redirect
-    function isMobileDevice() {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
-        || window.innerWidth < 768;
-    }
-
-    // Redirect mobile users to mobile.html
-    if (isMobileDevice() && !window.location.pathname.includes('mobile.html') && !localStorage.getItem('force-desktop')) {
-      window.location.href = 'mobile.html';
-    }
-
     const API_BASE = 'https://gymbakugan.onrender.com';
 
     // Navigation functionality
@@ -539,7 +529,7 @@
 
     // Switch to mobile version
     function switchToMobile() {
-      window.location.href = 'mobile.html';
+      DeviceDetection.forceMobileVersion();
     }
 
     // Load leaderboard

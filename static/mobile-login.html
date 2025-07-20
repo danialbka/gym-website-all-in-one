@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Login - GymRank Mobile</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏋️</text></svg>">
+  <link href="./src/output.css" rel="stylesheet">
+  <script src="./src/device-detection.js" data-no-redirect></script>
+  <style>
+    .mobile-login-container {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--background-alt) 0%, var(--background) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+    
+    .mobile-login-card {
+      background-color: var(--background);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .mobile-form-input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      background-color: var(--background);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    
+    .mobile-form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+    }
+    
+    .mobile-form-label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+    
+    .mobile-btn {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .mobile-btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .mobile-btn-primary:active {
+      transform: scale(0.98);
+      background-color: var(--primary-dark);
+    }
+    
+    .mobile-btn-secondary {
+      background-color: transparent;
+      color: var(--primary-color);
+      border: 2px solid var(--primary-color);
+    }
+    
+    .mobile-btn-secondary:active {
+      transform: scale(0.98);
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .mobile-nav-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--background);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+    }
+    
+    .mobile-back-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+    }
+    
+    .mobile-back-btn:active {
+      background-color: var(--background-alt);
+    }
+    
+    .mobile-brand {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+    
+    .mobile-desktop-btn {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+    
+    .mobile-login-content {
+      margin-top: 80px; /* Space for nav bar */
+    }
+    
+    .mobile-divider {
+      display: flex;
+      align-items: center;
+      margin: 1.5rem 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    .mobile-divider::before,
+    .mobile-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background-color: var(--border);
+    }
+    
+    .mobile-divider span {
+      margin: 0 1rem;
+    }
+    
+    .mobile-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .mobile-link:active {
+      opacity: 0.7;
+    }
+    
+    .mobile-alert {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .mobile-alert-error {
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--error);
+      color: var(--error);
+    }
+    
+    .mobile-alert-success {
+      background-color: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+  </style>
+</head>
+<body>
+  <!-- Mobile Navigation Bar -->
+  <div class="mobile-nav-bar">
+    <button class="mobile-back-btn" onclick="goBack()">←</button>
+    <div class="mobile-brand">🏋️ GymRank</div>
+    <button class="mobile-desktop-btn" onclick="switchToDesktop()">💻</button>
+  </div>
+
+  <!-- Mobile Login Content -->
+  <div class="mobile-login-content">
+    <div class="mobile-login-container">
+      <div class="mobile-login-card">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">🏋️</div>
+          <h1 style="font-size: 1.75rem; font-weight: bold; margin-bottom: 0.5rem; color: var(--text-primary);">
+            Welcome Back
+          </h1>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            Sign in to your GymRank account
+          </p>
+        </div>
+
+        <!-- Alert container -->
+        <div id="mobile-alert-container"></div>
+
+        <!-- Login Form -->
+        <form id="mobile-login-form">
+          <div style="margin-bottom: 1rem;">
+            <label class="mobile-form-label">Username</label>
+            <input 
+              type="text" 
+              id="mobile-username" 
+              class="mobile-form-input" 
+              placeholder="Enter your username"
+              autocomplete="username"
+              required
+            >
+          </div>
+          
+          <div style="margin-bottom: 1.5rem;">
+            <label class="mobile-form-label">Password</label>
+            <input 
+              type="password" 
+              id="mobile-password" 
+              class="mobile-form-input" 
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            >
+          </div>
+          
+          <button type="submit" class="mobile-btn mobile-btn-primary" id="mobile-login-btn">
+            Sign In
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="mobile-divider">
+          <span>or</span>
+        </div>
+
+        <!-- Register Link -->
+        <a href="mobile-register.html" class="mobile-btn mobile-btn-secondary" style="text-decoration: none; text-align: center; display: block;">
+          Create New Account
+        </a>
+
+        <!-- Forgot Password -->
+        <div style="text-align: center; margin-top: 1.5rem;">
+          <a href="mobile-forgot-password.html" class="mobile-link" style="font-size: 0.9rem;">
+            Forgot your password?
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://gymbakugan.onrender.com';
+
+    // Navigation functions
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = 'mobile.html';
+      }
+    }
+
+    function switchToDesktop() {
+      DeviceDetection.forceDesktopVersion();
+    }
+
+    // Alert functions
+    function showMobileAlert(message, type = 'error') {
+      const container = document.getElementById('mobile-alert-container');
+      container.innerHTML = `
+        <div class="mobile-alert mobile-alert-${type}">
+          ${message}
+        </div>
+      `;
+      
+      // Auto-hide success messages
+      if (type === 'success') {
+        setTimeout(() => {
+          container.innerHTML = '';
+        }, 3000);
+      }
+    }
+
+    function hideMobileAlert() {
+      document.getElementById('mobile-alert-container').innerHTML = '';
+    }
+
+    // Form handling
+    function handleMobileLogin(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('mobile-username').value.trim();
+      const password = document.getElementById('mobile-password').value;
+      
+      if (!username || !password) {
+        showMobileAlert('Please fill in all fields.');
+        return;
+      }
+      
+      // Show loading state
+      const submitBtn = document.getElementById('mobile-login-btn');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Signing In...';
+      submitBtn.disabled = true;
+      
+      hideMobileAlert();
+      
+      // Submit login request
+      fetch(`${API_BASE}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          showMobileAlert(data.error);
+        } else {
+          // Store user data
+          localStorage.setItem('gymrank_user', JSON.stringify(data));
+          
+          showMobileAlert('Login successful! Redirecting...', 'success');
+          
+          // Redirect to mobile home after short delay
+          setTimeout(() => {
+            window.location.href = 'mobile.html';
+          }, 1000);
+        }
+      })
+      .catch(err => {
+        console.error('Login error:', err);
+        showMobileAlert('Login failed. Please check your connection and try again.');
+      })
+      .finally(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      });
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('mobile-login-form');
+      form.addEventListener('submit', handleMobileLogin);
+      
+      // Focus first input
+      document.getElementById('mobile-username').focus();
+      
+      // Check if user is already logged in
+      const savedUser = localStorage.getItem('gymrank_user');
+      if (savedUser) {
+        showMobileAlert('You are already logged in. Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = 'mobile.html';
+        }, 1000);
+      }
+    });
+  </script>
+</body>
+</html>
