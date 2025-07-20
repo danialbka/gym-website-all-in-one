@@ -20,21 +20,24 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy package.json for frontend dependencies
+COPY static/package*.json ./static/
+RUN cd static && npm install
+
 # Copy application code
 COPY . .
 
 # Build frontend CSS
-RUN cd static && npm install && npm run build-css
+RUN cd static && npm run build-css
 
-# Create uploads directory
-RUN mkdir -p uploads
+# Create uploads and migrations directories
+RUN mkdir -p uploads migrations
 
-# Copy and run database migrations
-COPY *.sql ./migrations/
-RUN mkdir -p /app/migrations
+# Copy database migration files
+RUN find . -name "*.sql" -exec cp {} ./migrations/ \; || true
 
 # Expose port
 EXPOSE 8000
 
 # Run the application with gunicorn
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8000} app:app"]
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8000} --timeout 120 app:app"]
