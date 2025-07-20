@@ -670,7 +670,7 @@ def forgot_password():
                     
                     # Determine the base URL (use environment variable or default)
                     base_url = os.getenv('BASE_URL', 'http://localhost:5000')
-                    reset_url = f"{base_url}/static/reset-password.html?token={reset_token}"
+                    reset_url = f"{base_url}/reset-password.html?token={reset_token}"
                     
                     # Create email message
                     msg = Message(
