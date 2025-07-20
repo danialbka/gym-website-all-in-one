@@ -15,26 +15,26 @@
         <div class="flex items-center gap-2">
           <h1 class="navbar-brand">🏋️ GymRank</h1>
         </div>
-        <div class="navbar-nav">
-          <button onclick="showSection('home')" id="nav-home" class="nav-link active">
+        <div class="navbar-nav custom-scroll">
+          <button onclick="showSection('home')" id="nav-home" class="nav-link active touch-feedback">
             Home
           </button>
-          <button onclick="showSection('videos')" id="nav-videos" class="nav-link">
+          <button onclick="showSection('videos')" id="nav-videos" class="nav-link touch-feedback">
             Videos
           </button>
-          <button onclick="showSection('leaderboard')" id="nav-leaderboard" class="nav-link">
+          <button onclick="showSection('leaderboard')" id="nav-leaderboard" class="nav-link touch-feedback">
             Leaderboard
           </button>
-          <button onclick="showSection('teams')" id="nav-teams" class="nav-link">
+          <button onclick="showSection('teams')" id="nav-teams" class="nav-link touch-feedback">
             Teams
           </button>
-          <div id="user-info" class="hidden nav-link" onclick="showSection('profile')">
+          <div id="user-info" class="hidden nav-link touch-feedback" onclick="showSection('profile')">
             <div id="logged-in-user" class="flex items-center gap-2"></div>
           </div>
-          <button id="logout-btn" onclick="logout()" class="hidden btn btn-outline btn-sm">
+          <button id="logout-btn" onclick="logout()" class="hidden btn btn-outline btn-sm touch-feedback">
             Logout
           </button>
-          <button id="theme-toggle" onclick="toggleTheme()" class="btn btn-ghost btn-icon" title="Toggle dark mode">
+          <button id="theme-toggle" onclick="toggleTheme()" class="btn btn-ghost btn-icon touch-feedback" title="Toggle dark mode">
             <span id="theme-icon">🌙</span>
           </button>
           <div id="auth-buttons" class="flex items-center gap-2">
@@ -59,7 +59,7 @@
       </div>
 
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 stats-cards">
         <div class="card">
           <h3 class="font-semibold text-lg mb-2">Total Lifters</h3>
           <p class="text-3xl font-bold" style="color: var(--primary-color)" id="total-users">-</p>
@@ -127,7 +127,7 @@
         <p style="color: var(--text-secondary)">Watch incredible lifts from our community</p>
       </div>
       
-      <div id="videos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div id="videos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 videos-grid-mobile">
         <div class="flex justify-center items-center py-8 col-span-full">
           <div class="dot-matrix-spinner">
             <div class="dot"></div>
@@ -544,7 +544,7 @@
             const genderEmoji = user.gender === 'male' ? '♂️' : '♀️';
             
             return `
-              <div onclick="window.location.href='profile.html?username=${user.username}'" class="card flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+              <div onclick="window.location.href='profile.html?username=${user.username}'" class="card flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors leaderboard-item">
                 <div class="flex items-center gap-4">
                   <span class="text-2xl font-bold" style="color: var(--primary-color)">#${rank}</span>
                   <span class="text-2xl">${user.flag}</span>
