@@ -748,7 +748,7 @@ def reset_password():
                 password_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
                 
                 # Update password
-                cur.execute("UPDATE users SET password = %s WHERE username = %s", (password_hash, username))
+                cur.execute("UPDATE users SET password_hash = %s WHERE username = %s", (password_hash, username))
                 
                 # Delete used reset token
                 cur.execute("DELETE FROM password_reset_tokens WHERE username = %s", (username,))
