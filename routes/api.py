@@ -625,21 +625,24 @@ def forgot_password():
     """Handle forgot password requests"""
     try:
         data = request.get_json()
-        username = data.get('username', '').strip()
+        identifier = data.get('identifier', '').strip()
         
-        if not username:
-            return jsonify({'error': 'Username is required'}), 400
+        if not identifier:
+            return jsonify({'error': 'Username or email is required'}), 400
         
         conn = get_db_connection()
         try:
             with conn.cursor() as cur:
-                # Check if user exists
-                cur.execute("SELECT email, username FROM users WHERE username = %s AND is_active = TRUE", (username,))
+                # Check if user exists by username or email
+                cur.execute("""
+                    SELECT email, username FROM users 
+                    WHERE (username = %s OR email = %s) AND is_active = TRUE
+                """, (identifier, identifier))
                 user = cur.fetchone()
                 
                 if not user or not user['email']:
                     # Don't reveal if user exists or not for security
-                    return jsonify({'message': 'If your username exists, you will receive reset instructions.'}), 200
+                    return jsonify({'message': 'If your username or email exists, you will receive reset instructions.'}), 200
                 
                 # Generate reset token
                 reset_token = secrets.token_urlsafe(32)
@@ -656,7 +659,8 @@ def forgot_password():
                     )
                 """)
                 
-                # Store reset token (expires in 1 hour)
+                # Store reset token (expires in 1 hour) - use the username from database
+                username = user['username']
                 cur.execute("""
                     INSERT INTO password_reset_tokens (username, token_hash, expires_at, created_at)
                     VALUES (%s, %s, NOW() + INTERVAL '1 hour', NOW())
@@ -677,7 +681,7 @@ def forgot_password():
                     email = user.get('email')
                     if not email:
                         print(f"No email address found for user: {username}")
-                        return jsonify({'message': 'If your username exists, you will receive reset instructions.'}), 200
+                        return jsonify({'message': 'If your username or email exists, you will receive reset instructions.'}), 200
                     
                     # Determine the base URL (use environment variable or default)
                     base_url = os.getenv('BASE_URL', 'http://localhost:5000')
@@ -701,7 +705,7 @@ def forgot_password():
                     print(f"User data: {user}")
                     # Still return success to not reveal if user exists
                 
-                return jsonify({'message': 'If your username exists, you will receive reset instructions.'}), 200
+                return jsonify({'message': 'If your username or email exists, you will receive reset instructions.'}), 200
                 
         except Exception as e:
             conn.rollback()
