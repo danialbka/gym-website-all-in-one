@@ -94,8 +94,8 @@ def register_user():
     gender = data.get('gender')
     
     # Validate required fields
-    if not all([username, password, flag, gender]):
-        return jsonify({'error': 'Username, password, flag, and gender are required'}), 400
+    if not all([username, password, email, flag, gender]):
+        return jsonify({'error': 'Username, password, email, flag, and gender are required'}), 400
     
     # Hash password
     password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -108,11 +108,10 @@ def register_user():
             if cur.fetchone():
                 return jsonify({'error': 'Username already exists'}), 400
             
-            # Check if email already exists (if provided)
-            if email:
-                cur.execute("SELECT email FROM users WHERE email = %s", (email,))
-                if cur.fetchone():
-                    return jsonify({'error': 'Email already exists'}), 400
+            # Check if email already exists
+            cur.execute("SELECT email FROM users WHERE email = %s", (email,))
+            if cur.fetchone():
+                return jsonify({'error': 'Email already exists'}), 400
             
             cur.execute("""
                 INSERT INTO users (username, password_hash, email, display_name, flag, team, gender) 

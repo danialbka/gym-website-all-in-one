@@ -64,13 +64,15 @@
           </div>
 
           <div>
-            <label class="form-label">Email (Optional)</label>
+            <label class="form-label">Email</label>
             <input 
               type="email" 
               id="email" 
               class="form-input" 
               placeholder="your@email.com"
+              required
             >
+            <p class="text-sm mt-1" style="color: var(--text-secondary)">Required for password reset functionality</p>
           </div>
 
           <div>
@@ -393,8 +395,8 @@
       const flag = document.getElementById('flag').value;
       const gender = document.getElementById('gender').value;
       
-      if (!username || !password || !flag || !gender) {
-        alert('Username, password, country, and gender are required');
+      if (!username || !password || !email || !flag || !gender) {
+        alert('Username, password, email, country, and gender are required');
         return;
       }
       
@@ -403,8 +405,7 @@
         return;
       }
 
-      const registrationData = { username, password, flag, team, gender };
-      if (email) registrationData.email = email;
+      const registrationData = { username, password, email, flag, team, gender };
       if (displayName) registrationData.display_name = displayName;
 
       try {
