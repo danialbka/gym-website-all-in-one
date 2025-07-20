@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, current_app, render_template
 from werkzeug.utils import secure_filename
 from services.supabase import get_db_connection, calculate_elo
 from flask_mail import Message
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from functools import wraps
 import os
 import uuid
 import bcrypt
@@ -83,6 +85,31 @@ def get_user_total_lifts(username):
 
 api_blueprint = Blueprint('api', __name__)
 
+def auth_required(f):
+    """
+    Decorator to require JWT authentication and verify user owns the resource
+    """
+    @wraps(f)
+    @jwt_required()
+    def decorated_function(*args, **kwargs):
+        current_user = get_jwt_identity()
+        
+        # Check if request contains username and verify it matches the token
+        if request.method in ['POST', 'PUT', 'DELETE']:
+            # Handle both JSON and form data
+            if request.is_json:
+                data = request.json or {}
+                request_username = data.get('username')
+            else:
+                request_username = request.form.get('username')
+            
+            # For profile updates and post operations, verify user owns the resource
+            if request_username and request_username != current_user:
+                return jsonify({'error': 'Unauthorized: You can only modify your own data'}), 403
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
 @api_blueprint.route('/api/register', methods=['POST'])
 def register_user():
     data = request.json
@@ -157,9 +184,13 @@ def login_user():
                        (datetime.now(), username))
             conn.commit()
             
-            # Return user data without password hash
+            # Create JWT token
+            access_token = create_access_token(identity=username)
+            
+            # Return user data without password hash and include JWT token
             user_data = dict(user)
             del user_data['password_hash']
+            user_data['access_token'] = access_token
             return jsonify(user_data), 200
             
     except Exception as e:
@@ -240,6 +271,7 @@ def validate_video_file(file_path):
         return False
 
 @api_blueprint.route('/api/submit_pr', methods=['POST'])
+@auth_required
 def submit_pr():
     username = request.form.get('username')
     lift_type = request.form.get('lift_type')
@@ -355,6 +387,7 @@ def team_members(team_name):
         conn.close()
 
 @api_blueprint.route('/api/profile/update', methods=['PUT'])
+@auth_required
 def update_profile():
     data = request.json
     username = data.get('username')
@@ -420,6 +453,7 @@ def get_user_posts(username):
         conn.close()
 
 @api_blueprint.route('/api/posts/<int:post_id>', methods=['DELETE'])
+@auth_required
 def delete_post(post_id):
     data = request.json
     username = data.get('username')
@@ -464,6 +498,7 @@ def delete_post(post_id):
         conn.close()
 
 @api_blueprint.route('/api/posts/<int:post_id>', methods=['PUT'])
+@auth_required
 def edit_post(post_id):
     data = request.json
     username = data.get('username')

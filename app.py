@@ -1,6 +1,7 @@
 from flask import Flask, send_from_directory, send_file
 from flask_cors import CORS
 from flask_mail import Mail
+from flask_jwt_extended import JWTManager
 from routes.api import api_blueprint
 import os
 from dotenv import load_dotenv
@@ -17,8 +18,13 @@ app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
-# Initialize Flask-Mail
+# Configure JWT
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'your-secret-key-change-in-production')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 86400)  # 24 hours
+
+# Initialize extensions
 mail = Mail(app)
+jwt = JWTManager(app)
 
 CORS(app)
 app.register_blueprint(api_blueprint)
