@@ -352,6 +352,16 @@ body {
   z-index: 50;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.75rem 0 !important;
+    position: relative !important;
+    z-index: auto !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
 .navbar-brand {
   font-size: 1.5rem;
   font-weight: 700;
@@ -368,6 +378,27 @@ body {
   gap: 0.5rem;
   flex-wrap: wrap;
 }
+
+@media (max-width: 768px) {
+  .navbar-nav {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 0.1rem !important;
+    width: 100% !important;
+    justify-content: space-evenly !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    padding: 0.25rem !important;
+    background-color: var(--background-alt) !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--border) !important;
+  }
+  .navbar-nav::-webkit-scrollbar {
+    display: none !important;
+  }
+}
 .nav-link {
   color: var(--text-secondary);
   text-decoration: none;
@@ -380,6 +411,36 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .nav-link {
+    flex: 1 !important;
+    min-width: 0 !important;
+    padding: 0.4rem 0.2rem !important;
+    font-size: 0.7rem !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    border-radius: 8px !important;
+    touch-action: manipulation !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 50px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    gap: 0.1rem !important;
+  }
+  .nav-link span:first-child {
+    font-size: 1.1rem !important;
+    line-height: 1 !important;
+  }
+  .nav-link span:last-child {
+    font-size: 0.65rem !important;
+    line-height: 1 !important;
+    font-weight: 500 !important;
+  }
 }
 .nav-link:hover {
   color: var(--primary-color);
@@ -808,58 +869,6 @@ body {
 @media (max-width: 768px) {
   .container {
     padding: 0 1rem;
-  }
-  .navbar {
-    padding: 0.75rem 0;
-    position: relative;
-    z-index: auto;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-  .navbar-nav {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 0.1rem;
-    width: 100%;
-    justify-content: space-evenly;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding: 0.25rem;
-    background-color: var(--background-alt);
-    border-radius: 12px;
-    border: 1px solid var(--border);
-  }
-  .navbar-nav::-webkit-scrollbar {
-    display: none;
-  }
-  .nav-link {
-    flex: 1;
-    min-width: 0;
-    padding: 0.4rem 0.2rem;
-    font-size: 0.7rem;
-    white-space: nowrap;
-    text-align: center;
-    border-radius: 8px;
-    touch-action: manipulation;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 50px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    gap: 0.1rem;
-  }
-  .nav-link span:first-child {
-    font-size: 1.1rem;
-    line-height: 1;
-  }
-  .nav-link span:last-child {
-    font-size: 0.65rem;
-    line-height: 1;
-    font-weight: 500;
   }
   .modal-content {
     margin: 1rem;
