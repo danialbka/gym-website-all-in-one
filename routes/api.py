@@ -637,7 +637,7 @@ def forgot_password():
                 cur.execute("SELECT email, username FROM users WHERE username = %s AND is_active = TRUE", (username,))
                 user = cur.fetchone()
                 
-                if not user:
+                if not user or not user['email']:
                     # Don't reveal if user exists or not for security
                     return jsonify({'message': 'If your username exists, you will receive reset instructions.'}), 200
                 
@@ -662,6 +662,12 @@ def forgot_password():
                 try:
                     from app import mail
                     
+                    # Validate email exists
+                    email = user.get('email')
+                    if not email:
+                        print(f"No email address found for user: {username}")
+                        return jsonify({'message': 'If your username exists, you will receive reset instructions.'}), 200
+                    
                     # Determine the base URL (use environment variable or default)
                     base_url = os.getenv('BASE_URL', 'http://localhost:5000')
                     reset_url = f"{base_url}/static/reset-password.html?token={reset_token}"
@@ -669,7 +675,7 @@ def forgot_password():
                     # Create email message
                     msg = Message(
                         subject="Reset Your GymRank Password",
-                        recipients=[user['email']],
+                        recipients=[email],
                         html=render_template('password_reset_email.html', 
                                            username=username, 
                                            reset_url=reset_url)
@@ -677,10 +683,11 @@ def forgot_password():
                     
                     # Send the email
                     mail.send(msg)
-                    print(f"Password reset email sent to {user['email']} for user: {username}")
+                    print(f"Password reset email sent to {email} for user: {username}")
                     
                 except Exception as email_error:
                     print(f"Failed to send email: {email_error}")
+                    print(f"User data: {user}")
                     # Still return success to not reveal if user exists
                 
                 return jsonify({'message': 'If your username exists, you will receive reset instructions.'}), 200
