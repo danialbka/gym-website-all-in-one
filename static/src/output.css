@@ -811,11 +811,10 @@ body {
   }
   .navbar {
     padding: 0.75rem 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    position: relative;
+    z-index: auto;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
   .navbar-nav {
     flex-direction: row;
@@ -886,6 +885,7 @@ body {
   }
   .section {
     padding-bottom: 2rem;
+    padding-top: 1rem;
   }
   .grid-cols-1 {
     grid-template-columns: 1fr;
@@ -1018,8 +1018,10 @@ body {
 
 /* Safe area insets for notched devices */
 @supports (padding-top: env(safe-area-inset-top)) {
-  .navbar {
-    padding-top: calc(0.75rem + env(safe-area-inset-top));
+  @media (min-width: 769px) {
+    .navbar {
+      padding-top: calc(0.75rem + env(safe-area-inset-top));
+    }
   }
   
   .container {
@@ -1056,6 +1058,7 @@ body {
 @media screen and (max-height: 500px) and (orientation: landscape) {
   .navbar {
     padding: 0.5rem 0;
+    position: relative;
   }
   
   .container {
