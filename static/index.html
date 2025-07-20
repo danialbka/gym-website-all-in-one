@@ -17,33 +17,39 @@
         </div>
         <div class="navbar-nav custom-scroll">
           <button onclick="showSection('home')" id="nav-home" class="nav-link active touch-feedback">
-            Home
+            <span>🏠</span>
+            <span>Home</span>
           </button>
           <button onclick="showSection('videos')" id="nav-videos" class="nav-link touch-feedback">
-            Videos
+            <span>📹</span>
+            <span>Videos</span>
           </button>
           <button onclick="showSection('leaderboard')" id="nav-leaderboard" class="nav-link touch-feedback">
-            Leaderboard
+            <span>🏆</span>
+            <span>Ranks</span>
           </button>
           <button onclick="showSection('teams')" id="nav-teams" class="nav-link touch-feedback">
-            Teams
+            <span>🏟️</span>
+            <span>Teams</span>
           </button>
           <div id="user-info" class="hidden nav-link touch-feedback" onclick="showSection('profile')">
-            <div id="logged-in-user" class="flex items-center gap-2"></div>
+            <span>👤</span>
+            <div id="logged-in-user" class="text-center">Profile</div>
           </div>
-          <button id="logout-btn" onclick="logout()" class="hidden btn btn-outline btn-sm touch-feedback">
-            Logout
+          <button id="logout-btn" onclick="logout()" class="hidden nav-link touch-feedback">
+            <span>🚪</span>
+            <span>Logout</span>
           </button>
-          <button id="theme-toggle" onclick="toggleTheme()" class="btn btn-ghost btn-icon touch-feedback" title="Toggle dark mode">
+          <button id="theme-toggle" onclick="toggleTheme()" class="nav-link touch-feedback" title="Toggle dark mode">
             <span id="theme-icon">🌙</span>
+            <span>Theme</span>
           </button>
-          <div id="auth-buttons" class="flex items-center gap-2">
-            <a href="login.html" class="btn btn-outline">
-              Login
-            </a>
-            <a href="register.html" class="btn btn-primary">
-              Register
-            </a>
+          <div id="auth-buttons" class="nav-link touch-feedback">
+            <span>🔐</span>
+            <div class="flex flex-col gap-1">
+              <a href="login.html" class="text-xs">Login</a>
+              <a href="register.html" class="text-xs">Register</a>
+            </div>
           </div>
         </div>
       </div>
