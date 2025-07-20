@@ -78,21 +78,6 @@
               </a>
             </p>
           </div>
-
-          <!-- Demo account info -->
-          <div class="mt-6 p-4 rounded-lg" style="background-color: var(--background-alt); border: 1px solid var(--border);">
-            <h3 class="font-semibold mb-2" style="color: var(--text-primary)">Demo Account</h3>
-            <p class="text-sm mb-2" style="color: var(--text-secondary)">Try the app with these credentials:</p>
-            <div class="flex gap-2">
-              <button 
-                type="button" 
-                class="btn btn-outline btn-sm flex-1" 
-                onclick="fillDemoCredentials()"
-              >
-                Use Demo Account
-              </button>
-            </div>
-          </div>
         </div>
 
         <!-- Features showcase -->
@@ -153,25 +138,6 @@
       // Update theme icon
       const themeIcon = document.getElementById('theme-icon');
       themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-    }
-
-    // Fill demo credentials
-    function fillDemoCredentials() {
-      document.getElementById('username').value = 'demo';
-      document.getElementById('password').value = 'demo123';
-      
-      // Add visual feedback
-      const button = event.target;
-      const originalText = button.textContent;
-      button.textContent = 'Filled!';
-      button.style.background = 'var(--success)';
-      button.style.color = 'white';
-      
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.style.background = '';
-        button.style.color = '';
-      }, 1000);
     }
 
     // Enhanced form submission with better UX
