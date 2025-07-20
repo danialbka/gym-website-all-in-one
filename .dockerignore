@@ -23,3 +23,13 @@ frontend/
 backend/
 .DS_Store
 Thumbs.db
+*.png
+*.jpg
+*.jpeg
+*.gif
+.claude/
+.pytest_cache/
+.coverage
+*.db
+*.sqlite
+*.sqlite3

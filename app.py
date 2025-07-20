@@ -11,6 +11,10 @@ app.register_blueprint(api_blueprint)
 def home():
     return send_file('static/index.html')
 
+@app.route('/health')
+def health_check():
+    return {'status': 'healthy', 'version': '1.0.0'}, 200
+
 @app.route('/<path:filename>')
 def serve_static(filename):
     return send_from_directory('static', filename)

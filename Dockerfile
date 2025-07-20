@@ -29,8 +29,16 @@ RUN cd static && npm install && npm run build-css
 # Create uploads directory
 RUN mkdir -p uploads
 
+# Copy and run database migrations
+COPY *.sql ./migrations/
+RUN mkdir -p /app/migrations
+
 # Expose port
 EXPOSE 8000
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
 
 # Run the application with gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
