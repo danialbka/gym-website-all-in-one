@@ -7,3 +7,4 @@ werkzeug
 pillow
 ffmpeg-python
 bcrypt
+flask-mail

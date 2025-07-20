@@ -1,6 +1,7 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, render_template
 from werkzeug.utils import secure_filename
 from services.supabase import get_db_connection, calculate_elo
+from flask_mail import Message
 import os
 import uuid
 import bcrypt
@@ -657,10 +658,30 @@ def forgot_password():
                 
                 conn.commit()
                 
-                # TODO: Send email with reset link
-                # For now, just return success (you'll need to implement email sending)
-                print(f"Password reset token for {username}: {reset_token}")
-                print(f"Reset link: http://localhost:5000/reset-password?token={reset_token}")
+                # Send email with reset link
+                try:
+                    from app import mail
+                    
+                    # Determine the base URL (use environment variable or default)
+                    base_url = os.getenv('BASE_URL', 'http://localhost:5000')
+                    reset_url = f"{base_url}/static/reset-password.html?token={reset_token}"
+                    
+                    # Create email message
+                    msg = Message(
+                        subject="Reset Your GymRank Password",
+                        recipients=[user['email']],
+                        html=render_template('password_reset_email.html', 
+                                           username=username, 
+                                           reset_url=reset_url)
+                    )
+                    
+                    # Send the email
+                    mail.send(msg)
+                    print(f"Password reset email sent to {user['email']} for user: {username}")
+                    
+                except Exception as email_error:
+                    print(f"Failed to send email: {email_error}")
+                    # Still return success to not reveal if user exists
                 
                 return jsonify({'message': 'If your username exists, you will receive reset instructions.'}), 200
                 
