@@ -5,6 +5,8 @@ import os
 import uuid
 import bcrypt
 from datetime import datetime
+import secrets
+import hashlib
 
 # DOTS Formula Constants
 DOTS_MEN = {
@@ -617,3 +619,110 @@ def get_user_progress(username):
         return jsonify({'error': f'Failed to get user progress: {str(e)}'}), 500
     finally:
         conn.close()
+
+@api_blueprint.route('/api/forgot-password', methods=['POST'])
+def forgot_password():
+    """Handle forgot password requests"""
+    try:
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        
+        if not username:
+            return jsonify({'error': 'Username is required'}), 400
+        
+        conn = get_db_connection()
+        try:
+            with conn.cursor() as cur:
+                # Check if user exists
+                cur.execute("SELECT email, username FROM users WHERE username = %s AND is_active = TRUE", (username,))
+                user = cur.fetchone()
+                
+                if not user:
+                    # Don't reveal if user exists or not for security
+                    return jsonify({'message': 'If your username exists, you will receive reset instructions.'}), 200
+                
+                # Generate reset token
+                reset_token = secrets.token_urlsafe(32)
+                token_hash = hashlib.sha256(reset_token.encode()).hexdigest()
+                
+                # Store reset token (expires in 1 hour)
+                cur.execute("""
+                    INSERT INTO password_reset_tokens (username, token_hash, expires_at, created_at)
+                    VALUES (%s, %s, NOW() + INTERVAL '1 hour', NOW())
+                    ON CONFLICT (username) 
+                    DO UPDATE SET 
+                        token_hash = EXCLUDED.token_hash,
+                        expires_at = EXCLUDED.expires_at,
+                        created_at = EXCLUDED.created_at
+                """, (username, token_hash))
+                
+                conn.commit()
+                
+                # TODO: Send email with reset link
+                # For now, just return success (you'll need to implement email sending)
+                print(f"Password reset token for {username}: {reset_token}")
+                print(f"Reset link: http://localhost:5000/reset-password?token={reset_token}")
+                
+                return jsonify({'message': 'If your username exists, you will receive reset instructions.'}), 200
+                
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': 'Failed to process password reset request'}), 500
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        return jsonify({'error': 'Invalid request'}), 400
+
+@api_blueprint.route('/api/reset-password', methods=['POST'])
+def reset_password():
+    """Handle password reset with token"""
+    try:
+        data = request.get_json()
+        token = data.get('token', '').strip()
+        new_password = data.get('password', '').strip()
+        
+        if not token or not new_password:
+            return jsonify({'error': 'Token and new password are required'}), 400
+        
+        if len(new_password) < 6:
+            return jsonify({'error': 'Password must be at least 6 characters long'}), 400
+        
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
+        
+        conn = get_db_connection()
+        try:
+            with conn.cursor() as cur:
+                # Check if token is valid and not expired
+                cur.execute("""
+                    SELECT username FROM password_reset_tokens 
+                    WHERE token_hash = %s AND expires_at > NOW()
+                """, (token_hash,))
+                
+                result = cur.fetchone()
+                if not result:
+                    return jsonify({'error': 'Invalid or expired reset token'}), 400
+                
+                username = result['username']
+                
+                # Hash new password
+                password_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                
+                # Update password
+                cur.execute("UPDATE users SET password = %s WHERE username = %s", (password_hash, username))
+                
+                # Delete used reset token
+                cur.execute("DELETE FROM password_reset_tokens WHERE username = %s", (username,))
+                
+                conn.commit()
+                
+                return jsonify({'message': 'Password reset successful'}), 200
+                
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': 'Failed to reset password'}), 500
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        return jsonify({'error': 'Invalid request'}), 400
