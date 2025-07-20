@@ -645,6 +645,17 @@ def forgot_password():
                 reset_token = secrets.token_urlsafe(32)
                 token_hash = hashlib.sha256(reset_token.encode()).hexdigest()
                 
+                # Ensure password_reset_tokens table exists
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                        id SERIAL PRIMARY KEY,
+                        username VARCHAR(255) UNIQUE NOT NULL,
+                        token_hash VARCHAR(255) NOT NULL,
+                        expires_at TIMESTAMP NOT NULL,
+                        created_at TIMESTAMP DEFAULT NOW()
+                    )
+                """)
+                
                 # Store reset token (expires in 1 hour)
                 cur.execute("""
                     INSERT INTO password_reset_tokens (username, token_hash, expires_at, created_at)
@@ -694,6 +705,7 @@ def forgot_password():
                 
         except Exception as e:
             conn.rollback()
+            print(f"Forgot password error: {str(e)}")
             return jsonify({'error': 'Failed to process password reset request'}), 500
         finally:
             conn.close()
@@ -747,6 +759,7 @@ def reset_password():
                 
         except Exception as e:
             conn.rollback()
+            print(f"Password reset error: {str(e)}")
             return jsonify({'error': 'Failed to reset password'}), 500
         finally:
             conn.close()
