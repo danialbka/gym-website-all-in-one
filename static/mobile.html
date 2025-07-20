@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>GymRank - Mobile</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏋️</text></svg>">
+  <link href="./src/output.css" rel="stylesheet">
+  <style>
+    /* Mobile-specific CSS */
+    body {
+      padding-bottom: 80px; /* Space for bottom navigation */
+    }
+    
+    .mobile-header {
+      background-color: var(--background);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    
+    .mobile-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--background);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 0.5rem;
+      z-index: 100;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem;
+      text-decoration: none;
+      color: var(--text-secondary);
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      min-width: 60px;
+      touch-action: manipulation;
+    }
+    
+    .mobile-nav-item.active {
+      color: var(--primary-color);
+      background-color: var(--primary-light);
+    }
+    
+    .mobile-nav-item:active {
+      transform: scale(0.95);
+    }
+    
+    .mobile-nav-icon {
+      font-size: 1.25rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .mobile-nav-text {
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+    
+    .mobile-section {
+      padding: 1rem;
+      display: none;
+    }
+    
+    .mobile-section.active {
+      display: block;
+    }
+    
+    .mobile-card {
+      background-color: var(--background);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .mobile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .mobile-stat-card {
+      background-color: var(--background-alt);
+      border-radius: 8px;
+      padding: 0.75rem;
+      text-align: center;
+    }
+    
+    .mobile-stat-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+    
+    .mobile-stat-label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+    
+    .mobile-btn {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+    }
+    
+    .mobile-btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .mobile-btn-primary:active {
+      transform: scale(0.98);
+      background-color: var(--primary-dark);
+    }
+    
+    .mobile-form-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .mobile-leaderboard-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    
+    .mobile-leaderboard-item:active {
+      background-color: var(--background-alt);
+    }
+    
+    .mobile-video-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .mobile-video-card {
+      background-color: var(--background);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    
+    /* Dark mode support */
+    .dark .mobile-header {
+      background-color: var(--background);
+    }
+    
+    .dark .mobile-nav {
+      background-color: var(--background);
+    }
+  </style>
+</head>
+<body>
+  <!-- Mobile Header -->
+  <div class="mobile-header">
+    <h1 style="color: var(--primary-color); font-size: 1.5rem; font-weight: bold; margin: 0;">
+      🏋️ GymRank
+    </h1>
+    <button id="mobile-theme-toggle" onclick="toggleTheme()" style="position: absolute; right: 3rem; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.25rem; cursor: pointer;">
+      <span id="mobile-theme-icon">🌙</span>
+    </button>
+    <button onclick="switchToDesktop()" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.8rem; color: var(--text-secondary); cursor: pointer;">
+      💻
+    </button>
+  </div>
+
+  <!-- Mobile Content Sections -->
+  <div class="mobile-section active" id="mobile-home">
+    <!-- Stats -->
+    <div class="mobile-stats">
+      <div class="mobile-stat-card">
+        <div class="mobile-stat-number" id="mobile-total-users">-</div>
+        <div class="mobile-stat-label">Lifters</div>
+      </div>
+      <div class="mobile-stat-card">
+        <div class="mobile-stat-number" id="mobile-total-prs">-</div>
+        <div class="mobile-stat-label">PRs</div>
+      </div>
+      <div class="mobile-stat-card">
+        <div class="mobile-stat-number" id="mobile-top-elo">-</div>
+        <div class="mobile-stat-label">Top DOTS</div>
+      </div>
+    </div>
+
+    <!-- PR Submission (for logged-in users) -->
+    <div id="mobile-pr-section" class="mobile-card" style="display: none;">
+      <h2 style="text-align: center; margin-bottom: 1rem;">🥇 Submit PR</h2>
+      <form id="mobile-pr-form">
+        <select id="mobile-lift-type" class="mobile-form-input">
+          <option value="bench">Bench Press</option>
+          <option value="deadlift">Deadlift</option>
+          <option value="squat">Squat</option>
+        </select>
+        <input type="number" id="mobile-weight" class="mobile-form-input" placeholder="Weight (kg)" step="0.5" required>
+        <input type="url" id="mobile-instagram-url" class="mobile-form-input" placeholder="Instagram video URL" required>
+        <button type="submit" class="mobile-btn mobile-btn-primary">Submit PR</button>
+      </form>
+    </div>
+
+    <!-- Welcome/Login Section -->
+    <div id="mobile-welcome" class="mobile-card">
+      <h2 style="text-align: center; margin-bottom: 1rem;">Welcome to GymRank!</h2>
+      <p style="text-align: center; color: var(--text-secondary); margin-bottom: 1.5rem;">
+        Competitive lifting platform inspired by Bakugan rankings
+      </p>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="register.html" class="mobile-btn mobile-btn-primary" style="text-decoration: none; text-align: center; display: block;">
+          Get Started
+        </a>
+        <a href="login.html" class="mobile-btn" style="text-decoration: none; text-align: center; display: block; background-color: var(--background-alt); color: var(--text-primary);">
+          Sign In
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Videos Section -->
+  <div class="mobile-section" id="mobile-videos">
+    <h2 style="text-align: center; margin-bottom: 1rem;">📹 PR Videos</h2>
+    <div id="mobile-videos-grid" class="mobile-video-grid">
+      <div style="text-align: center; padding: 2rem;">Loading videos...</div>
+    </div>
+  </div>
+
+  <!-- Leaderboard Section -->
+  <div class="mobile-section" id="mobile-leaderboard">
+    <h2 style="text-align: center; margin-bottom: 1rem;">🏆 Leaderboard</h2>
+    
+    <!-- Filter Buttons -->
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; justify-content: center;">
+      <button onclick="setMobileFilter('all')" id="mobile-filter-all" class="mobile-btn mobile-btn-primary" style="flex: 1; max-width: 80px; font-size: 0.8rem;">All</button>
+      <button onclick="setMobileFilter('male')" id="mobile-filter-male" class="mobile-btn" style="flex: 1; max-width: 80px; font-size: 0.8rem; background-color: var(--background-alt); color: var(--text-primary);">♂️ Men</button>
+      <button onclick="setMobileFilter('female')" id="mobile-filter-female" class="mobile-btn" style="flex: 1; max-width: 80px; font-size: 0.8rem; background-color: var(--background-alt); color: var(--text-primary);">♀️ Women</button>
+    </div>
+    
+    <div class="mobile-card">
+      <div id="mobile-leaderboard-list">
+        <div style="text-align: center; padding: 2rem;">Loading leaderboard...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teams Section -->
+  <div class="mobile-section" id="mobile-teams">
+    <h2 style="text-align: center; margin-bottom: 1rem;">🏟️ Teams</h2>
+    <div class="mobile-card">
+      <div id="mobile-teams-list">
+        <div style="text-align: center; padding: 2rem;">Loading teams...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Section -->
+  <div class="mobile-section" id="mobile-profile">
+    <h2 style="text-align: center; margin-bottom: 1rem;">👤 Profile</h2>
+    <div id="mobile-profile-content">
+      <div style="text-align: center; padding: 2rem;">Please log in to view your profile.</div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <div class="mobile-nav">
+    <button class="mobile-nav-item active" onclick="showMobileSection('home')" id="mobile-nav-home">
+      <div class="mobile-nav-icon">🏠</div>
+      <div class="mobile-nav-text">Home</div>
+    </button>
+    <button class="mobile-nav-item" onclick="showMobileSection('videos')" id="mobile-nav-videos">
+      <div class="mobile-nav-icon">📹</div>
+      <div class="mobile-nav-text">Videos</div>
+    </button>
+    <button class="mobile-nav-item" onclick="showMobileSection('leaderboard')" id="mobile-nav-leaderboard">
+      <div class="mobile-nav-icon">🏆</div>
+      <div class="mobile-nav-text">Ranks</div>
+    </button>
+    <button class="mobile-nav-item" onclick="showMobileSection('teams')" id="mobile-nav-teams">
+      <div class="mobile-nav-icon">🏟️</div>
+      <div class="mobile-nav-text">Teams</div>
+    </button>
+    <button class="mobile-nav-item" onclick="showMobileSection('profile')" id="mobile-nav-profile">
+      <div class="mobile-nav-icon">👤</div>
+      <div class="mobile-nav-text">Profile</div>
+    </button>
+  </div>
+
+  <script>
+    const API_BASE = 'https://gymbakugan.onrender.com';
+    let currentUser = null;
+    let currentMobileFilter = '';
+
+    // Mobile navigation
+    function showMobileSection(sectionName) {
+      // Hide all sections
+      document.querySelectorAll('.mobile-section').forEach(section => {
+        section.classList.remove('active');
+      });
+      
+      // Remove active state from all nav items
+      document.querySelectorAll('.mobile-nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // Show selected section
+      document.getElementById(`mobile-${sectionName}`).classList.add('active');
+      
+      // Add active state to clicked nav item
+      document.getElementById(`mobile-nav-${sectionName}`).classList.add('active');
+      
+      // Load data for specific sections
+      if (sectionName === 'videos') {
+        loadMobileVideos();
+      } else if (sectionName === 'leaderboard') {
+        loadMobileLeaderboard();
+      } else if (sectionName === 'teams') {
+        loadMobileTeams();
+      } else if (sectionName === 'profile') {
+        loadMobileProfile();
+      } else if (sectionName === 'home') {
+        loadMobileStats();
+      }
+    }
+
+    // Theme management
+    function toggleTheme() {
+      const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      
+      localStorage.setItem('gymrank-theme', newTheme);
+      document.getElementById('mobile-theme-icon').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    function initializeTheme() {
+      const savedTheme = localStorage.getItem('gymrank-theme') || 'light';
+      
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+      
+      document.getElementById('mobile-theme-icon').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    // User session management
+    function checkUserSession() {
+      const savedUser = localStorage.getItem('gymrank_user');
+      if (savedUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          updateMobileUIForLoggedInUser();
+        } catch (e) {
+          localStorage.removeItem('gymrank_user');
+        }
+      }
+    }
+
+    function updateMobileUIForLoggedInUser() {
+      if (currentUser) {
+        document.getElementById('mobile-pr-section').style.display = 'block';
+        document.getElementById('mobile-welcome').style.display = 'none';
+      } else {
+        document.getElementById('mobile-pr-section').style.display = 'none';
+        document.getElementById('mobile-welcome').style.display = 'block';
+      }
+    }
+
+    // Load mobile stats
+    function loadMobileStats() {
+      fetch(`${API_BASE}/api/leaderboard`)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('mobile-total-users').textContent = data.length;
+          document.getElementById('mobile-top-elo').textContent = data[0] ? data[0].dots_score : '0';
+          
+          // Count total PRs
+          const totalPRs = data.reduce((sum, user) => {
+            let prs = 0;
+            if (user.bench) prs++;
+            if (user.squat) prs++;
+            if (user.deadlift) prs++;
+            return sum + prs;
+          }, 0);
+          document.getElementById('mobile-total-prs').textContent = totalPRs;
+        })
+        .catch(err => {
+          console.error('Error loading stats:', err);
+        });
+    }
+
+    // Load mobile leaderboard
+    function loadMobileLeaderboard(gender = '') {
+      const params = new URLSearchParams();
+      if (gender) params.append('gender', gender);
+      const url = `${API_BASE}/api/leaderboard${params.toString() ? '?' + params.toString() : ''}`;
+      
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById('mobile-leaderboard-list');
+          if (data.length === 0) {
+            list.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">No qualified lifters yet.</div>';
+            return;
+          }
+          
+          list.innerHTML = data.map((user, index) => {
+            const rank = index + 1;
+            const genderEmoji = user.gender === 'male' ? '♂️' : '♀️';
+            
+            return `
+              <div class="mobile-leaderboard-item" onclick="window.location.href='profile.html?username=${user.username}'">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="font-weight: bold; color: var(--primary-color);">#${rank}</span>
+                  <span style="font-size: 1.25rem;">${user.flag}</span>
+                  <div>
+                    <div style="font-weight: 600;">${user.username} ${genderEmoji}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">${user.team || 'Independent'}</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: bold; color: var(--primary-color);">${user.dots_score} DOTS</div>
+                  <div style="font-size: 0.8rem; color: var(--text-secondary);">${user.total_lifted}kg</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        })
+        .catch(err => {
+          document.getElementById('mobile-leaderboard-list').innerHTML = 
+            '<div style="text-align: center; padding: 2rem; color: var(--error);">Error loading leaderboard.</div>';
+        });
+    }
+
+    // Mobile filter management
+    function setMobileFilter(filter) {
+      currentMobileFilter = filter === 'all' ? '' : filter;
+      
+      // Update button styles
+      document.querySelectorAll('[id^="mobile-filter-"]').forEach(btn => {
+        btn.className = 'mobile-btn';
+        btn.style.backgroundColor = 'var(--background-alt)';
+        btn.style.color = 'var(--text-primary)';
+      });
+      
+      const activeBtn = document.getElementById(`mobile-filter-${filter}`);
+      if (activeBtn) {
+        activeBtn.className = 'mobile-btn mobile-btn-primary';
+        activeBtn.style.backgroundColor = 'var(--primary-color)';
+        activeBtn.style.color = 'white';
+      }
+      
+      loadMobileLeaderboard(currentMobileFilter);
+    }
+
+    // Load mobile videos
+    function loadMobileVideos() {
+      fetch(`${API_BASE}/api/videos`)
+        .then(res => res.json())
+        .then(data => {
+          const grid = document.getElementById('mobile-videos-grid');
+          if (data.length === 0) {
+            grid.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">No videos yet.</div>';
+            return;
+          }
+          
+          grid.innerHTML = data.map(video => {
+            const liftEmoji = {
+              'bench': '🏋️',
+              'deadlift': '🏋️‍♂️',
+              'squat': '🦵'
+            };
+            
+            return `
+              <div class="mobile-video-card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.25rem;">${video.flag}</span>
+                    <span style="font-weight: bold; color: var(--primary-color);">${video.username}</span>
+                  </div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                    ${new Date(video.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 2rem;">${liftEmoji[video.lift_type] || '🏋️'}</span>
+                    <div>
+                      <div style="font-weight: bold; font-size: 1.25rem; color: var(--primary-color);">${video.weight}kg</div>
+                      <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: capitalize;">${video.lift_type}</div>
+                    </div>
+                  </div>
+                  <a href="${video.video_url}" target="_blank" class="mobile-btn mobile-btn-primary" style="text-decoration: none; text-align: center; padding: 0.5rem 1rem; max-width: 80px;">
+                    View
+                  </a>
+                </div>
+              </div>
+            `;
+          }).join('');
+        })
+        .catch(err => {
+          document.getElementById('mobile-videos-grid').innerHTML = 
+            '<div style="text-align: center; padding: 2rem; color: var(--error);">Error loading videos.</div>';
+        });
+    }
+
+    // Load mobile teams
+    function loadMobileTeams() {
+      fetch(`${API_BASE}/api/team_leaderboard`)
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById('mobile-teams-list');
+          if (data.length === 0) {
+            list.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">No teams yet.</div>';
+            return;
+          }
+          
+          list.innerHTML = data.map((team, index) => {
+            const rank = index + 1;
+            
+            return `
+              <div class="mobile-leaderboard-item">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="font-weight: bold; color: var(--primary-color);">#${rank}</span>
+                  <div>
+                    <div style="font-weight: 600;">${team.team}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">${team.member_count} members</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: bold;">${team.avg_elo.toFixed(0)} Avg</div>
+                  <div style="font-size: 0.8rem; color: var(--text-secondary);">Top: ${team.top_elo.toFixed(0)}</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        })
+        .catch(err => {
+          document.getElementById('mobile-teams-list').innerHTML = 
+            '<div style="text-align: center; padding: 2rem; color: var(--error);">Error loading teams.</div>';
+        });
+    }
+
+    // Load mobile profile
+    function loadMobileProfile() {
+      if (!currentUser) {
+        document.getElementById('mobile-profile-content').innerHTML = `
+          <div style="text-align: center; padding: 2rem;">
+            <p style="margin-bottom: 1rem; color: var(--text-secondary);">Please log in to view your profile.</p>
+            <div style="display: flex; gap: 0.5rem;">
+              <a href="login.html" class="mobile-btn mobile-btn-primary" style="text-decoration: none; text-align: center; display: block;">
+                Login
+              </a>
+              <a href="register.html" class="mobile-btn" style="text-decoration: none; text-align: center; display: block; background-color: var(--background-alt); color: var(--text-primary);">
+                Register
+              </a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      // Show user profile content
+      document.getElementById('mobile-profile-content').innerHTML = `
+        <div class="mobile-card">
+          <div style="text-align: center; margin-bottom: 1rem;">
+            <span style="font-size: 2rem;">${currentUser.flag}</span>
+            <h3 style="margin: 0.5rem 0;">${currentUser.display_name || currentUser.username}</h3>
+            <p style="color: var(--text-secondary); margin: 0;">${currentUser.team || 'Independent'}</p>
+          </div>
+          <button onclick="logout()" class="mobile-btn" style="background-color: var(--error); color: white;">
+            Logout
+          </button>
+        </div>
+      `;
+    }
+
+    // Handle mobile PR submission
+    function handleMobilePR(e) {
+      e.preventDefault();
+      
+      const liftType = document.getElementById('mobile-lift-type').value;
+      const weight = parseFloat(document.getElementById('mobile-weight').value);
+      const instagramUrl = document.getElementById('mobile-instagram-url').value;
+      
+      if (!instagramUrl.includes('instagram.com')) {
+        alert('Please enter a valid Instagram URL.');
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('username', currentUser.username);
+      formData.append('lift_type', liftType);
+      formData.append('weight', weight);
+      formData.append('instagram_url', instagramUrl);
+      
+      fetch(`${API_BASE}/api/submit_pr`, {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert('Submission failed: ' + data.error);
+        } else {
+          alert('PR submitted successfully!');
+          document.getElementById('mobile-pr-form').reset();
+          loadMobileStats();
+        }
+      })
+      .catch(err => {
+        alert('Upload failed. Please try again.');
+      });
+    }
+
+    // Logout function
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('gymrank_user');
+      updateMobileUIForLoggedInUser();
+      loadMobileProfile();
+      alert('Logged out successfully!');
+    }
+
+    // Switch to desktop version
+    function switchToDesktop() {
+      localStorage.setItem('force-desktop', 'true');
+      window.location.href = 'index.html';
+    }
+
+    // Initialize app
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeTheme();
+      checkUserSession();
+      showMobileSection('home');
+      
+      // Setup PR form
+      const prForm = document.getElementById('mobile-pr-form');
+      if (prForm) {
+        prForm.addEventListener('submit', handleMobilePR);
+      }
+    });
+  </script>
+</body>
+</html>
