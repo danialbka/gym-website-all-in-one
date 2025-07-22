@@ -194,6 +194,7 @@ def login_user():
             return jsonify(user_data), 200
             
     except Exception as e:
+        print(f"Login error: {str(e)}")
         return jsonify({'error': 'Login failed'}), 500
     finally:
         conn.close()
