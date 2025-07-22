@@ -245,83 +245,49 @@ def leaderboard():
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            # Optimized leaderboard query - step by step for debugging
+            # Get users with weight and gender for DOTS calculation
             query = """
-                SELECT 
-                    u.username,
-                    u.display_name,
-                    u.email,
-                    u.flag,
-                    u.team,
-                    u.weight,
-                    u.gender,
-                    u.elo,
-                    u.created_at
-                FROM users u
-                WHERE u.weight IS NOT NULL 
-                    AND u.weight > 0 
-                    AND u.gender IS NOT NULL
+                SELECT username, display_name, email, flag, team, weight, gender, elo, created_at 
+                FROM users 
+                WHERE weight IS NOT NULL AND weight > 0 AND gender IS NOT NULL
             """
-            
             params = []
             
             if gender_filter in ['male', 'female']:
-                query += " AND u.gender = %s"
+                query += " AND gender = %s"
                 params.append(gender_filter)
             
             if country_filter:
-                query += " AND u.flag = %s"
+                query += " AND flag = %s"
                 params.append(country_filter)
             
             cur.execute(query, tuple(params))
             users = cur.fetchall()
             
-            # Get lift data for all users in a single query - much more efficient
-            if users:
-                usernames = [user['username'] for user in users]
-                placeholders = ','.join(['%s'] * len(usernames))
+            # Calculate DOTS scores for each user
+            leaderboard_data = []
+            for user in users:
+                user_dict = dict(user)
+                lift_data = get_user_total_lifts(user['username'])
                 
-                cur.execute(f"""
-                    SELECT username, lift_type, MAX(weight) as max_weight
-                    FROM prs 
-                    WHERE username IN ({placeholders})
-                    GROUP BY username, lift_type
-                """, usernames)
-                
-                lift_results = cur.fetchall()
-                
-                # Organize lift data by username
-                user_lifts = {}
-                for lift in lift_results:
-                    username = lift['username']
-                    if username not in user_lifts:
-                        user_lifts[username] = {'bench': 0, 'squat': 0, 'deadlift': 0}
-                    user_lifts[username][lift['lift_type']] = float(lift['max_weight'])
-                
-                # Calculate DOTS scores
-                leaderboard_data = []
-                for user in users:
-                    user_dict = dict(user)
-                    username = user['username']
-                    lifts = user_lifts.get(username, {'bench': 0, 'squat': 0, 'deadlift': 0})
-                    total_lifted = lifts['bench'] + lifts['squat'] + lifts['deadlift']
+                if lift_data['total'] > 0:  # Only include users with actual lifts
+                    dots_score = calculate_dots_score(
+                        lift_data['total'], 
+                        user['weight'], 
+                        user['gender']
+                    )
                     
-                    if total_lifted > 0:  # Only include users with actual lifts
-                        dots_score = calculate_dots_score(total_lifted, user['weight'], user['gender'])
-                        
-                        user_dict['dots_score'] = dots_score
-                        user_dict['total_lifted'] = total_lifted
-                        user_dict['bench'] = lifts['bench']
-                        user_dict['squat'] = lifts['squat']
-                        user_dict['deadlift'] = lifts['deadlift']
-                        
-                        leaderboard_data.append(user_dict)
-                
-                # Sort by DOTS score (descending) and limit to top 50
-                leaderboard_data.sort(key=lambda x: x['dots_score'], reverse=True)
-                return jsonify(leaderboard_data[:50])
+                    user_dict['dots_score'] = dots_score
+                    user_dict['total_lifted'] = lift_data['total']
+                    user_dict['bench'] = lift_data['bench']
+                    user_dict['squat'] = lift_data['squat']
+                    user_dict['deadlift'] = lift_data['deadlift']
+                    
+                    leaderboard_data.append(user_dict)
             
-            return jsonify([])
+            # Sort by DOTS score (descending) and limit to top 50
+            leaderboard_data.sort(key=lambda x: x['dots_score'], reverse=True)
+            return jsonify(leaderboard_data[:50])
             
     finally:
         conn.close()
@@ -433,7 +399,7 @@ def team_leaderboard():
                     MAX(elo) as top_elo,
                     SUM(elo) as total_elo
                 FROM users 
-                WHERE team IS NOT NULL AND team != '' AND is_active = TRUE
+                WHERE team IS NOT NULL AND team != ''
                 GROUP BY team 
                 HAVING COUNT(DISTINCT username) > 0
                 ORDER BY avg_elo DESC
