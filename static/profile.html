@@ -267,7 +267,15 @@
       document.getElementById('profile-content').classList.remove('hidden');
     }
 
-    // Initialize page
+    // Redirect to main app with SPA navigation
+    const username = getUsernameFromURL();
+    if (username) {
+      window.location.href = `index.html#user-profile-${username}`;
+    } else {
+      window.location.href = 'index.html';
+    }
+
+    // Initialize page (fallback if redirect fails)
     document.addEventListener('DOMContentLoaded', function() {
       initializeTheme();
       

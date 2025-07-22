@@ -362,8 +362,9 @@ def team_leaderboard():
                     MAX(elo) as top_elo,
                     SUM(elo) as total_elo
                 FROM users 
-                WHERE team IS NOT NULL AND team != '' 
+                WHERE team IS NOT NULL AND team != '' AND is_active = TRUE
                 GROUP BY team 
+                HAVING COUNT(DISTINCT username) > 0
                 ORDER BY avg_elo DESC
             """)
             teams = cur.fetchall()
@@ -432,6 +433,7 @@ def update_profile():
             
             return jsonify(dict(user)), 200
     except Exception as e:
+        print(f"Profile update error: {str(e)}")
         return jsonify({'error': 'Profile update failed'}), 500
     finally:
         conn.close()

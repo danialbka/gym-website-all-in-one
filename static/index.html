@@ -42,12 +42,12 @@
             📱
           </button>
           <div id="auth-buttons" class="flex items-center gap-2">
-            <a href="login.html" class="btn btn-outline">
+            <button onclick="showLoginModal()" class="btn btn-outline">
               Login
-            </a>
-            <a href="register.html" class="btn btn-primary">
+            </button>
+            <button onclick="showRegisterModal()" class="btn btn-primary">
               Register
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -114,12 +114,12 @@
         <h2 class="text-2xl font-semibold mb-4">Welcome to GymRank!</h2>
         <p class="mb-6" style="color: var(--text-secondary)">Join the competitive lifting platform inspired by Bakugan rankings</p>
         <div class="flex justify-center gap-4">
-          <a href="register.html" class="btn btn-primary btn-lg">
+          <button onclick="showRegisterModal()" class="btn btn-primary btn-lg">
             Get Started
-          </a>
-          <a href="login.html" class="btn btn-outline btn-lg">
+          </button>
+          <button onclick="showLoginModal()" class="btn btn-outline btn-lg">
             Sign In
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -397,14 +397,166 @@
     </div>
   </div>
 
+  <!-- User Profile View Section (for viewing other users) -->
+  <div id="user-profile-section" class="section hidden">
+    <div class="container mx-auto px-4 py-8">
+      <!-- Back Button -->
+      <div class="mb-6">
+        <button onclick="goBackToPrevious()" class="btn btn-outline">
+          ← Back
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div id="user-profile-loading" class="flex flex-col items-center justify-center py-16">
+        <div class="dot-matrix-spinner mb-4">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <p style="color: var(--text-secondary)">Loading profile...</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="user-profile-error" class="hidden flex flex-col items-center justify-center py-16">
+        <div class="text-6xl mb-4">😵</div>
+        <h2 class="text-2xl font-bold mb-2">Profile Not Found</h2>
+        <p style="color: var(--text-secondary)" class="mb-6">The user profile you're looking for doesn't exist.</p>
+        <button onclick="goBackToPrevious()" class="btn btn-primary btn-lg">
+          Go Back
+        </button>
+      </div>
+
+      <!-- Profile Content -->
+      <div id="user-profile-content" class="hidden">
+        <!-- User Info Header -->
+        <div class="card mb-6">
+          <div class="flex items-center gap-4">
+            <span id="viewed-user-flag" class="text-6xl"></span>
+            <div class="flex-1">
+              <div class="flex items-center gap-3">
+                <h1 id="viewed-user-username" class="text-3xl font-bold"></h1>
+                <span id="viewed-user-gender" class="text-2xl"></span>
+              </div>
+              <p id="viewed-user-team" style="color: var(--text-secondary)" class="text-lg"></p>
+              <div class="flex items-center gap-4 mt-3">
+                <span id="viewed-user-dots" class="btn btn-primary btn-sm"></span>
+                <span id="viewed-user-total" style="color: var(--text-secondary)"></span>
+                <span id="viewed-user-bodyweight" style="color: var(--text-secondary)"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PR Records -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="card text-center">
+            <div class="text-4xl mb-3">🏋️</div>
+            <div style="color: var(--text-secondary)" class="mb-2">Bench Press</div>
+            <div id="viewed-user-bench" class="text-3xl font-bold" style="color: var(--primary-color)"></div>
+          </div>
+          <div class="card text-center">
+            <div class="text-4xl mb-3">🦵</div>
+            <div style="color: var(--text-secondary)" class="mb-2">Squat</div>
+            <div id="viewed-user-squat" class="text-3xl font-bold" style="color: var(--primary-color)"></div>
+          </div>
+          <div class="card text-center">
+            <div class="text-4xl mb-3">🏋️‍♂️</div>
+            <div style="color: var(--text-secondary)" class="mb-2">Deadlift</div>
+            <div id="viewed-user-deadlift" class="text-3xl font-bold" style="color: var(--primary-color)"></div>
+          </div>
+        </div>
+
+        <!-- Videos Section -->
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold mb-6">📹 PR Videos</h2>
+          <div id="viewed-user-videos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Videos will be loaded here -->
+          </div>
+        </div>
+
+        <!-- PR History -->
+        <div>
+          <h2 class="text-2xl font-bold mb-6">📈 PR History</h2>
+          <div class="card">
+            <div id="viewed-user-history" class="space-y-4">
+              <!-- PR history will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_BASE = 'https://gymbakugan.onrender.com';
 
+    // Data caching system
+    const dataCache = {
+      leaderboard: { data: null, timestamp: 0, ttl: 60000 }, // 1 minute
+      teamLeaderboard: { data: null, timestamp: 0, ttl: 60000 }, // 1 minute
+      videos: { data: null, timestamp: 0, ttl: 30000 }, // 30 seconds
+      userProfiles: new Map(), // username -> { data, timestamp, ttl: 300000 } // 5 minutes
+    };
+
+    // Navigation history for back button
+    let navigationHistory = [];
+    let currentSection = 'home'; // Track current section explicitly
+    let lastSectionBeforeProfile = null; // Track the section we came from when viewing a profile
+
+    function isCacheValid(cacheEntry) {
+      return cacheEntry.data && (Date.now() - cacheEntry.timestamp) < cacheEntry.ttl;
+    }
+
+    function setCacheData(key, data, ttl = 60000) {
+      if (key === 'userProfiles') return; // Handle separately
+      dataCache[key] = { data, timestamp: Date.now(), ttl };
+    }
+
+    function setCacheUserProfile(username, data) {
+      dataCache.userProfiles.set(username, { 
+        data, 
+        timestamp: Date.now(), 
+        ttl: 300000 // 5 minutes for user profiles
+      });
+    }
+
     // Navigation functionality
-    function showSection(sectionName) {
-      // Hide all sections
+    function showSection(sectionName, updateURL = true, addToHistory = true) {
+      console.log(`showSection: ${sectionName}, currentSection: ${currentSection}, addToHistory: ${addToHistory}`);
+      
+      // Add current section to history if not user-profile and section is changing
+      if (addToHistory && sectionName !== 'user-profile' && currentSection !== sectionName) {
+        console.log(`Adding ${currentSection} to navigationHistory`);
+        navigationHistory.push(currentSection);
+        // Keep history reasonable size
+        if (navigationHistory.length > 5) {
+          navigationHistory.shift();
+        }
+      }
+      
+      // Update current section tracker
+      if (sectionName !== 'user-profile') {
+        currentSection = sectionName;
+        console.log(`Updated currentSection to: ${currentSection}`);
+      }
+
+      // Hide all sections with fade out
       document.querySelectorAll('.section').forEach(section => {
-        section.classList.add('hidden');
+        if (!section.classList.contains('hidden')) {
+          section.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+          section.style.opacity = '0';
+          section.style.transform = 'translateY(10px)';
+          setTimeout(() => {
+            section.classList.add('hidden');
+          }, 200);
+        }
       });
       
       // Remove active state from all nav buttons
@@ -412,8 +564,19 @@
         btn.classList.remove('active');
       });
       
-      // Show selected section
-      document.getElementById(`${sectionName}-section`).classList.remove('hidden');
+      // Show selected section with fade in after delay
+      setTimeout(() => {
+        const targetSection = document.getElementById(`${sectionName}-section`);
+        targetSection.classList.remove('hidden');
+        targetSection.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+        targetSection.style.opacity = '0';
+        targetSection.style.transform = 'translateY(10px)';
+        
+        setTimeout(() => {
+          targetSection.style.opacity = '1';
+          targetSection.style.transform = 'translateY(0)';
+        }, 50);
+      }, 200);
       
       // Add active state to clicked nav button (if it exists)
       const activeBtn = document.getElementById(`nav-${sectionName}`);
@@ -421,18 +584,320 @@
         activeBtn.classList.add('active');
       }
       
-      // Load data for specific sections
-      if (sectionName === 'videos') {
-        loadVideos();
-      } else if (sectionName === 'leaderboard') {
-        loadLeaderboard();
-      } else if (sectionName === 'teams') {
-        loadTeams();
-      } else if (sectionName === 'profile') {
-        loadUserProfile();
-      } else if (sectionName === 'home') {
-        loadLeaderboard(); // For stats
+      // Update URL without page reload
+      if (updateURL && history.pushState && sectionName !== 'user-profile') {
+        const url = sectionName === 'home' ? '/' : `/#${sectionName}`;
+        history.pushState({section: sectionName}, '', url);
       }
+      
+      // Load data for specific sections with delay for smooth transition
+      setTimeout(() => {
+        if (sectionName === 'videos') {
+          loadVideosCached();
+        } else if (sectionName === 'leaderboard') {
+          loadLeaderboardCached();
+        } else if (sectionName === 'teams') {
+          loadTeamsCached();
+        } else if (sectionName === 'profile') {
+          loadUserProfile();
+        } else if (sectionName === 'home') {
+          loadLeaderboardCached(); // For stats
+        }
+      }, 250);
+    }
+
+    // Back navigation function
+    function goBackToPrevious() {
+      console.log('goBackToPrevious called');
+      console.log('lastSectionBeforeProfile:', lastSectionBeforeProfile);
+      console.log('navigationHistory:', navigationHistory);
+      
+      // If we have a saved section before profile, go back to that
+      if (lastSectionBeforeProfile) {
+        console.log('Going back to lastSectionBeforeProfile:', lastSectionBeforeProfile);
+        const targetSection = lastSectionBeforeProfile;
+        lastSectionBeforeProfile = null; // Clear it after using
+        showSection(targetSection, true, false);
+      } else if (navigationHistory.length > 0) {
+        const previousSection = navigationHistory.pop();
+        console.log('Going back to history section:', previousSection);
+        showSection(previousSection, true, false);
+      } else {
+        console.log('No history, going to home');
+        showSection('home', true, false);
+      }
+    }
+
+    // Function to show user profile
+    function showUserProfile(username) {
+      console.log('showUserProfile called from section:', currentSection);
+      lastSectionBeforeProfile = currentSection; // Remember where we came from
+      console.log('Saved lastSectionBeforeProfile as:', lastSectionBeforeProfile);
+      showSection('user-profile', false, false); // Don't use history system for profile
+      loadUserProfileCached(username);
+    }
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', (event) => {
+      const section = event.state?.section || getHashSection() || 'home';
+      currentSection = section; // Update current section for browser navigation
+      showSection(section, false, false); // Don't add to history for browser navigation
+    });
+
+    // Get section from URL hash
+    function getHashSection() {
+      const hash = window.location.hash.replace('#', '');
+      const validSections = ['home', 'videos', 'leaderboard', 'teams', 'profile'];
+      return validSections.includes(hash) ? hash : null;
+    }
+
+    // Handle special hash actions
+    function handleSpecialHashes() {
+      const hash = window.location.hash.replace('#', '');
+      if (hash === 'login-modal') {
+        // Clear the hash and show login modal
+        history.replaceState(null, '', window.location.pathname);
+        setTimeout(() => showLoginModal(), 100);
+      } else if (hash === 'register-modal') {
+        // Clear the hash and show register modal
+        history.replaceState(null, '', window.location.pathname);
+        setTimeout(() => showRegisterModal(), 100);
+      } else if (hash.startsWith('user-profile-')) {
+        // Extract username and show user profile
+        const username = hash.replace('user-profile-', '');
+        history.replaceState(null, '', window.location.pathname);
+        setTimeout(() => showUserProfile(username), 100);
+      }
+    }
+
+    // Login Modal
+    function showLoginModal() {
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content card" style="max-width: 400px;">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="text-3xl">🔑</div>
+              <h3 class="text-2xl font-bold">Welcome Back</h3>
+            </div>
+            <button onclick="this.closest('.modal').remove()" class="btn btn-outline btn-sm">✕</button>
+          </div>
+
+          <form id="modal-login-form">
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" id="modal-username" class="form-input" placeholder="Enter your username" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" id="modal-password" class="form-input" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full btn-lg mb-4">
+              <span class="mr-2">🔑</span>
+              Sign In
+            </button>
+          </form>
+
+          <div class="text-center">
+            <p class="text-sm mb-2" style="color: var(--text-secondary)">
+              <a href="forgot-password.html" class="hover:underline" style="color: var(--primary-color)">
+                Forgot your password?
+              </a>
+            </p>
+            <p class="text-sm" style="color: var(--text-secondary)">
+              Don't have an account? 
+              <button onclick="this.closest('.modal').remove(); showRegisterModal();" class="hover:underline" style="color: var(--primary-color); background: none; border: none; cursor: pointer;">
+                Sign up here
+              </button>
+            </p>
+          </div>
+        </div>
+      `;
+
+      // Add click outside to close
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+      });
+
+      // Handle form submission
+      modal.querySelector('#modal-login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = modal.querySelector('#modal-username').value;
+        const password = modal.querySelector('#modal-password').value;
+        const submitBtn = modal.querySelector('button[type="submit"]');
+        
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="mr-2">⏳</span>Signing in...';
+        submitBtn.disabled = true;
+
+        try {
+          const response = await fetch(`${API_BASE}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+
+          const data = await response.json();
+
+          if (data.error) {
+            alert('Login failed: ' + data.error);
+          } else {
+            localStorage.setItem('gymrank_user', JSON.stringify(data));
+            modal.remove();
+            checkUserSession(); // Refresh UI
+            showSection('home');
+          }
+        } catch (error) {
+          alert('Login failed. Please check your connection.');
+        } finally {
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+        }
+      });
+      
+      document.body.appendChild(modal);
+      modal.querySelector('#modal-username').focus();
+    }
+
+    // Register Modal
+    function showRegisterModal() {
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content card" style="max-width: 500px; max-height: 80vh; overflow-y: auto;">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="text-3xl">🏋️</div>
+              <h3 class="text-2xl font-bold">Join GymRank</h3>
+            </div>
+            <button onclick="this.closest('.modal').remove()" class="btn btn-outline btn-sm">✕</button>
+          </div>
+
+          <form id="modal-register-form" class="space-y-4">
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" id="modal-reg-username" class="form-input" placeholder="Choose a username" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" id="modal-reg-password" class="form-input" placeholder="Create a password" required>
+              <p class="text-sm mt-1" style="color: var(--text-secondary)">Must be at least 6 characters</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" id="modal-reg-email" class="form-input" placeholder="your@email.com" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Display Name (Optional)</label>
+              <input type="text" id="modal-reg-display-name" class="form-input" placeholder="How you want to be displayed">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Team/Gym</label>
+              <input type="text" id="modal-reg-team" class="form-input" placeholder="Enter your team/gym name">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Country/Region</label>
+              <select id="modal-reg-flag" class="form-input" required>
+                <option value="">Select your country</option>
+                <option value="🇺🇸">🇺🇸 United States</option>
+                <option value="🇨🇦">🇨🇦 Canada</option>
+                <option value="🇬🇧">🇬🇧 United Kingdom</option>
+                <option value="🇦🇺">🇦🇺 Australia</option>
+                <option value="🇩🇪">🇩🇪 Germany</option>
+                <option value="🇫🇷">🇫🇷 France</option>
+                <option value="🇮🇹">🇮🇹 Italy</option>
+                <option value="🇪🇸">🇪🇸 Spain</option>
+                <option value="🇯🇵">🇯🇵 Japan</option>
+                <option value="🇸🇬">🇸🇬 Singapore</option>
+                <option value="🌍">🌍 Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Gender</label>
+              <select id="modal-reg-gender" class="form-input" required>
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full btn-lg">
+              <span class="mr-2">🚀</span>
+              Create Account
+            </button>
+          </form>
+
+          <div class="text-center mt-4">
+            <p class="text-sm" style="color: var(--text-secondary)">
+              Already have an account? 
+              <button onclick="this.closest('.modal').remove(); showLoginModal();" class="hover:underline" style="color: var(--primary-color); background: none; border: none; cursor: pointer;">
+                Sign in here
+              </button>
+            </p>
+          </div>
+        </div>
+      `;
+
+      // Add click outside to close
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+      });
+
+      // Handle form submission
+      modal.querySelector('#modal-register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = {
+          username: modal.querySelector('#modal-reg-username').value,
+          password: modal.querySelector('#modal-reg-password').value,
+          email: modal.querySelector('#modal-reg-email').value,
+          display_name: modal.querySelector('#modal-reg-display-name').value,
+          team: modal.querySelector('#modal-reg-team').value || 'Independent',
+          flag: modal.querySelector('#modal-reg-flag').value,
+          gender: modal.querySelector('#modal-reg-gender').value
+        };
+
+        const submitBtn = modal.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="mr-2">⏳</span>Creating account...';
+        submitBtn.disabled = true;
+
+        try {
+          const response = await fetch(`${API_BASE}/api/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+          });
+
+          const data = await response.json();
+
+          if (data.error) {
+            alert('Registration failed: ' + data.error);
+          } else {
+            alert('Registration successful! Please login.');
+            modal.remove();
+            showLoginModal();
+          }
+        } catch (error) {
+          alert('Registration failed. Please check your connection.');
+        } finally {
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+        }
+      });
+      
+      document.body.appendChild(modal);
+      modal.querySelector('#modal-reg-username').focus();
     }
 
     // Theme management
@@ -533,6 +998,160 @@
     }
 
     // Load leaderboard
+    // Cached loading functions
+    function loadLeaderboardCached(gender = '', country = '') {
+      const cacheKey = `leaderboard_${gender}_${country}`;
+      const cached = dataCache.leaderboard;
+      
+      if (isCacheValid(cached) && !gender && !country) {
+        displayLeaderboard(cached.data);
+        return;
+      }
+      
+      loadLeaderboard(gender, country);
+    }
+
+    function loadVideosCached() {
+      const cached = dataCache.videos;
+      
+      if (isCacheValid(cached)) {
+        displayVideos(cached.data);
+        return;
+      }
+      
+      loadVideos();
+    }
+
+    function loadTeamsCached() {
+      const cached = dataCache.teamLeaderboard;
+      
+      if (isCacheValid(cached)) {
+        displayTeams(cached.data);
+        return;
+      }
+      
+      loadTeams();
+    }
+
+    function loadUserProfileCached(username) {
+      const cached = dataCache.userProfiles.get(username);
+      
+      if (cached && isCacheValid(cached)) {
+        displayUserProfileView(cached.data);
+        return;
+      }
+      
+      // Show loading state
+      document.getElementById('user-profile-loading').classList.remove('hidden');
+      document.getElementById('user-profile-error').classList.add('hidden');
+      document.getElementById('user-profile-content').classList.add('hidden');
+      
+      fetch(`${API_BASE}/api/user/${username}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            showUserProfileError();
+            return;
+          }
+          
+          setCacheUserProfile(username, data);
+          displayUserProfileView(data);
+        })
+        .catch(err => {
+          console.error('Error loading user profile:', err);
+          showUserProfileError();
+        });
+    }
+
+    function showUserProfileError() {
+      document.getElementById('user-profile-loading').classList.add('hidden');
+      document.getElementById('user-profile-error').classList.remove('hidden');
+      document.getElementById('user-profile-content').classList.add('hidden');
+    }
+
+    function displayUserProfileView(data) {
+      const user = data.user;
+      const prs = data.current_prs;
+      const genderEmoji = user.gender === 'male' ? '♂️' : '♀️';
+      
+      // Populate user info
+      document.getElementById('viewed-user-flag').textContent = user.flag;
+      document.getElementById('viewed-user-username').textContent = user.username;
+      document.getElementById('viewed-user-gender').textContent = genderEmoji;
+      document.getElementById('viewed-user-team').textContent = user.team || 'Independent';
+      document.getElementById('viewed-user-dots').textContent = data.dots_score ? `${data.dots_score} DOTS` : 'N/A';
+      document.getElementById('viewed-user-total').textContent = `${data.total_lifted}kg Total`;
+      document.getElementById('viewed-user-bodyweight').textContent = user.weight ? `${user.weight}kg BW` : 'N/A';
+      
+      // Populate PR records
+      document.getElementById('viewed-user-bench').textContent = prs.bench ? `${prs.bench}kg` : 'N/A';
+      document.getElementById('viewed-user-squat').textContent = prs.squat ? `${prs.squat}kg` : 'N/A';
+      document.getElementById('viewed-user-deadlift').textContent = prs.deadlift ? `${prs.deadlift}kg` : 'N/A';
+      
+      // Populate videos
+      const videosContainer = document.getElementById('viewed-user-videos');
+      if (data.videos.length === 0) {
+        videosContainer.innerHTML = '<p style="color: var(--text-secondary)" class="text-center py-8 col-span-full">No videos available</p>';
+      } else {
+        videosContainer.innerHTML = data.videos.map(video => {
+          const liftEmoji = video.lift_type === 'bench' ? '🏋️' : video.lift_type === 'squat' ? '🦵' : '🏋️‍♂️';
+          return `
+            <div class="card card-compact transition-shadow hover:shadow-lg">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-2xl">${liftEmoji}</span>
+                  <div>
+                    <div class="font-semibold text-lg">${video.weight}kg</div>
+                    <div class="text-sm capitalize" style="color: var(--text-secondary)">${video.lift_type}</div>
+                  </div>
+                </div>
+                <a href="${video.video_url}" target="_blank" rel="noopener noreferrer" 
+                   class="btn btn-outline btn-sm">
+                  Watch →
+                </a>
+              </div>
+              <div class="text-xs" style="color: var(--text-secondary)">
+                ${new Date(video.created_at).toLocaleDateString()}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // Populate PR history
+      const historyContainer = document.getElementById('viewed-user-history');
+      if (data.history.length === 0) {
+        historyContainer.innerHTML = '<p style="color: var(--text-secondary)" class="text-center py-8">No PR history available</p>';
+      } else {
+        historyContainer.innerHTML = data.history.map(record => {
+          const liftEmoji = record.lift_type === 'bench' ? '🏋️' : record.lift_type === 'squat' ? '🦵' : '🏋️‍♂️';
+          return `
+            <div class="flex items-center justify-between p-4 border" style="border-color: var(--border); border-radius: 0.5rem;" class="hover:bg-muted transition-colors">
+              <div class="flex items-center gap-4">
+                <span class="text-2xl">${liftEmoji}</span>
+                <div>
+                  <div class="font-semibold text-lg">${record.weight}kg ${record.lift_type}</div>
+                  <div class="text-sm" style="color: var(--text-secondary)">${new Date(record.created_at).toLocaleDateString()}</div>
+                </div>
+              </div>
+              ${record.video_url ? `
+                <a href="${record.video_url}" target="_blank" rel="noopener noreferrer" 
+                   class="btn btn-outline btn-sm">
+                  Video →
+                </a>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // Show profile content
+      document.getElementById('user-profile-loading').classList.add('hidden');
+      document.getElementById('user-profile-error').classList.add('hidden');
+      document.getElementById('user-profile-content').classList.remove('hidden');
+    }
+
+    // Original loading functions (updated to cache data)
     function loadLeaderboard(gender = '', country = '') {
       const params = new URLSearchParams();
       if (gender) params.append('gender', gender);
@@ -542,18 +1161,30 @@
       fetch(url)
         .then(res => res.json())
         .then(data => {
-          const list = document.getElementById('leaderboard');
-          if (data.length === 0) {
-            list.innerHTML = '<p class="text-center py-8" style="color: var(--text-secondary)">No qualified lifters yet. Complete all three lifts (bench, squat, deadlift) with bodyweight recorded!</p>';
-            return;
+          if (!gender && !country) {
+            setCacheData('leaderboard', data);
           }
-          
-          list.innerHTML = data.map((user, index) => {
+          displayLeaderboard(data);
+        })
+        .catch(err => {
+          document.getElementById('leaderboard').innerHTML = 
+            '<div class="text-center py-8" style="color: var(--error)">Error loading leaderboard.</div>';
+        });
+    }
+
+    function displayLeaderboard(data) {
+      const list = document.getElementById('leaderboard');
+      if (data.length === 0) {
+        list.innerHTML = '<p class="text-center py-8" style="color: var(--text-secondary)">No qualified lifters yet. Complete all three lifts (bench, squat, deadlift) with bodyweight recorded!</p>';
+        return;
+      }
+      
+      list.innerHTML = data.map((user, index) => {
             const rank = index + 1;
             const genderEmoji = user.gender === 'male' ? '♂️' : '♀️';
             
             return `
-              <div onclick="window.location.href='profile.html?username=${user.username}'" class="card flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors leaderboard-item">
+              <div onclick="showUserProfile('${user.username}')" class="card flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors leaderboard-item">
                 <div class="flex items-center gap-4">
                   <span class="text-2xl font-bold" style="color: var(--primary-color)">#${rank}</span>
                   <span class="text-2xl">${user.flag}</span>
@@ -582,11 +1213,6 @@
           // Update stats
           document.getElementById('total-users').textContent = data.length;
           document.getElementById('top-elo').textContent = data[0] ? data[0].dots_score : '0';
-        })
-        .catch(err => {
-          document.getElementById('leaderboard').innerHTML = 
-            '<div class="text-center py-8" style="color: var(--error)">Error loading leaderboard. Make sure the backend is running.</div>';
-        });
     }
 
     // Set active filter button
@@ -617,6 +1243,16 @@
       fetch(`${API_BASE}/api/videos`)
         .then(res => res.json())
         .then(data => {
+          setCacheData('videos', data);
+          displayVideos(data);
+        })
+        .catch(err => {
+          document.getElementById('videos-grid').innerHTML = 
+            '<div class="text-center py-8 col-span-full" style="color: var(--error)">Error loading videos.</div>';
+        });
+    }
+
+    function displayVideos(data) {
           const grid = document.getElementById('videos-grid');
           if (data.length === 0) {
             grid.innerHTML = '<p class="text-center py-8 col-span-full" style="color: var(--text-secondary)">No videos yet. Upload the first one!</p>';
@@ -636,7 +1272,7 @@
                   <div class="flex justify-between items-start mb-3">
                     <div class="flex items-center gap-3">
                       <span class="text-xl">${video.flag}</span>
-                      <a href="profile.html?username=${video.username}" class="text-base font-bold hover:underline" style="color: var(--primary-color)">${video.username}</a>
+                      <button onclick="showUserProfile('${video.username}')" class="text-base font-bold hover:underline bg-none border-none cursor-pointer" style="color: var(--primary-color); background: none; padding: 0;">${video.username}</button>
                     </div>
                     <div class="text-right">
                       <div class="text-xs mb-1" style="color: var(--text-secondary)">
@@ -668,11 +1304,6 @@
               </div>
             `;
           }).join('');
-        })
-        .catch(err => {
-          document.getElementById('videos-grid').innerHTML = 
-            '<div class="text-center py-8 col-span-full" style="color: var(--error)">Error loading videos.</div>';
-        });
     }
 
     // Load teams
@@ -680,6 +1311,16 @@
       fetch(`${API_BASE}/api/team_leaderboard`)
         .then(res => res.json())
         .then(data => {
+          setCacheData('teamLeaderboard', data);
+          displayTeams(data);
+        })
+        .catch(err => {
+          document.getElementById('team-leaderboard').innerHTML = 
+            '<div class="text-center py-8" style="color: var(--error)">Error loading teams.</div>';
+        });
+    }
+
+    function displayTeams(data) {
           const list = document.getElementById('team-leaderboard');
           if (data.length === 0) {
             list.innerHTML = '<p class="text-center py-8" style="color: var(--text-secondary)">No teams yet.</p>';
@@ -707,11 +1348,6 @@
               </div>
             `;
           }).join('');
-        })
-        .catch(err => {
-          document.getElementById('team-leaderboard').innerHTML = 
-            '<div class="text-center py-8" style="color: var(--error)">Error loading teams.</div>';
-        });
     }
 
     // Show team details
@@ -719,34 +1355,104 @@
       fetch(`${API_BASE}/api/team_members/${encodeURIComponent(teamName)}`)
         .then(res => res.json())
         .then(data => {
+          if (!data || data.length === 0) {
+            alert('No members found for this team.');
+            return;
+          }
+
+          // Calculate team stats
+          const totalElo = data.reduce((sum, member) => sum + member.elo, 0);
+          const avgElo = totalElo / data.length;
+          const topElo = Math.max(...data.map(member => member.elo));
+          const memberCount = data.length;
+
           const modal = document.createElement('div');
           modal.className = 'modal';
           modal.innerHTML = `
-            <div class="modal-content card">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold">${teamName}</h3>
-                <button onclick="this.closest('.modal').remove()" class="btn btn-outline btn-sm">✕</button>
-              </div>
-              <div class="space-y-3">
-                ${data.map((member, index) => `
-                  <div class="flex items-center justify-between p-3 border rounded">
-                    <div class="flex items-center gap-3">
-                      <span class="text-lg font-bold" style="color: var(--text-secondary)">${index + 1}</span>
-                      <span class="text-xl">${member.flag}</span>
-                      <span class="font-medium">${member.display_name || member.username}</span>
-                    </div>
-                    <div class="text-right">
-                      <div class="font-bold">${member.elo.toFixed(0)} ELO</div>
-                    </div>
+            <div class="modal-content card" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+              <!-- Team Header -->
+              <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                  <div class="text-3xl">🏟️</div>
+                  <div>
+                    <h3 class="text-2xl font-bold" style="color: var(--primary-color);">${teamName}</h3>
+                    <p class="text-sm" style="color: var(--text-secondary);">${memberCount} ${memberCount === 1 ? 'member' : 'members'}</p>
                   </div>
-                `).join('')}
+                </div>
+                <button onclick="this.closest('.modal').remove()" class="btn btn-outline btn-sm hover:bg-red-500 hover:text-white transition-colors">✕</button>
+              </div>
+
+              <!-- Team Stats -->
+              <div class="grid grid-cols-3 gap-4 mb-6 p-4 rounded-lg" style="background: var(--background-alt);">
+                <div class="text-center">
+                  <div class="text-xl font-bold" style="color: var(--primary-color);">${avgElo.toFixed(0)}</div>
+                  <div class="text-xs" style="color: var(--text-secondary);">Avg ELO</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-xl font-bold" style="color: var(--success);">${topElo.toFixed(0)}</div>
+                  <div class="text-xs" style="color: var(--text-secondary);">Top ELO</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-xl font-bold" style="color: var(--info);">${totalElo.toFixed(0)}</div>
+                  <div class="text-xs" style="color: var(--text-secondary);">Total ELO</div>
+                </div>
+              </div>
+
+              <!-- Members List -->
+              <div class="space-y-2">
+                <h4 class="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <span>👥</span>
+                  Team Members
+                </h4>
+                ${data.map((member, index) => {
+                  const rank = index + 1;
+                  const rankColor = rank === 1 ? 'var(--warning)' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : 'var(--text-secondary)';
+                  const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🏅';
+                  
+                  return `
+                    <div class="flex items-center justify-between p-4 rounded-lg border transition-all hover:shadow-md cursor-pointer" 
+                         style="border-color: var(--border-color); background: var(--background);"
+                         onclick="showUserProfile('${member.username}')"
+                      <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                          <span class="text-lg">${rankIcon}</span>
+                          <span class="text-sm font-bold" style="color: ${rankColor}; min-width: 20px;">#${rank}</span>
+                        </div>
+                        <div class="text-2xl">${member.flag}</div>
+                        <div class="flex flex-col">
+                          <span class="font-semibold text-base">${member.display_name || member.username}</span>
+                          <span class="text-xs" style="color: var(--text-secondary);">@${member.username}</span>
+                        </div>
+                      </div>
+                      <div class="text-right">
+                        <div class="font-bold text-lg" style="color: var(--primary-color);">${member.elo.toFixed(0)}</div>
+                        <div class="text-xs" style="color: var(--text-secondary);">ELO Rating</div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              <!-- Footer -->
+              <div class="mt-6 pt-4 border-t text-center" style="border-color: var(--border-color);">
+                <p class="text-sm" style="color: var(--text-secondary);">
+                  Click on any member to view their profile
+                </p>
               </div>
             </div>
           `;
+          
+          // Add click outside to close
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+              modal.remove();
+            }
+          });
+          
           document.body.appendChild(modal);
         })
         .catch(err => {
-          alert('Error loading team details.');
+          alert('Error loading team details. Please try again.');
         });
     }
 
@@ -957,7 +1663,10 @@
         
         fetch(`${API_BASE}/api/posts/${postId}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentUser.access_token}`
+          },
           body: JSON.stringify({
             username: currentUser.username,
             lift_type: liftType,
@@ -991,7 +1700,10 @@
       
       fetch(`${API_BASE}/api/posts/${postId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentUser.access_token}`
+        },
         body: JSON.stringify({ username: currentUser.username })
       })
       .then(res => res.json())
@@ -1030,7 +1742,10 @@
       
       fetch(`${API_BASE}/api/profile/update`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentUser.access_token}`
+        },
         body: JSON.stringify({
           username: currentUser.username,
           new_username: newUsername,
@@ -1100,6 +1815,9 @@
       
       fetch(`${API_BASE}/api/submit_pr`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${currentUser.access_token}`
+        },
         body: formData
       })
       .then(res => res.json())
@@ -1144,7 +1862,15 @@
       initializeTheme();
       initializeEventListeners();
       checkUserSession();
-      showSection('home');
+      
+      // Handle special hashes (login/register modals)
+      handleSpecialHashes();
+      
+      // Handle initial URL routing
+      const initialSection = getHashSection() || 'home';
+      currentSection = initialSection; // Set initial current section
+      showSection(initialSection, false, false); // Don't add initial section to history
+      
       loadLeaderboard();
     });
   </script>

@@ -441,7 +441,7 @@
             const genderEmoji = user.gender === 'male' ? '♂️' : '♀️';
             
             return `
-              <div class="mobile-leaderboard-item" onclick="window.location.href='profile.html?username=${user.username}'">
+              <div class="mobile-leaderboard-item" onclick="window.location.href='index.html#user-profile-${user.username}'">
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                   <span style="font-weight: bold; color: var(--primary-color);">#${rank}</span>
                   <span style="font-size: 1.25rem;">${user.flag}</span>
@@ -628,6 +628,9 @@
       
       fetch(`${API_BASE}/api/submit_pr`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${currentUser.access_token}`
+        },
         body: formData
       })
       .then(res => res.json())
