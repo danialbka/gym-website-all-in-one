@@ -245,23 +245,8 @@ def leaderboard():
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            # Optimized single-query leaderboard with DOTS calculation
+            # Optimized leaderboard query - step by step for debugging
             query = """
-                WITH user_lifts AS (
-                    SELECT 
-                        username,
-                        MAX(CASE WHEN lift_type = 'bench' THEN weight ELSE 0 END) as bench,
-                        MAX(CASE WHEN lift_type = 'squat' THEN weight ELSE 0 END) as squat,
-                        MAX(CASE WHEN lift_type = 'deadlift' THEN weight ELSE 0 END) as deadlift,
-                        (
-                            MAX(CASE WHEN lift_type = 'bench' THEN weight ELSE 0 END) +
-                            MAX(CASE WHEN lift_type = 'squat' THEN weight ELSE 0 END) +
-                            MAX(CASE WHEN lift_type = 'deadlift' THEN weight ELSE 0 END)
-                        ) as total_lifted
-                    FROM prs 
-                    GROUP BY username
-                    HAVING total_lifted > 0
-                )
                 SELECT 
                     u.username,
                     u.display_name,
@@ -271,37 +256,11 @@ def leaderboard():
                     u.weight,
                     u.gender,
                     u.elo,
-                    u.created_at,
-                    COALESCE(ul.bench, 0) as bench,
-                    COALESCE(ul.squat, 0) as squat,
-                    COALESCE(ul.deadlift, 0) as deadlift,
-                    COALESCE(ul.total_lifted, 0) as total_lifted,
-                    CASE 
-                        WHEN u.weight IS NULL OR u.weight <= 0 OR ul.total_lifted IS NULL OR ul.total_lifted <= 0 THEN 0
-                        WHEN u.gender = 'male' THEN 
-                            500 * COALESCE(ul.total_lifted, 0) / (
-                                47.46178854 + 
-                                8.472061379 * u.weight + 
-                                0.07369410346 * POWER(u.weight, 2) + 
-                                -0.001395833811 * POWER(u.weight, 3) + 
-                                0.000007076659730 * POWER(u.weight, 4)
-                            )
-                        WHEN u.gender = 'female' THEN
-                            500 * COALESCE(ul.total_lifted, 0) / (
-                                -125.4255398 + 
-                                13.71219419 * u.weight + 
-                                -0.03307250631 * POWER(u.weight, 2) + 
-                                0.0003872554572 * POWER(u.weight, 3) + 
-                                -0.00000113708316 * POWER(u.weight, 4)
-                            )
-                        ELSE 0
-                    END as dots_score
+                    u.created_at
                 FROM users u
-                INNER JOIN user_lifts ul ON u.username = ul.username
                 WHERE u.weight IS NOT NULL 
                     AND u.weight > 0 
                     AND u.gender IS NOT NULL
-                    AND ul.total_lifted > 0
             """
             
             params = []
@@ -314,22 +273,55 @@ def leaderboard():
                 query += " AND u.flag = %s"
                 params.append(country_filter)
             
-            query += """
-                ORDER BY dots_score DESC
-                LIMIT 50
-            """
-            
             cur.execute(query, tuple(params))
-            leaderboard_data = cur.fetchall()
+            users = cur.fetchall()
             
-            # Convert to list of dictionaries and round DOTS scores
-            result = []
-            for row in leaderboard_data:
-                user_dict = dict(row)
-                user_dict['dots_score'] = round(user_dict['dots_score'], 1)
-                result.append(user_dict)
+            # Get lift data for all users in a single query - much more efficient
+            if users:
+                usernames = [user['username'] for user in users]
+                placeholders = ','.join(['%s'] * len(usernames))
+                
+                cur.execute(f"""
+                    SELECT username, lift_type, MAX(weight) as max_weight
+                    FROM prs 
+                    WHERE username IN ({placeholders})
+                    GROUP BY username, lift_type
+                """, usernames)
+                
+                lift_results = cur.fetchall()
+                
+                # Organize lift data by username
+                user_lifts = {}
+                for lift in lift_results:
+                    username = lift['username']
+                    if username not in user_lifts:
+                        user_lifts[username] = {'bench': 0, 'squat': 0, 'deadlift': 0}
+                    user_lifts[username][lift['lift_type']] = float(lift['max_weight'])
+                
+                # Calculate DOTS scores
+                leaderboard_data = []
+                for user in users:
+                    user_dict = dict(user)
+                    username = user['username']
+                    lifts = user_lifts.get(username, {'bench': 0, 'squat': 0, 'deadlift': 0})
+                    total_lifted = lifts['bench'] + lifts['squat'] + lifts['deadlift']
+                    
+                    if total_lifted > 0:  # Only include users with actual lifts
+                        dots_score = calculate_dots_score(total_lifted, user['weight'], user['gender'])
+                        
+                        user_dict['dots_score'] = dots_score
+                        user_dict['total_lifted'] = total_lifted
+                        user_dict['bench'] = lifts['bench']
+                        user_dict['squat'] = lifts['squat']
+                        user_dict['deadlift'] = lifts['deadlift']
+                        
+                        leaderboard_data.append(user_dict)
+                
+                # Sort by DOTS score (descending) and limit to top 50
+                leaderboard_data.sort(key=lambda x: x['dots_score'], reverse=True)
+                return jsonify(leaderboard_data[:50])
             
-            return jsonify(result)
+            return jsonify([])
             
     finally:
         conn.close()
