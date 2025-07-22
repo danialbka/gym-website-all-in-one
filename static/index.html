@@ -54,9 +54,9 @@
     </div>
   </nav>
 
-  <div class="container">
+  <div class="container" style="padding-top: 2rem;">
     <!-- Home Section -->
-    <div id="home-section" class="section">
+    <div id="home-section" class="section" style="padding-top: 1rem;">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold mb-2">Welcome to GymRank</h2>
         <p style="color: var(--text-secondary)">Competitive lifting platform inspired by Bakugan rankings</p>
@@ -125,7 +125,7 @@
     </div>
 
     <!-- Videos Section -->
-    <div id="videos-section" class="section hidden">
+    <div id="videos-section" class="section hidden" style="padding-top: 1rem;">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold mb-2">📹 PR Videos</h2>
         <p style="color: var(--text-secondary)">Watch incredible lifts from our community</p>
@@ -149,7 +149,7 @@
     </div>
 
     <!-- Leaderboard Section -->
-    <div id="leaderboard-section" class="section hidden">
+    <div id="leaderboard-section" class="section hidden" style="padding-top: 1rem;">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold mb-2">🏆 Leaderboard</h2>
         <p style="color: var(--text-secondary)">Top lifters ranked by DOTS score (Bodyweight adjusted)</p>
@@ -230,7 +230,7 @@
     </div>
 
     <!-- Teams Section -->
-    <div id="teams-section" class="section hidden">
+    <div id="teams-section" class="section hidden" style="padding-top: 1rem;">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold mb-2">🏟️ Team Competition</h2>
         <p style="color: var(--text-secondary)">Team rankings and competitions</p>
@@ -256,7 +256,7 @@
     </div>
 
     <!-- Profile Section -->
-    <div id="profile-section" class="section hidden">
+    <div id="profile-section" class="section hidden" style="padding-top: 1rem;">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold mb-2">👤 My Profile</h2>
         <p style="color: var(--text-secondary)">Manage your posts and profile settings</p>
@@ -398,7 +398,7 @@
   </div>
 
   <!-- User Profile View Section (for viewing other users) -->
-  <div id="user-profile-section" class="section hidden">
+  <div id="user-profile-section" class="section hidden" style="padding-top: 1rem;">
     <div class="container mx-auto px-4 py-8">
       <!-- Back Button -->
       <div class="mb-6">
@@ -675,44 +675,78 @@
       const modal = document.createElement('div');
       modal.className = 'modal';
       modal.innerHTML = `
-        <div class="modal-content card" style="max-width: 400px;">
-          <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-3">
-              <div class="text-3xl">🔑</div>
-              <h3 class="text-2xl font-bold">Welcome Back</h3>
+        <div class="modal-content card" style="max-width: 420px; padding: 0;">
+          <!-- Modal Header -->
+          <div class="p-6 border-b" style="border-color: var(--border); background: linear-gradient(135deg, var(--background-alt) 0%, var(--background) 100%);">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-2xl font-bold">Welcome Back</h3>
+                <p class="text-sm" style="color: var(--text-secondary)">Sign in to your GymRank account</p>
+              </div>
+              <button onclick="this.closest('.modal').remove()" class="btn btn-outline btn-sm">✕</button>
             </div>
-            <button onclick="this.closest('.modal').remove()" class="btn btn-outline btn-sm">✕</button>
           </div>
 
-          <form id="modal-login-form">
-            <div class="form-group">
-              <label class="form-label">Username</label>
-              <input type="text" id="modal-username" class="form-input" placeholder="Enter your username" required>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label">Password</label>
-              <input type="password" id="modal-password" class="form-input" placeholder="Enter your password" required>
-            </div>
+          <!-- Modal Body -->
+          <div class="p-6">
+            <form id="modal-login-form">
+              <div class="form-group mb-4">
+                <label class="form-label">Username</label>
+                <input 
+                  type="text" 
+                  id="modal-username" 
+                  class="form-input w-full" 
+                  placeholder="Enter your username" 
+                  required
+                >
+              </div>
+              
+              <div class="form-group mb-6">
+                <label class="form-label">Password</label>
+                <div class="relative">
+                  <input 
+                    type="password" 
+                    id="modal-password" 
+                    class="form-input pr-10 w-full" 
+                    placeholder="Enter your password" 
+                    required
+                  >
+                  <button 
+                    type="button" 
+                    class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer toggle-password"
+                    style="background: none; border: none; color: var(--text-secondary); top: 50%; transform: translateY(-50%);"
+                  >
+                    <span class="text-lg">👁️</span>
+                  </button>
+                </div>
+              </div>
 
-            <button type="submit" class="btn btn-primary w-full btn-lg mb-4">
-              <span class="mr-2">🔑</span>
-              Sign In
-            </button>
-          </form>
-
-          <div class="text-center">
-            <p class="text-sm mb-2" style="color: var(--text-secondary)">
-              <a href="forgot-password.html" class="hover:underline" style="color: var(--primary-color)">
-                Forgot your password?
-              </a>
-            </p>
-            <p class="text-sm" style="color: var(--text-secondary)">
-              Don't have an account? 
-              <button onclick="this.closest('.modal').remove(); showRegisterModal();" class="hover:underline" style="color: var(--primary-color); background: none; border: none; cursor: pointer;">
-                Sign up here
+              <button type="submit" class="btn btn-primary w-full btn-lg mb-4 flex items-center justify-center">
+                <span class="mr-2">🔑</span>
+                <span class="sign-in-text">Sign In</span>
+                <span class="loading-spinner hidden ml-2">
+                  <div class="dot-matrix-spinner small">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                  </div>
+                </span>
               </button>
-            </p>
+            </form>
+
+            <div class="text-center">
+              <p class="text-sm mb-2" style="color: var(--text-secondary)">
+                <a href="forgot-password.html" class="hover:underline" style="color: var(--primary-color)">
+                  Forgot your password?
+                </a>
+              </p>
+              <p class="text-sm" style="color: var(--text-secondary)">
+                Don't have an account? 
+                <button onclick="this.closest('.modal').remove(); showRegisterModal();" class="hover:underline" style="color: var(--primary-color); background: none; border: none; cursor: pointer;">
+                  Sign up here
+                </button>
+              </p>
+            </div>
           </div>
         </div>
       `;
@@ -722,6 +756,15 @@
         if (e.target === modal) modal.remove();
       });
 
+      // Password visibility toggle
+      const togglePassword = modal.querySelector('.toggle-password');
+      const passwordInput = modal.querySelector('#modal-password');
+      togglePassword.addEventListener('click', () => {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        togglePassword.innerHTML = type === 'password' ? '<span class="text-lg">👁️</span>' : '<span class="text-lg">🙈</span>';
+      });
+
       // Handle form submission
       modal.querySelector('#modal-login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -729,9 +772,18 @@
         const username = modal.querySelector('#modal-username').value;
         const password = modal.querySelector('#modal-password').value;
         const submitBtn = modal.querySelector('button[type="submit"]');
+        const signInText = submitBtn.querySelector('.sign-in-text');
+        const loadingSpinner = submitBtn.querySelector('.loading-spinner');
         
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="mr-2">⏳</span>Signing in...';
+        // Validate inputs
+        if (!username || !password) {
+          showAlert('Please fill in all fields', 'error');
+          return;
+        }
+
+        // Show loading state
+        signInText.classList.add('hidden');
+        loadingSpinner.classList.remove('hidden');
         submitBtn.disabled = true;
 
         try {
@@ -744,7 +796,7 @@
           const data = await response.json();
 
           if (data.error) {
-            alert('Login failed: ' + data.error);
+            showAlert('Login failed: ' + data.error, 'error');
           } else {
             localStorage.setItem('gymrank_user', JSON.stringify(data));
             modal.remove();
@@ -752,15 +804,44 @@
             showSection('home');
           }
         } catch (error) {
-          alert('Login failed. Please check your connection.');
+          showAlert('Login failed. Please check your connection.', 'error');
         } finally {
-          submitBtn.innerHTML = originalText;
+          signInText.classList.remove('hidden');
+          loadingSpinner.classList.add('hidden');
           submitBtn.disabled = false;
         }
       });
       
       document.body.appendChild(modal);
       modal.querySelector('#modal-username').focus();
+    }
+
+    // Enhanced alert function
+    function showAlert(message, type = 'info') {
+      // Remove existing alerts
+      const existingAlert = document.querySelector('.alert');
+      if (existingAlert) {
+        existingAlert.remove();
+      }
+
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} fixed top-4 right-4 z-50 max-w-sm`;
+      alertDiv.style.zIndex = '9999';
+      
+      const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+      alertDiv.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span>${icon}</span>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(alertDiv);
+      
+      // Auto remove after 5 seconds
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 5000);
     }
 
     // Register Modal

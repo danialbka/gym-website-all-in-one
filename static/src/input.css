@@ -368,6 +368,7 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 100;
+  padding: 1rem;
 }
 
 .modal-content {
@@ -376,6 +377,7 @@ body {
   max-width: 90vw;
   max-height: 90vh;
   overflow-y: auto;
+  width: 100%;
 }
 
 /* Custom dropdown styles */
@@ -440,6 +442,27 @@ body {
 .dot-matrix-spinner .dot:nth-child(8) { top: 24px; left: 13px; animation-delay: 0.7s; }
 .dot-matrix-spinner .dot:nth-child(9) { top: 24px; left: 24px; animation-delay: 0.8s; }
 
+/* Smaller spinner for buttons */
+.dot-matrix-spinner.small {
+  width: 20px;
+  height: 20px;
+}
+
+.dot-matrix-spinner.small .dot {
+  width: 4px;
+  height: 4px;
+}
+
+.dot-matrix-spinner.small .dot:nth-child(1) { top: 1px; left: 1px; }
+.dot-matrix-spinner.small .dot:nth-child(2) { top: 1px; left: 8px; }
+.dot-matrix-spinner.small .dot:nth-child(3) { top: 1px; left: 15px; }
+.dot-matrix-spinner.small .dot:nth-child(4) { top: 8px; left: 1px; }
+.dot-matrix-spinner.small .dot:nth-child(5) { top: 8px; left: 8px; }
+.dot-matrix-spinner.small .dot:nth-child(6) { top: 8px; left: 15px; }
+.dot-matrix-spinner.small .dot:nth-child(7) { top: 15px; left: 1px; }
+.dot-matrix-spinner.small .dot:nth-child(8) { top: 15px; left: 8px; }
+.dot-matrix-spinner.small .dot:nth-child(9) { top: 15px; left: 15px; }
+
 @keyframes dot-matrix {
   0%, 20% {
     opacity: 0;
@@ -453,6 +476,11 @@ body {
     opacity: 0;
     transform: scale(0.8);
   }
+}
+
+/* Hidden utility class */
+.hidden {
+  display: none !important;
 }
 
 /* Utility classes */
