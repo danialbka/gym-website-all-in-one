@@ -85,6 +85,43 @@ def get_user_total_lifts(username):
 
 api_blueprint = Blueprint('api', __name__)
 
+def create_performance_indexes():
+    """Create database indexes for better query performance"""
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            # Create indexes for better leaderboard performance
+            indexes = [
+                "CREATE INDEX IF NOT EXISTS idx_users_weight_gender ON users(weight, gender)",
+                "CREATE INDEX IF NOT EXISTS idx_users_team_active ON users(team, is_active)", 
+                "CREATE INDEX IF NOT EXISTS idx_prs_username_lift ON prs(username, lift_type)",
+                "CREATE INDEX IF NOT EXISTS idx_prs_weight ON prs(weight)",
+                "CREATE INDEX IF NOT EXISTS idx_prs_created_at ON prs(created_at)"
+            ]
+            
+            for index_sql in indexes:
+                try:
+                    cur.execute(index_sql)
+                    print(f"✓ Index created: {index_sql}")
+                except Exception as e:
+                    print(f"⚠ Index creation warning: {e}")
+            
+            conn.commit()
+            print("Database indexes optimization completed")
+    except Exception as e:
+        print(f"Error creating indexes: {e}")
+    finally:
+        conn.close()
+
+@api_blueprint.route('/api/init_db', methods=['POST'])
+def init_database():
+    """Initialize database with performance indexes - admin only"""
+    try:
+        create_performance_indexes()
+        return jsonify({'message': 'Database indexes created successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': f'Failed to initialize database: {str(e)}'}), 500
+
 def auth_required(f):
     """
     Decorator to require JWT authentication and verify user owns the resource
@@ -208,49 +245,91 @@ def leaderboard():
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            # Get users with weight and gender for DOTS calculation
+            # Optimized single-query leaderboard with DOTS calculation
             query = """
-                SELECT username, display_name, email, flag, team, weight, gender, elo, created_at 
-                FROM users 
-                WHERE weight IS NOT NULL AND weight > 0 AND gender IS NOT NULL
+                WITH user_lifts AS (
+                    SELECT 
+                        username,
+                        MAX(CASE WHEN lift_type = 'bench' THEN weight ELSE 0 END) as bench,
+                        MAX(CASE WHEN lift_type = 'squat' THEN weight ELSE 0 END) as squat,
+                        MAX(CASE WHEN lift_type = 'deadlift' THEN weight ELSE 0 END) as deadlift,
+                        (
+                            MAX(CASE WHEN lift_type = 'bench' THEN weight ELSE 0 END) +
+                            MAX(CASE WHEN lift_type = 'squat' THEN weight ELSE 0 END) +
+                            MAX(CASE WHEN lift_type = 'deadlift' THEN weight ELSE 0 END)
+                        ) as total_lifted
+                    FROM prs 
+                    GROUP BY username
+                    HAVING total_lifted > 0
+                )
+                SELECT 
+                    u.username,
+                    u.display_name,
+                    u.email,
+                    u.flag,
+                    u.team,
+                    u.weight,
+                    u.gender,
+                    u.elo,
+                    u.created_at,
+                    COALESCE(ul.bench, 0) as bench,
+                    COALESCE(ul.squat, 0) as squat,
+                    COALESCE(ul.deadlift, 0) as deadlift,
+                    COALESCE(ul.total_lifted, 0) as total_lifted,
+                    CASE 
+                        WHEN u.weight IS NULL OR u.weight <= 0 OR ul.total_lifted IS NULL OR ul.total_lifted <= 0 THEN 0
+                        WHEN u.gender = 'male' THEN 
+                            500 * COALESCE(ul.total_lifted, 0) / (
+                                47.46178854 + 
+                                8.472061379 * u.weight + 
+                                0.07369410346 * POWER(u.weight, 2) + 
+                                -0.001395833811 * POWER(u.weight, 3) + 
+                                0.000007076659730 * POWER(u.weight, 4)
+                            )
+                        WHEN u.gender = 'female' THEN
+                            500 * COALESCE(ul.total_lifted, 0) / (
+                                -125.4255398 + 
+                                13.71219419 * u.weight + 
+                                -0.03307250631 * POWER(u.weight, 2) + 
+                                0.0003872554572 * POWER(u.weight, 3) + 
+                                -0.00000113708316 * POWER(u.weight, 4)
+                            )
+                        ELSE 0
+                    END as dots_score
+                FROM users u
+                INNER JOIN user_lifts ul ON u.username = ul.username
+                WHERE u.weight IS NOT NULL 
+                    AND u.weight > 0 
+                    AND u.gender IS NOT NULL
+                    AND ul.total_lifted > 0
             """
+            
             params = []
             
             if gender_filter in ['male', 'female']:
-                query += " AND gender = %s"
+                query += " AND u.gender = %s"
                 params.append(gender_filter)
             
             if country_filter:
-                query += " AND flag = %s"
+                query += " AND u.flag = %s"
                 params.append(country_filter)
             
+            query += """
+                ORDER BY dots_score DESC
+                LIMIT 50
+            """
+            
             cur.execute(query, tuple(params))
-            users = cur.fetchall()
+            leaderboard_data = cur.fetchall()
             
-            # Calculate DOTS scores for each user
-            leaderboard_data = []
-            for user in users:
-                user_dict = dict(user)
-                lift_data = get_user_total_lifts(user['username'])
-                
-                if lift_data['total'] > 0:  # Only include users with actual lifts
-                    dots_score = calculate_dots_score(
-                        lift_data['total'], 
-                        user['weight'], 
-                        user['gender']
-                    )
-                    
-                    user_dict['dots_score'] = dots_score
-                    user_dict['total_lifted'] = lift_data['total']
-                    user_dict['bench'] = lift_data['bench']
-                    user_dict['squat'] = lift_data['squat']
-                    user_dict['deadlift'] = lift_data['deadlift']
-                    
-                    leaderboard_data.append(user_dict)
+            # Convert to list of dictionaries and round DOTS scores
+            result = []
+            for row in leaderboard_data:
+                user_dict = dict(row)
+                user_dict['dots_score'] = round(user_dict['dots_score'], 1)
+                result.append(user_dict)
             
-            # Sort by DOTS score (descending) and limit to top 50
-            leaderboard_data.sort(key=lambda x: x['dots_score'], reverse=True)
-            return jsonify(leaderboard_data[:50])
+            return jsonify(result)
             
     finally:
         conn.close()

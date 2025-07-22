@@ -30,6 +30,18 @@ jwt = JWTManager(app)
 CORS(app)
 app.register_blueprint(api_blueprint)
 
+# Initialize database indexes on startup
+def initialize_database():
+    try:
+        from routes.api import create_performance_indexes
+        create_performance_indexes()
+    except Exception as e:
+        print(f"Warning: Could not create database indexes on startup: {e}")
+
+# Call initialization
+with app.app_context():
+    initialize_database()
+
 @app.route('/')
 def home():
     return send_file('static/index.html')
