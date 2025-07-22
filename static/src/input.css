@@ -145,6 +145,12 @@ body {
   width: 2.5rem;
 }
 
+/* Leaderboard item hover effect */
+.leaderboard-item:hover {
+  background-color: var(--background-alt) !important;
+  color: var(--text-primary) !important;
+}
+
 /* Form styles */
 .form-input {
   width: 100%;

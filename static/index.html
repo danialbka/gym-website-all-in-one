@@ -1265,7 +1265,7 @@
             const genderEmoji = user.gender === 'male' ? '♂️' : '♀️';
             
             return `
-              <div onclick="showUserProfile('${user.username}')" class="card flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors leaderboard-item">
+              <div onclick="showUserProfile('${user.username}')" class="card flex items-center justify-between cursor-pointer transition-colors leaderboard-item">
                 <div class="flex items-center gap-4">
                   <span class="text-2xl font-bold" style="color: var(--primary-color)">#${rank}</span>
                   <span class="text-2xl">${user.flag}</span>
