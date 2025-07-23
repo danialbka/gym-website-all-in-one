@@ -5,7 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GymRank - Competitive Lifting Platform</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏋️</text></svg>">
-  <link href="./src/output.css" rel="stylesheet">
+  <!-- Critical CSS will be inlined by critical-css.js -->
+  <link href="./src/output.css" rel="stylesheet" data-critical="false">
+  
+  <!-- Preload critical scripts -->
+  <link rel="preload" href="./src/critical-css.js" as="script">
+  <link rel="preload" href="./src/prefetch.js" as="script">
+  <link rel="preload" href="./src/asset-optimizer.js" as="script">
+  
+  <!-- Load optimization scripts early -->
+  <script src="./src/critical-css.js"></script>
+  <script src="./src/prefetch.js"></script>
+  <script src="./src/asset-optimizer.js"></script>
+  <script src="../performance-monitor.js"></script>
   <script src="./src/device-detection.js"></script>
 </head>
 <body class="min-h-screen">
@@ -1954,6 +1966,45 @@
       
       loadLeaderboard();
     });
+  </script>
+  <!-- Service Worker Registration -->
+  <script>
+    // Register service worker for McMaster-Carr style caching
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('✅ SW registered:', registration);
+            
+            // Listen for updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('🔄 New SW available');
+                  // Optionally notify user of update
+                }
+              });
+            });
+          })
+          .catch(error => {
+            console.warn('❌ SW registration failed:', error);
+          });
+      });
+    }
+    
+    // Initialize page scripts after content updates
+    window.initializePageScripts = function() {
+      // Reinitialize any components that need it after prefetch navigation
+      if (window.assetOptimizer) {
+        window.assetOptimizer.setupLazyImages();
+        window.assetOptimizer.optimizeImages();
+        window.assetOptimizer.optimizeVideos();
+      }
+      
+      // Reinitialize event listeners
+      initializeEventListeners();
+    };
   </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, send_file
+from flask import Flask, send_from_directory, send_file, request
 from flask_cors import CORS
 from flask_mail import Mail
 from flask_jwt_extended import JWTManager
@@ -29,6 +29,35 @@ jwt = JWTManager(app)
 
 CORS(app)
 app.register_blueprint(api_blueprint)
+
+# Add cache headers for static assets (McMaster-Carr style caching)
+@app.after_request
+def add_cache_headers(response):
+    # Static assets get long cache times
+    if request.endpoint == 'serve_static':
+        if any(request.path.endswith(ext) for ext in ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf']):
+            # 1 year cache for static assets
+            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+            response.headers['Expires'] = 'Thu, 31 Dec 2025 23:59:59 GMT'
+        elif request.path.endswith('.html'):
+            # 5 minutes cache for HTML pages
+            response.headers['Cache-Control'] = 'public, max-age=300'
+    
+    # API responses get shorter cache times
+    elif request.endpoint and 'api' in request.endpoint:
+        if 'leaderboard' in request.path:
+            response.headers['Cache-Control'] = 'public, max-age=300'  # 5 minutes
+        elif 'videos' in request.path:
+            response.headers['Cache-Control'] = 'public, max-age=60'   # 1 minute
+        else:
+            response.headers['Cache-Control'] = 'no-cache'
+    
+    # Add security headers
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    
+    return response
 
 # Initialize database indexes on startup
 def initialize_database():
