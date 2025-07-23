@@ -151,6 +151,12 @@ body {
   color: var(--text-primary) !important;
 }
 
+/* Team leaderboard item hover effect */
+.team-leaderboard-item:hover {
+  background-color: var(--background-alt) !important;
+  color: var(--text-primary) !important;
+}
+
 /* Form styles */
 .form-input {
   width: 100%;

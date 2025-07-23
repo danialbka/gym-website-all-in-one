@@ -1148,6 +1148,13 @@ body {
   color: var(--text-primary) !important;
 }
 
+/* Team leaderboard item hover effect */
+
+.team-leaderboard-item:hover {
+  background-color: var(--background-alt) !important;
+  color: var(--text-primary) !important;
+}
+
 /* Form styles */
 
 .form-input {
@@ -2029,11 +2036,6 @@ body {
   }
 }
 
-.hover\:bg-gray-50:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
-}
-
 .hover\:bg-red-500:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1));
@@ -2093,12 +2095,5 @@ body {
 @media (min-width: 1280px) {
   .xl\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .dark\:hover\:bg-gray-800:hover {
-    --tw-bg-opacity: 1;
-    background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));
   }
 }
