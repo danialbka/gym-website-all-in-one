@@ -229,13 +229,14 @@ class CriticalCSSManager {
     }
 
     /**
-     * Inline critical CSS in the document head
+     * Inline critical CSS in the document head (skip if already exists)
      */
     inlineCriticalCSS() {
-        // Remove existing critical CSS if present
+        // Check if critical CSS is already inlined in HTML
         const existingCritical = document.querySelector('#critical-css');
         if (existingCritical) {
-            existingCritical.remove();
+            console.log('✅ Critical CSS already inlined in HTML');
+            return;
         }
 
         // Create and inject critical CSS with high priority
@@ -252,7 +253,7 @@ class CriticalCSSManager {
             document.head.appendChild(style);
         }
 
-        console.log('✅ Critical CSS inlined');
+        console.log('✅ Critical CSS inlined via JavaScript');
     }
 
     /**

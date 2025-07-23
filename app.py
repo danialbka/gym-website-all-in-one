@@ -35,7 +35,12 @@ app.register_blueprint(api_blueprint)
 def add_cache_headers(response):
     # Static assets get long cache times
     if request.endpoint == 'serve_static':
-        if any(request.path.endswith(ext) for ext in ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf']):
+        # Critical files get no cache to avoid styling issues
+        if 'critical-css.js' in request.path or request.path.endswith('index.html'):
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+        elif any(request.path.endswith(ext) for ext in ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf']):
             # 1 year cache for static assets
             response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
             response.headers['Expires'] = 'Thu, 31 Dec 2025 23:59:59 GMT'
