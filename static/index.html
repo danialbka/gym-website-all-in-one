@@ -99,18 +99,9 @@
       100% { transform: rotate(360deg); }
     }
   </style>
-  <link href="./src/output.css" rel="stylesheet" data-critical="false">
+  <link href="./src/output.css" rel="stylesheet">
   
-  <!-- Preload critical scripts -->
-  <link rel="preload" href="./src/critical-css.js?v=2" as="script">
-  <link rel="preload" href="./src/prefetch.js?v=1" as="script">
-  <link rel="preload" href="./src/asset-optimizer.js?v=1" as="script">
-  
-  <!-- Load optimization scripts early with cache busting -->
-  <script src="./src/critical-css.js?v=2"></script>
-  <script src="./src/prefetch.js?v=1"></script>
-  <script src="./src/asset-optimizer.js?v=1"></script>
-  <script src="../performance-monitor.js?v=1"></script>
+  <!-- Load essential scripts only -->
   <script src="./src/device-detection.js"></script>
 </head>
 <body class="min-h-screen">
@@ -2060,44 +2051,29 @@
       loadLeaderboard();
     });
   </script>
-  <!-- Service Worker Registration -->
+  <!-- Unregister service worker and clear cache to fix issues -->
   <script>
-    // Register service worker for McMaster-Carr style caching
+    // Clear service worker and cache
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(registration => {
-            console.log('✅ SW registered:', registration);
-            
-            // Listen for updates
-            registration.addEventListener('updatefound', () => {
-              const newWorker = registration.installing;
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  console.log('🔄 New SW available');
-                  // Optionally notify user of update
-                }
-              });
-            });
-          })
-          .catch(error => {
-            console.warn('❌ SW registration failed:', error);
-          });
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('🗑️ Service worker unregistered');
+        }
       });
     }
     
-    // Initialize page scripts after content updates
-    window.initializePageScripts = function() {
-      // Reinitialize any components that need it after prefetch navigation
-      if (window.assetOptimizer) {
-        window.assetOptimizer.setupLazyImages();
-        window.assetOptimizer.optimizeImages();
-        window.assetOptimizer.optimizeVideos();
-      }
-      
-      // Reinitialize event listeners
-      initializeEventListeners();
-    };
+    // Clear cache storage
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        names.forEach(function(name) {
+          caches.delete(name);
+          console.log('🧹 Cache cleared:', name);
+        });
+      });
+    }
+    
+    console.log('✅ Navigation styling should work without caching interference');
   </script>
 </body>
 </html>
