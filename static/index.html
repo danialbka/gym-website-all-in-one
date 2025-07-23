@@ -9,15 +9,15 @@
   <link href="./src/output.css" rel="stylesheet" data-critical="false">
   
   <!-- Preload critical scripts -->
-  <link rel="preload" href="./src/critical-css.js" as="script">
-  <link rel="preload" href="./src/prefetch.js" as="script">
-  <link rel="preload" href="./src/asset-optimizer.js" as="script">
+  <link rel="preload" href="./src/critical-css.js?v=2" as="script">
+  <link rel="preload" href="./src/prefetch.js?v=1" as="script">
+  <link rel="preload" href="./src/asset-optimizer.js?v=1" as="script">
   
-  <!-- Load optimization scripts early -->
-  <script src="./src/critical-css.js"></script>
-  <script src="./src/prefetch.js"></script>
-  <script src="./src/asset-optimizer.js"></script>
-  <script src="../performance-monitor.js"></script>
+  <!-- Load optimization scripts early with cache busting -->
+  <script src="./src/critical-css.js?v=2"></script>
+  <script src="./src/prefetch.js?v=1"></script>
+  <script src="./src/asset-optimizer.js?v=1"></script>
+  <script src="../performance-monitor.js?v=1"></script>
   <script src="./src/device-detection.js"></script>
 </head>
 <body class="min-h-screen">

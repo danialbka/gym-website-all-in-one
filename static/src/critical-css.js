@@ -23,48 +23,80 @@ class CriticalCSSManager {
         return `
             /* Critical CSS - Above the fold styles */
             
+            /* CSS Variables - Essential for theming */
+            :root {
+                --primary-color: #ea580c;
+                --primary-dark: #c2410c;
+                --primary-light: #fed7aa;
+                --secondary-color: #1f2937;
+                --secondary-light: #374151;
+                --text-primary: #111827;
+                --text-secondary: #6b7280;
+                --background: #ffffff;
+                --background-alt: #f9fafb;
+                --border: #e5e7eb;
+                --success: #10b981;
+                --error: #ef4444;
+                --warning: #f59e0b;
+            }
+            
+            .dark {
+                --primary-color: #ea580c;
+                --primary-dark: #c2410c;
+                --primary-light: #fed7aa;
+                --secondary-color: #f9fafb;
+                --secondary-light: #e5e7eb;
+                --text-primary: #f9fafb;
+                --text-secondary: #d1d5db;
+                --background: #111827;
+                --background-alt: #1f2937;
+                --border: #374151;
+                --success: #10b981;
+                --error: #ef4444;
+                --warning: #f59e0b;
+            }
+            
             /* Reset and base styles */
             * { box-sizing: border-box; }
             body { 
                 margin: 0; 
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 line-height: 1.5;
-                color: #333;
-                background: #fff;
+                color: var(--text-primary);
+                background: var(--background);
             }
             
             /* Navigation - Always visible */
-            nav, .navbar {
-                display: flex;
-                align-items: center;
-                padding: 1rem;
-                background: #1f2937;
-                color: white;
+            .navbar {
+                background-color: var(--background);
+                border-bottom: 2px solid var(--border);
+                padding: 1rem 0;
                 position: sticky;
                 top: 0;
-                z-index: 100;
+                z-index: 50;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
             
             /* Navigation links - Higher specificity to override defaults */
-            .nav-link, nav a, .navbar a {
-                color: white !important;
+            .nav-link {
+                color: var(--text-primary) !important;
                 text-decoration: none;
                 padding: 0.5rem 1rem;
-                border-radius: 0.25rem;
-                transition: background-color 0.15s ease;
+                border-radius: 0.375rem;
+                transition: all 0.2s ease;
                 background: transparent;
                 border: 1px solid transparent;
+                font-weight: 500;
             }
             
-            .nav-link:hover, nav a:hover, .navbar a:hover {
-                background-color: rgba(255, 255, 255, 0.1);
-                color: white !important;
+            .nav-link:hover {
+                background-color: var(--background-alt);
+                color: var(--primary-color) !important;
             }
             
             .nav-link.active {
-                background-color: rgba(59, 130, 246, 0.2);
-                border-color: rgba(59, 130, 246, 0.3);
-                color: white !important;
+                background-color: var(--primary-color);
+                color: black !important;
             }
             
             /* Main content container - Critical for layout */
@@ -171,14 +203,13 @@ class CriticalCSSManager {
                 h1 { font-size: 2rem; }
                 h2 { font-size: 1.5rem; }
                 
-                nav, .navbar {
-                    padding: 0.5rem;
-                    flex-wrap: wrap;
+                .navbar {
+                    padding: 0.75rem 0;
                 }
                 
-                .nav-link, nav a, .navbar a {
-                    color: white !important;
-                    padding: 0.25rem 0.5rem;
+                .nav-link {
+                    padding: 0.5rem;
+                    font-size: 0.875rem;
                 }
                 
                 form {
