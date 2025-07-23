@@ -45,16 +45,26 @@ class CriticalCSSManager {
                 z-index: 100;
             }
             
-            nav a, .navbar a {
-                color: white;
+            /* Navigation links - Higher specificity to override defaults */
+            .nav-link, nav a, .navbar a {
+                color: white !important;
                 text-decoration: none;
                 padding: 0.5rem 1rem;
                 border-radius: 0.25rem;
                 transition: background-color 0.15s ease;
+                background: transparent;
+                border: 1px solid transparent;
             }
             
-            nav a:hover, .navbar a:hover {
+            .nav-link:hover, nav a:hover, .navbar a:hover {
                 background-color: rgba(255, 255, 255, 0.1);
+                color: white !important;
+            }
+            
+            .nav-link.active {
+                background-color: rgba(59, 130, 246, 0.2);
+                border-color: rgba(59, 130, 246, 0.3);
+                color: white !important;
             }
             
             /* Main content container - Critical for layout */
@@ -166,6 +176,11 @@ class CriticalCSSManager {
                     flex-wrap: wrap;
                 }
                 
+                .nav-link, nav a, .navbar a {
+                    color: white !important;
+                    padding: 0.25rem 0.5rem;
+                }
+                
                 form {
                     max-width: 100%;
                 }
@@ -192,9 +207,10 @@ class CriticalCSSManager {
             existingCritical.remove();
         }
 
-        // Create and inject critical CSS
+        // Create and inject critical CSS with high priority
         const style = document.createElement('style');
         style.id = 'critical-css';
+        style.setAttribute('data-priority', 'critical');
         style.textContent = this.criticalCSS;
         
         // Insert before any other stylesheets
@@ -212,23 +228,26 @@ class CriticalCSSManager {
      * Load non-critical CSS asynchronously
      */
     loadNonCriticalCSS() {
-        // Find all non-critical stylesheets
-        const stylesheets = document.querySelectorAll('link[rel="stylesheet"][data-critical="false"]');
-        
-        if (stylesheets.length === 0) {
-            // If no stylesheets marked as non-critical, load main CSS async
-            this.loadStylesheetAsync('/src/output.css');
-        } else {
-            stylesheets.forEach(stylesheet => {
-                this.loadStylesheetAsync(stylesheet.href);
-                stylesheet.remove(); // Remove the blocking link
-            });
-        }
+        // Small delay to ensure critical CSS takes precedence
+        setTimeout(() => {
+            // Find all non-critical stylesheets
+            const stylesheets = document.querySelectorAll('link[rel="stylesheet"][data-critical="false"]');
+            
+            if (stylesheets.length === 0) {
+                // If no stylesheets marked as non-critical, load main CSS async
+                this.loadStylesheetAsync('/src/output.css');
+            } else {
+                stylesheets.forEach(stylesheet => {
+                    this.loadStylesheetAsync(stylesheet.href);
+                    stylesheet.remove(); // Remove the blocking link
+                });
+            }
 
-        // Load after initial render
-        requestIdleCallback(() => {
-            this.markNonCriticalContentVisible();
-        });
+            // Load after initial render
+            requestIdleCallback(() => {
+                this.markNonCriticalContentVisible();
+            });
+        }, 50); // 50ms delay to ensure critical CSS is processed first
     }
 
     /**
