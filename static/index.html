@@ -71,16 +71,128 @@
       background: transparent;
       border: 1px solid transparent;
       font-weight: 500;
+      position: relative;
     }
     
     .nav-link:hover {
       background-color: var(--background-alt);
       color: var(--primary-color) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(234, 88, 12, 0.15);
     }
     
     .nav-link.active {
       background-color: var(--primary-color);
-      color: black !important;
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+      font-weight: 600;
+    }
+    
+    
+
+    /* Leaderboard item hover effects */
+    .leaderboard-item {
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    
+    .leaderboard-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: var(--primary-color);
+      background: linear-gradient(135deg, var(--background-alt) 0%, var(--background) 100%);
+    }
+    
+    .leaderboard-item:hover .rank-number {
+      color: var(--primary-color) !important;
+      font-weight: 700;
+    }
+
+    /* Team leaderboard item hover effects */
+    .team-leaderboard-item {
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    
+    .team-leaderboard-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: var(--primary-color);
+      background: linear-gradient(135deg, var(--background-alt) 0%, var(--background) 100%);
+    }
+
+    /* Tooltip styles */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 120px;
+      background-color: var(--secondary-color);
+      color: var(--background);
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -60px;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tooltip .tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: var(--secondary-color) transparent transparent transparent;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Team member item hover effects */
+    .team-member-item {
+      transition: all 0.2s ease;
+    }
+    
+    .team-member-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: var(--primary-color) !important;
+    }
+
+    /* Video card enhancements */
+    .video-card {
+      transition: all 0.3s ease;
+    }
+    
+    .video-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .instagram-embed-placeholder {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      transition: all 0.2s ease;
+    }
+
+    .instagram-embed-placeholder:hover {
+      transform: scale(1.02);
+      background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
     }
     
     /* Loading states */
@@ -113,35 +225,42 @@
           <h1 class="navbar-brand">🏋️ GymRank</h1>
         </div>
         <div class="navbar-nav">
-          <button onclick="showSection('home')" id="nav-home" class="nav-link active">
-            Home
+          <button onclick="showSection('home')" id="nav-home" class="nav-link active" aria-label="Go to home page" title="Home - Dashboard and PR submission">
+            🏠 Home
           </button>
-          <button onclick="showSection('videos')" id="nav-videos" class="nav-link">
-            Videos
+          <button onclick="showSection('videos')" id="nav-videos" class="nav-link" aria-label="View PR videos" title="Videos - Watch community PRs">
+            📹 Videos
           </button>
-          <button onclick="showSection('leaderboard')" id="nav-leaderboard" class="nav-link">
-            Leaderboard
+          <button onclick="showSection('leaderboard')" id="nav-leaderboard" class="nav-link" aria-label="View leaderboard rankings" title="Leaderboard - DOTS rankings">
+            🏆 Leaderboard
           </button>
-          <button onclick="showSection('teams')" id="nav-teams" class="nav-link">
-            Teams
+          <button onclick="showSection('teams')" id="nav-teams" class="nav-link" aria-label="View team rankings" title="Teams - Team competitions">
+            🏟️ Teams
           </button>
-          <div id="user-info" class="hidden nav-link" onclick="showSection('profile')">
+          <div id="user-info" class="hidden nav-link tooltip" onclick="showSection('profile')" aria-label="View your profile" title="Profile - Manage your account">
             <div id="logged-in-user" class="flex items-center gap-2"></div>
+            <span class="tooltiptext">My Profile</span>
           </div>
-          <button id="logout-btn" onclick="logout()" class="hidden btn btn-outline btn-sm">
+          <button id="logout-btn" onclick="logout()" class="hidden btn btn-outline btn-sm" aria-label="Sign out of your account" title="Sign out">
             Logout
           </button>
-          <button id="theme-toggle" onclick="toggleTheme()" class="btn btn-ghost btn-icon" title="Toggle dark mode">
-            <span id="theme-icon">🌙</span>
-          </button>
-          <button onclick="switchToMobile()" class="btn btn-ghost btn-sm" title="Mobile view">
-            📱
-          </button>
+          <div class="tooltip">
+            <button id="theme-toggle" onclick="toggleTheme()" class="btn btn-ghost btn-icon" aria-label="Toggle between light and dark theme">
+              <span id="theme-icon">🌙</span>
+            </button>
+            <span class="tooltiptext">Toggle theme</span>
+          </div>
+          <div class="tooltip">
+            <button onclick="switchToMobile()" class="btn btn-ghost btn-sm" aria-label="Switch to mobile view">
+              📱
+            </button>
+            <span class="tooltiptext">Mobile view</span>
+          </div>
           <div id="auth-buttons" class="flex items-center gap-2">
-            <button onclick="showLoginModal()" class="btn btn-outline">
+            <button onclick="showLoginModal()" class="btn btn-outline" aria-label="Sign in to your account">
               Login
             </button>
-            <button onclick="showRegisterModal()" class="btn btn-primary">
+            <button onclick="showRegisterModal()" class="btn btn-primary" aria-label="Create a new account">
               Register
             </button>
           </div>
@@ -191,13 +310,34 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Weight (kg)</label>
-            <input type="number" id="weight" class="form-input" placeholder="Enter weight in kg" step="0.5" required>
+            <label for="weight" class="form-label">Weight (kg)</label>
+            <input 
+              type="number" 
+              id="weight" 
+              name="weight"
+              class="form-input" 
+              placeholder="Enter weight in kg" 
+              step="0.5" 
+              min="1" 
+              max="600" 
+              required
+              aria-describedby="weight-help"
+            >
+            <p id="weight-help" class="text-sm" style="color: var(--text-secondary); margin-top: 0.25rem">Enter your PR weight in kilograms (1-600kg)</p>
           </div>
           <div class="form-group">
-            <label class="form-label">Instagram Video Link (Required)</label>
-            <input type="url" id="instagram-url" class="form-input" placeholder="https://www.instagram.com/reel/..." required>
-            <p class="text-sm" style="color: var(--text-secondary); margin-top: 0.25rem">Required: Instagram reel or video link • Must be a valid Instagram URL</p>
+            <label for="instagram-url" class="form-label">Instagram Video Link (Required)</label>
+            <input 
+              type="url" 
+              id="instagram-url" 
+              name="instagram-url"
+              class="form-input" 
+              placeholder="https://www.instagram.com/reel/..." 
+              required
+              aria-describedby="instagram-help"
+              pattern="https://www\.instagram\.com/(reel|p|tv)/.*"
+            >
+            <p id="instagram-help" class="text-sm" style="color: var(--text-secondary); margin-top: 0.25rem">Required: Instagram reel, post, or IGTV link • Must be a valid Instagram URL</p>
           </div>
           <button type="submit" class="btn btn-primary w-full btn-lg">
             Submit PR
@@ -227,7 +367,7 @@
         <p style="color: var(--text-secondary)">Watch incredible lifts from our community</p>
       </div>
       
-      <div id="videos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 videos-grid-mobile">
+      <div id="videos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 videos-grid-mobile">
         <div class="flex justify-center items-center py-8 col-span-full">
           <div class="dot-matrix-spinner">
             <div class="dot"></div>
@@ -332,6 +472,37 @@
         <p style="color: var(--text-secondary)">Team rankings and competitions</p>
       </div>
       
+      <!-- Search and Filter Controls -->
+      <div class="mb-6">
+        <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div class="flex-1 max-w-md">
+            <label for="team-search" class="sr-only">Search teams</label>
+            <div class="relative">
+              <input 
+                type="text" 
+                id="team-search" 
+                class="form-input pl-10 pr-4" 
+                placeholder="Search teams by name..."
+                aria-label="Search teams"
+                oninput="filterTeams()"
+              >
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="text-gray-500">🔍</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <label for="team-sort" class="text-sm font-medium" style="color: var(--text-secondary)">Sort by:</label>
+            <select id="team-sort" class="form-input" onchange="sortTeams(this.value)">
+              <option value="avg_elo">Average ELO</option>
+              <option value="member_count">Member Count</option>
+              <option value="top_elo">Top ELO</option>
+              <option value="total_elo">Total ELO</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
       <div class="card">
         <div id="team-leaderboard" class="space-y-3">
           <div class="flex justify-center items-center py-8">
@@ -345,6 +516,116 @@
               <div class="dot"></div>
               <div class="dot"></div>
               <div class="dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Detail Section -->
+    <div id="team-detail-section" class="section hidden" style="padding-top: 1rem;">
+      <div class="container mx-auto px-4 py-8">
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="Breadcrumb" class="mb-6">
+          <div class="flex items-center gap-2 text-sm">
+            <button onclick="showSection('home', true, false)" class="text-primary hover:underline" style="color: var(--primary-color)">
+              🏠 Home
+            </button>
+            <span style="color: var(--text-secondary)">›</span>
+            <button onclick="showSection('teams', true, false)" class="text-primary hover:underline" style="color: var(--primary-color)">
+              🏟️ Teams
+            </button>
+            <span style="color: var(--text-secondary)">›</span>
+            <span id="team-detail-name" style="color: var(--text-secondary)">
+              Team Details
+            </span>
+          </div>
+        </nav>
+
+        <!-- Back Button -->
+        <div class="mb-6">
+          <button onclick="showSection('teams', true, false)" class="btn btn-outline" aria-label="Go back to teams">
+            ← Back to Teams
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="team-detail-loading" class="flex flex-col items-center justify-center py-16">
+          <div class="dot-matrix-spinner mb-4">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+          <p style="color: var(--text-secondary)">Loading team details...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="team-detail-error" class="hidden flex flex-col items-center justify-center py-16">
+          <div class="text-6xl mb-4">😵</div>
+          <h2 class="text-2xl font-bold mb-2">Team Not Found</h2>
+          <p style="color: var(--text-secondary)" class="mb-6">The team you're looking for doesn't exist.</p>
+          <button onclick="showSection('teams', true, false)" class="btn btn-primary btn-lg">
+            Go Back to Teams
+          </button>
+        </div>
+
+        <!-- Team Content -->
+        <div id="team-detail-content" class="hidden">
+          <!-- Team Header -->
+          <div class="card mb-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <span class="text-6xl">🏟️</span>
+                <div>
+                  <h1 id="team-detail-title" class="text-3xl font-bold"></h1>
+                  <p id="team-detail-member-count" style="color: var(--text-secondary)" class="text-lg"></p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div id="team-detail-rank" class="text-lg font-bold" style="color: var(--primary-color)"></div>
+                <div class="text-sm" style="color: var(--text-secondary)">Team Rank</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Team Stats -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="card text-center">
+              <div class="text-4xl mb-3">📊</div>
+              <div style="color: var(--text-secondary)" class="mb-2">Average ELO</div>
+              <div id="team-detail-avg-elo" class="text-3xl font-bold" style="color: var(--primary-color)"></div>
+            </div>
+            <div class="card text-center">
+              <div class="text-4xl mb-3">🏆</div>
+              <div style="color: var(--text-secondary)" class="mb-2">Top ELO</div>
+              <div id="team-detail-top-elo" class="text-3xl font-bold" style="color: var(--success)"></div>
+            </div>
+            <div class="card text-center">
+              <div class="text-4xl mb-3">👥</div>
+              <div style="color: var(--text-secondary)" class="mb-2">Members</div>
+              <div id="team-detail-members" class="text-3xl font-bold" style="color: var(--info)"></div>
+            </div>
+            <div class="card text-center">
+              <div class="text-4xl mb-3">💪</div>
+              <div style="color: var(--text-secondary)" class="mb-2">Total ELO</div>
+              <div id="team-detail-total-elo" class="text-3xl font-bold" style="color: var(--warning)"></div>
+            </div>
+          </div>
+
+          <!-- Members List -->
+          <div class="card">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+              <span>👥</span>
+              Team Members
+            </h2>
+            <div id="team-detail-members-list" class="space-y-2">
+              <!-- Members will be loaded here -->
             </div>
           </div>
         </div>
@@ -496,10 +777,27 @@
   <!-- User Profile View Section (for viewing other users) -->
   <div id="user-profile-section" class="section hidden" style="padding-top: 1rem;">
     <div class="container mx-auto px-4 py-8">
+      <!-- Breadcrumb Navigation -->
+      <nav aria-label="Breadcrumb" class="mb-6">
+        <div class="flex items-center gap-2 text-sm">
+          <button onclick="showSection('home', true, false)" class="text-primary hover:underline" style="color: var(--primary-color)">
+            🏠 Home
+          </button>
+          <span style="color: var(--text-secondary)">›</span>
+          <span id="breadcrumb-section" class="text-primary hover:underline cursor-pointer" style="color: var(--primary-color)">
+            Leaderboard
+          </span>
+          <span style="color: var(--text-secondary)">›</span>
+          <span id="breadcrumb-username" style="color: var(--text-secondary)">
+            User Profile
+          </span>
+        </div>
+      </nav>
+
       <!-- Back Button -->
       <div class="mb-6">
-        <button onclick="goBackToPrevious()" class="btn btn-outline">
-          ← Back
+        <button onclick="goBackToPrevious()" class="btn btn-outline" aria-label="Go back to previous page">
+          ← Back to <span id="back-button-text">Previous</span>
         </button>
       </div>
 
@@ -572,7 +870,7 @@
         <!-- Videos Section -->
         <div class="mb-8">
           <h2 class="text-2xl font-bold mb-6">📹 PR Videos</h2>
-          <div id="viewed-user-videos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div id="viewed-user-videos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             <!-- Videos will be loaded here -->
           </div>
         </div>
@@ -694,6 +992,8 @@
           loadLeaderboardCached();
         } else if (sectionName === 'teams') {
           loadTeamsCached();
+        } else if (sectionName === 'team-detail') {
+          // Team detail loading is handled by showTeamDetailPage
         } else if (sectionName === 'profile') {
           loadUserProfile();
         } else if (sectionName === 'home') {
@@ -729,6 +1029,28 @@
       console.log('showUserProfile called from section:', currentSection);
       lastSectionBeforeProfile = currentSection; // Remember where we came from
       console.log('Saved lastSectionBeforeProfile as:', lastSectionBeforeProfile);
+      
+      // Update breadcrumb information
+      const breadcrumbSection = document.getElementById('breadcrumb-section');
+      const breadcrumbUsername = document.getElementById('breadcrumb-username');
+      const backButtonText = document.getElementById('back-button-text');
+      
+      const sectionNames = {
+        'home': '🏠 Home',
+        'leaderboard': '🏆 Leaderboard', 
+        'teams': '🏟️ Teams',
+        'videos': '📹 Videos',
+        'profile': '👤 Profile'
+      };
+      
+      if (breadcrumbSection && breadcrumbUsername && backButtonText) {
+        const sectionName = sectionNames[currentSection] || 'Previous';
+        breadcrumbSection.textContent = sectionName;
+        breadcrumbSection.onclick = () => goBackToPrevious();
+        breadcrumbUsername.textContent = `@${username}`;
+        backButtonText.textContent = sectionName.replace(/🏠|🏆|🏟️|📹|👤/g, '').trim();
+      }
+      
       showSection('user-profile', false, false); // Don't use history system for profile
       loadUserProfileCached(username);
     }
@@ -1360,15 +1682,23 @@
             const rank = index + 1;
             const genderEmoji = user.gender === 'male' ? '♂️' : '♀️';
             
+            const rankTitle = rank === 1 ? '👑 Champion' : rank === 2 ? '🥈 Elite' : rank === 3 ? '🥉 Titan' : '🏅 Brawler';
+            const rankColor = rank === 1 ? '#FFD700' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : 'var(--primary-color)';
+            
             return `
-              <div onclick="showUserProfile('${user.username}')" class="card flex items-center justify-between cursor-pointer transition-colors leaderboard-item">
+              <div onclick="showUserProfile('${user.username}')" 
+                   class="card flex items-center justify-between cursor-pointer transition-colors leaderboard-item"
+                   role="button" 
+                   tabindex="0"
+                   aria-label="View ${user.username}'s profile - Rank ${rank} with ${user.dots_score} DOTS"
+                   onkeydown="if(event.key==='Enter'||event.key===' ') showUserProfile('${user.username}')">
                 <div class="flex items-center gap-4">
-                  <span class="text-2xl font-bold" style="color: var(--primary-color)">#${rank}</span>
-                  <span class="text-2xl">${user.flag}</span>
+                  <span class="rank-number text-2xl font-bold" style="color: ${rankColor}">#${rank}</span>
+                  <span class="text-2xl" role="img" aria-label="${user.flag} flag">${user.flag}</span>
                   <div class="flex flex-col">
                     <div class="flex items-center gap-1">
                       <span class="font-semibold">${user.username}</span>
-                      <span class="text-lg">${genderEmoji}</span>
+                      <span class="text-lg" role="img" aria-label="${user.gender === 'male' ? 'Male' : 'Female'}">${genderEmoji}</span>
                     </div>
                     <span class="text-sm" style="color: var(--text-secondary)">${user.team || 'Independent'}</span>
                     <span class="text-xs" style="color: var(--text-secondary)">
@@ -1379,8 +1709,11 @@
                 <div class="text-right">
                   <div class="text-lg font-bold" style="color: var(--primary-color)">${user.dots_score} DOTS</div>
                   <div class="text-sm font-medium">${user.total_lifted}kg Total</div>
-                  <div class="text-sm" style="color: var(--text-secondary)">
-                    ${rank === 1 ? 'Champion' : rank === 2 ? 'Elite' : rank === 3 ? 'Titan' : 'Brawler'}
+                  <div class="text-sm font-medium" style="color: ${rankColor}">
+                    ${rankTitle}
+                  </div>
+                  <div class="text-xs mt-1" style="color: var(--text-secondary)">
+                    Click to view profile →
                   </div>
                 </div>
               </div>
@@ -1388,8 +1721,15 @@
           }).join('');
           
           // Update stats
-          document.getElementById('total-users').textContent = data.length;
+          document.getElementById('total-users').textContent = data.length || '0';
           document.getElementById('top-elo').textContent = data[0] ? data[0].dots_score : '0';
+          
+          // Calculate total PRs from all users
+          const totalPRs = data.reduce((sum, user) => {
+            const userPRs = (user.bench > 0 ? 1 : 0) + (user.squat > 0 ? 1 : 0) + (user.deadlift > 0 ? 1 : 0);
+            return sum + userPRs;
+          }, 0);
+          document.getElementById('total-prs').textContent = totalPRs || '0';
     }
 
     // Set active filter button
@@ -1443,13 +1783,20 @@
               'squat': '🦵'
             };
             
+            // Extract Instagram post ID for embedding
+            const instagramId = extractInstagramId(video.video_url);
+            const canEmbed = instagramId !== null;
+            
             return `
-              <div class="card hover:shadow-lg transition-shadow" style="min-height: 240px; padding: 2rem;">
-                <div class="mb-6">
+              <div class="card hover:shadow-lg transition-shadow video-card" style="min-height: 320px; padding: 1.5rem;">
+                <div class="mb-4">
                   <div class="flex justify-between items-start mb-3">
                     <div class="flex items-center gap-3">
-                      <span class="text-xl">${video.flag}</span>
-                      <button onclick="showUserProfile('${video.username}')" class="text-base font-bold hover:underline cursor-pointer" style="color: var(--primary-color); background: none; border: none; padding: 0; font-family: inherit; margin-left: 0.5rem;">${video.username}</button>
+                      <span class="text-xl" role="img" aria-label="${video.flag} flag">${video.flag}</span>
+                      <button onclick="showUserProfile('${video.username}')" 
+                              class="text-base font-bold hover:underline cursor-pointer" 
+                              style="color: var(--primary-color); background: none; border: none; padding: 0; font-family: inherit;"
+                              aria-label="View ${video.username}'s profile">${video.username}</button>
                     </div>
                     <div class="text-right">
                       <div class="text-xs mb-1" style="color: var(--text-secondary)">
@@ -1462,25 +1809,197 @@
                   </div>
                   <div class="text-sm" style="color: var(--text-secondary)">${video.team || 'Independent'}</div>
                 </div>
+
+                <!-- Video Preview/Embed Section -->
+                <div class="mb-4 bg-gray-100 rounded-lg overflow-hidden" style="background: var(--background-alt); min-height: 120px;">
+                  ${canEmbed ? `
+                    <div class="relative">
+                      <div class="instagram-embed-placeholder" 
+                           data-instagram-id="${instagramId}" 
+                           style="min-height: 120px; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+                           onclick="loadInstagramEmbed(this, '${instagramId}')">
+                        <div class="text-center">
+                          <div class="text-4xl mb-2">📱</div>
+                          <div class="text-sm font-medium">Click to load Instagram video</div>
+                          <div class="text-xs" style="color: var(--text-secondary)">Tap to view embedded content</div>
+                        </div>
+                      </div>
+                    </div>
+                  ` : `
+                    <div class="flex items-center justify-center h-full py-8">
+                      <div class="text-center">
+                        <div class="text-4xl mb-2">🎥</div>
+                        <div class="text-sm" style="color: var(--text-secondary)">Video preview not available</div>
+                      </div>
+                    </div>
+                  `}
+                </div>
                 
-                <div class="flex items-center justify-between mt-auto">
+                <div class="flex items-center justify-between">
                   <div class="flex items-center gap-3">
-                    <span class="text-3xl">${liftEmoji[video.lift_type] || '🏋️'}</span>
+                    <span class="text-3xl" role="img" aria-label="${video.lift_type}">${liftEmoji[video.lift_type] || '🏋️'}</span>
                     <div>
                       <div class="font-bold text-xl" style="color: var(--primary-color)">${video.weight}kg</div>
                       <div class="text-sm capitalize font-medium" style="color: var(--text-secondary)">${video.lift_type}</div>
                     </div>
                   </div>
                   
-                  <a href="${video.video_url}" target="_blank" rel="noopener noreferrer" 
-                     class="btn btn-primary btn-sm">
-                    <span class="text-sm">📱</span>
-                    <span class="ml-1">View</span>
-                  </a>
+                  <div class="flex items-center gap-2">
+                    <!-- Social sharing buttons -->
+                    <button onclick="shareVideo('${video.username}', '${video.lift_type}', '${video.weight}', '${video.video_url}')" 
+                            class="btn btn-ghost btn-sm tooltip" 
+                            aria-label="Share this PR"
+                            title="Share this PR">
+                      <span>🔗</span>
+                      <span class="tooltiptext">Share</span>
+                    </button>
+                    
+                    <!-- Like button (placeholder for future functionality) -->
+                    <button class="btn btn-ghost btn-sm tooltip" 
+                            aria-label="Like this PR"
+                            title="Like this PR">
+                      <span>❤️</span>
+                      <span class="tooltiptext">Like</span>
+                    </button>
+                    
+                    <!-- View on Instagram button -->
+                    <a href="${video.video_url}" target="_blank" rel="noopener noreferrer" 
+                       class="btn btn-primary btn-sm tooltip"
+                       aria-label="View on Instagram">
+                      <span class="text-sm">📱</span>
+                      <span class="ml-1">Instagram</span>
+                      <span class="tooltiptext">View on Instagram</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             `;
           }).join('');
+    }
+
+    // Extract Instagram post ID from URL
+    function extractInstagramId(url) {
+      try {
+        const patterns = [
+          /instagram\.com\/p\/([A-Za-z0-9_-]+)/,
+          /instagram\.com\/reel\/([A-Za-z0-9_-]+)/,
+          /instagram\.com\/tv\/([A-Za-z0-9_-]+)/
+        ];
+        
+        for (const pattern of patterns) {
+          const match = url.match(pattern);
+          if (match) {
+            return match[1];
+          }
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Load Instagram embed (lazy loading)
+    function loadInstagramEmbed(element, instagramId) {
+      if (!instagramId) return;
+      
+      // Show loading state
+      element.innerHTML = `
+        <div class="flex items-center justify-center py-8">
+          <div class="dot-matrix-spinner">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+      `;
+      
+      // Create Instagram embed
+      const embedUrl = `https://www.instagram.com/p/${instagramId}/embed/`;
+      
+      element.innerHTML = `
+        <iframe 
+          src="${embedUrl}" 
+          width="100%" 
+          height="200" 
+          frameborder="0" 
+          scrolling="no" 
+          allowtransparency="true"
+          style="border-radius: 8px;"
+          onload="this.style.opacity=1"
+          style="opacity: 0; transition: opacity 0.3s ease;"
+          onerror="this.parentElement.innerHTML='<div class=\\'text-center py-8\\' style=\\'color: var(--text-secondary)\\'>Unable to load Instagram embed</div>'"
+        ></iframe>
+      `;
+    }
+
+    // Share video functionality
+    function shareVideo(username, liftType, weight, videoUrl) {
+      const shareText = `Check out ${username}'s ${weight}kg ${liftType} PR on GymRank! 🏋️`;
+      const shareUrl = window.location.origin + `#user-profile-${username}`;
+      
+      if (navigator.share) {
+        // Use native sharing if available
+        navigator.share({
+          title: 'GymRank PR',
+          text: shareText,
+          url: shareUrl
+        }).catch(err => {
+          console.log('Error sharing:', err);
+          fallbackShare(shareText, shareUrl);
+        });
+      } else {
+        fallbackShare(shareText, shareUrl);
+      }
+    }
+
+    // Fallback sharing method
+    function fallbackShare(text, url) {
+      // Copy to clipboard
+      const shareContent = `${text}\n\n${url}`;
+      
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(shareContent).then(() => {
+          showAlert('Share link copied to clipboard! 📋', 'success');
+        }).catch(() => {
+          showShareModal(text, url);
+        });
+      } else {
+        showShareModal(text, url);
+      }
+    }
+
+    // Show share modal as final fallback
+    function showShareModal(text, url) {
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content card" style="max-width: 400px;">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold">Share PR</h3>
+            <button onclick="this.closest('.modal').remove()" class="btn btn-outline btn-sm">✕</button>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Share this PR:</label>
+            <textarea class="form-input" rows="3" readonly onclick="this.select()">${text}\n\n${url}</textarea>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="window.open('https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}', '_blank')" 
+                    class="btn btn-outline flex-1">
+              🐦 Twitter
+            </button>
+            <button onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}', '_blank')" 
+                    class="btn btn-outline flex-1">
+              📘 Facebook
+            </button>
+          </div>
+        </div>
+      `;
+      
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+      });
+      
+      document.body.appendChild(modal);
     }
 
     // Load teams
@@ -1497,6 +2016,10 @@
         });
     }
 
+    // Store original team data for filtering
+    let originalTeamData = [];
+    let currentTeamSort = 'avg_elo';
+
     function displayTeams(data) {
           const list = document.getElementById('team-leaderboard');
           if (data.length === 0) {
@@ -1504,22 +2027,37 @@
             return;
           }
           
+          // Store original data for filtering
+          originalTeamData = [...data];
+          
           list.innerHTML = data.map((team, index) => {
             const rank = index + 1;
+            const rankColor = rank === 1 ? '#FFD700' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : 'var(--primary-color)';
             
             return `
-              <div class="card flex items-center justify-between cursor-pointer transition-colors team-leaderboard-item" onclick="showTeamDetails('${team.team}')">
+              <div class="card flex items-center justify-between cursor-pointer transition-colors team-leaderboard-item" 
+                   onclick="showTeamDetailPage('${team.team}')"
+                   role="button" 
+                   tabindex="0"
+                   aria-label="View ${team.team} team details - ${team.member_count} members"
+                   onkeydown="if(event.key==='Enter'||event.key===' ') showTeamDetailPage('${team.team}')">
                 <div class="flex items-center gap-4">
-                  <span class="text-2xl font-bold" style="color: var(--primary-color)">#${rank}</span>
-                  <div class="flex flex-col">
-                    <span class="font-semibold text-lg">${team.team}</span>
-                    <span class="text-sm" style="color: var(--text-secondary)">${team.member_count} members</span>
+                  <span class="text-2xl font-bold" style="color: ${rankColor}">#${rank}</span>
+                  <div class="flex items-center gap-3">
+                    <span class="text-3xl">🏟️</span>
+                    <div class="flex flex-col">
+                      <span class="font-semibold text-lg">${team.team}</span>
+                      <span class="text-sm" style="color: var(--text-secondary)">${team.member_count} ${team.member_count === 1 ? 'member' : 'members'}</span>
+                    </div>
                   </div>
                 </div>
                 <div class="text-right">
                   <div class="text-lg font-bold">${team.avg_elo.toFixed(0)} Avg ELO</div>
-                  <div class="text-sm" style="color: var(--text-secondary)">
+                  <div class="text-sm font-medium" style="color: var(--success)">
                     Top: ${team.top_elo.toFixed(0)} ELO
+                  </div>
+                  <div class="text-xs mt-1" style="color: var(--text-secondary)">
+                    Click to view details →
                   </div>
                 </div>
               </div>
@@ -1527,110 +2065,169 @@
           }).join('');
     }
 
-    // Show team details
-    function showTeamDetails(teamName) {
-      fetch(`${API_BASE}/api/team_members/${encodeURIComponent(teamName)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (!data || data.length === 0) {
-            alert('No members found for this team.');
-            return;
+    // Filter teams based on search input
+    function filterTeams() {
+      const searchTerm = document.getElementById('team-search').value.toLowerCase();
+      if (!originalTeamData.length) return;
+      
+      const filteredData = originalTeamData.filter(team => 
+        team.team.toLowerCase().includes(searchTerm)
+      );
+      
+      // Re-sort filtered data
+      sortTeamData(filteredData, currentTeamSort);
+      displayTeams(filteredData);
+    }
+
+    // Sort teams by selected criteria
+    function sortTeams(sortBy) {
+      currentTeamSort = sortBy;
+      const searchTerm = document.getElementById('team-search').value.toLowerCase();
+      
+      let dataToSort = originalTeamData;
+      if (searchTerm) {
+        dataToSort = originalTeamData.filter(team => 
+          team.team.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      sortTeamData(dataToSort, sortBy);
+      displayTeams(dataToSort);
+    }
+
+    // Helper function to sort team data
+    function sortTeamData(data, sortBy) {
+      data.sort((a, b) => {
+        switch (sortBy) {
+          case 'member_count':
+            return b.member_count - a.member_count;
+          case 'top_elo':
+            return b.top_elo - a.top_elo;
+          case 'total_elo':
+            return b.total_elo - a.total_elo;
+          case 'avg_elo':
+          default:
+            return b.avg_elo - a.avg_elo;
+        }
+      });
+    }
+
+    // Show team detail page (new dedicated page)
+    function showTeamDetailPage(teamName) {
+      console.log('showTeamDetailPage called for:', teamName);
+      lastSectionBeforeProfile = currentSection; // Remember where we came from
+      
+      // Update breadcrumb
+      document.getElementById('team-detail-name').textContent = teamName;
+      
+      showSection('team-detail', false, false);
+      loadTeamDetailCached(teamName);
+    }
+
+    // Load team detail with caching
+    function loadTeamDetailCached(teamName) {
+      // Show loading state
+      document.getElementById('team-detail-loading').classList.remove('hidden');
+      document.getElementById('team-detail-error').classList.add('hidden');
+      document.getElementById('team-detail-content').classList.add('hidden');
+      
+      Promise.all([
+        fetch(`${API_BASE}/api/team_members/${encodeURIComponent(teamName)}`).then(res => res.json()),
+        fetch(`${API_BASE}/api/team_leaderboard`).then(res => res.json())
+      ])
+      .then(([membersData, teamsData]) => {
+        if (!membersData || membersData.length === 0) {
+          showTeamDetailError();
+          return;
+        }
+
+        // Find team rank
+        const teamRank = teamsData.findIndex(team => team.team === teamName) + 1;
+
+        // Calculate team stats
+        const totalElo = membersData.reduce((sum, member) => sum + member.elo, 0);
+        const avgElo = totalElo / membersData.length;
+        const topElo = Math.max(...membersData.map(member => member.elo));
+        const memberCount = membersData.length;
+
+        displayTeamDetail({
+          name: teamName,
+          members: membersData,
+          stats: {
+            avgElo,
+            topElo,
+            totalElo,
+            memberCount,
+            rank: teamRank
           }
+        });
+      })
+      .catch(err => {
+        console.error('Error loading team details:', err);
+        showTeamDetailError();
+      });
+    }
 
-          // Calculate team stats
-          const totalElo = data.reduce((sum, member) => sum + member.elo, 0);
-          const avgElo = totalElo / data.length;
-          const topElo = Math.max(...data.map(member => member.elo));
-          const memberCount = data.length;
+    function showTeamDetailError() {
+      document.getElementById('team-detail-loading').classList.add('hidden');
+      document.getElementById('team-detail-error').classList.remove('hidden');
+      document.getElementById('team-detail-content').classList.add('hidden');
+    }
 
-          const modal = document.createElement('div');
-          modal.className = 'modal';
-          modal.innerHTML = `
-            <div class="modal-content card" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
-              <!-- Team Header -->
-              <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center gap-3">
-                  <div class="text-3xl">🏟️</div>
-                  <div>
-                    <h3 class="text-2xl font-bold" style="color: var(--primary-color);">${teamName}</h3>
-                    <p class="text-sm" style="color: var(--text-secondary);">${memberCount} ${memberCount === 1 ? 'member' : 'members'}</p>
-                  </div>
-                </div>
-                <button onclick="this.closest('.modal').remove()" class="btn btn-outline btn-sm hover:bg-red-500 hover:text-white transition-colors">✕</button>
+    function displayTeamDetail(teamData) {
+      const { name, members, stats } = teamData;
+      
+      // Populate team header
+      document.getElementById('team-detail-title').textContent = name;
+      document.getElementById('team-detail-member-count').textContent = 
+        `${stats.memberCount} ${stats.memberCount === 1 ? 'member' : 'members'}`;
+      document.getElementById('team-detail-rank').textContent = 
+        stats.rank ? `#${stats.rank}` : 'Unranked';
+
+      // Populate team stats
+      document.getElementById('team-detail-avg-elo').textContent = stats.avgElo.toFixed(0);
+      document.getElementById('team-detail-top-elo').textContent = stats.topElo.toFixed(0);
+      document.getElementById('team-detail-members').textContent = stats.memberCount;
+      document.getElementById('team-detail-total-elo').textContent = stats.totalElo.toFixed(0);
+
+      // Populate members list
+      const membersList = document.getElementById('team-detail-members-list');
+      membersList.innerHTML = members.map((member, index) => {
+        const rank = index + 1;
+        const rankColor = rank === 1 ? '#FFD700' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : 'var(--text-secondary)';
+        const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🏅';
+        
+        return `
+          <div class="flex items-center justify-between p-4 rounded-lg border transition-all hover:shadow-md cursor-pointer team-member-item" 
+               style="border-color: var(--border); background: var(--background);"
+               onclick="showUserProfile('${member.username}')"
+               role="button" 
+               tabindex="0"
+               aria-label="View ${member.username}'s profile - ${member.elo.toFixed(0)} ELO"
+               onkeydown="if(event.key==='Enter'||event.key===' ') showUserProfile('${member.username}')">
+            <div class="flex items-center gap-4">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">${rankIcon}</span>
+                <span class="text-sm font-bold" style="color: ${rankColor}; min-width: 20px;">#${rank}</span>
               </div>
-
-              <!-- Team Stats -->
-              <div class="grid grid-cols-3 gap-4 mb-6 p-4 rounded-lg" style="background: var(--background-alt);">
-                <div class="text-center">
-                  <div class="text-xl font-bold" style="color: var(--primary-color);">${avgElo.toFixed(0)}</div>
-                  <div class="text-xs" style="color: var(--text-secondary);">Avg ELO</div>
-                </div>
-                <div class="text-center">
-                  <div class="text-xl font-bold" style="color: var(--success);">${topElo.toFixed(0)}</div>
-                  <div class="text-xs" style="color: var(--text-secondary);">Top ELO</div>
-                </div>
-                <div class="text-center">
-                  <div class="text-xl font-bold" style="color: var(--info);">${totalElo.toFixed(0)}</div>
-                  <div class="text-xs" style="color: var(--text-secondary);">Total ELO</div>
-                </div>
-              </div>
-
-              <!-- Members List -->
-              <div class="space-y-2">
-                <h4 class="text-lg font-semibold mb-3 flex items-center gap-2">
-                  <span>👥</span>
-                  Team Members
-                </h4>
-                ${data.map((member, index) => {
-                  const rank = index + 1;
-                  const rankColor = rank === 1 ? 'var(--warning)' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : 'var(--text-secondary)';
-                  const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🏅';
-                  
-                  return `
-                    <div class="flex items-center justify-between p-4 rounded-lg border transition-all hover:shadow-md cursor-pointer" 
-                         style="border-color: var(--border-color); background: var(--background);"
-                         onclick="showUserProfile('${member.username}')"
-                      <div class="flex items-center gap-4">
-                        <div class="flex items-center gap-2">
-                          <span class="text-lg">${rankIcon}</span>
-                          <span class="text-sm font-bold" style="color: ${rankColor}; min-width: 20px;">#${rank}</span>
-                        </div>
-                        <div class="text-2xl">${member.flag}</div>
-                        <div class="flex flex-col">
-                          <span class="font-semibold text-base">${member.display_name || member.username}</span>
-                          <span class="text-xs" style="color: var(--text-secondary);">@${member.username}</span>
-                        </div>
-                      </div>
-                      <div class="text-right">
-                        <div class="font-bold text-lg" style="color: var(--primary-color);">${member.elo.toFixed(0)}</div>
-                        <div class="text-xs" style="color: var(--text-secondary);">ELO Rating</div>
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-
-              <!-- Footer -->
-              <div class="mt-6 pt-4 border-t text-center" style="border-color: var(--border-color);">
-                <p class="text-sm" style="color: var(--text-secondary);">
-                  Click on any member to view their profile
-                </p>
+              <div class="text-2xl" role="img" aria-label="${member.flag} flag">${member.flag}</div>
+              <div class="flex flex-col">
+                <span class="font-semibold text-base">${member.display_name || member.username}</span>
+                <span class="text-xs" style="color: var(--text-secondary);">@${member.username}</span>
               </div>
             </div>
-          `;
-          
-          // Add click outside to close
-          modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-              modal.remove();
-            }
-          });
-          
-          document.body.appendChild(modal);
-        })
-        .catch(err => {
-          alert('Error loading team details. Please try again.');
-        });
+            <div class="text-right">
+              <div class="font-bold text-lg" style="color: var(--primary-color);">${member.elo.toFixed(0)}</div>
+              <div class="text-xs" style="color: var(--text-secondary);">ELO Rating</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Show team content
+      document.getElementById('team-detail-loading').classList.add('hidden');
+      document.getElementById('team-detail-error').classList.add('hidden');
+      document.getElementById('team-detail-content').classList.remove('hidden');
     }
 
     // Load user profile
@@ -1963,24 +2560,47 @@
       
       const username = currentUser.username;
       const lift_type = document.getElementById('lift-type').value;
-      const weight = parseFloat(document.getElementById('weight').value);
-      const instagramUrl = document.getElementById('instagram-url').value;
+      const weightInput = document.getElementById('weight');
+      const weight = parseFloat(weightInput.value);
+      const instagramUrl = document.getElementById('instagram-url').value.trim();
       
-      // Validate that Instagram URL is required and valid
-      if (!instagramUrl) {
-        alert('Instagram video link is required to submit a PR.');
+      // Enhanced validation
+      if (!lift_type) {
+        showAlert('Please select a lift type', 'error');
+        document.getElementById('lift-type').focus();
         return;
       }
       
-      if (!instagramUrl.includes('instagram.com')) {
-        alert('Please enter a valid Instagram URL.');
+      if (!weight || isNaN(weight)) {
+        showAlert('Please enter a valid weight', 'error');
+        weightInput.focus();
+        return;
+      }
+      
+      if (weight < 1 || weight > 600) {
+        showAlert('Weight must be between 1kg and 600kg', 'error');
+        weightInput.focus();
+        return;
+      }
+      
+      if (!instagramUrl) {
+        showAlert('Instagram video link is required to submit a PR', 'error');
+        document.getElementById('instagram-url').focus();
+        return;
+      }
+      
+      // Enhanced Instagram URL validation
+      const instagramPattern = /^https:\/\/www\.instagram\.com\/(reel|p|tv)\/[A-Za-z0-9_-]+\/?(\?.*)?$/;
+      if (!instagramPattern.test(instagramUrl)) {
+        showAlert('Please enter a valid Instagram URL (reel, post, or IGTV)', 'error');
+        document.getElementById('instagram-url').focus();
         return;
       }
       
       // Show loading state
       const submitBtn = e.target.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
-      submitBtn.textContent = 'Submitting...';
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="mr-2">⏳</span>Submitting PR...';
       submitBtn.disabled = true;
       
       // Submit with Instagram URL
@@ -2000,22 +2620,41 @@
       .then(res => res.json())
       .then(data => {
         if (data.error) {
-          alert('Submission failed: ' + data.error);
+          let errorMessage = data.error;
+          if (errorMessage.includes('Invalid Instagram URL')) {
+            errorMessage = 'The Instagram URL format is not valid. Please check and try again.';
+          } else if (errorMessage.includes('Database error')) {
+            errorMessage = 'Failed to save your PR. Please try again.';
+          }
+          showAlert('Submission failed: ' + errorMessage, 'error');
         } else {
-          alert('PR with Instagram video submitted successfully!');
+          showAlert('🎉 PR submitted successfully! Your lift has been added to the leaderboard.', 'success');
+          
+          // Clear form and reset to defaults
           document.getElementById('combined-pr-form').reset();
-          loadVideos();
-          loadLeaderboard();
+          document.getElementById('lift-type').value = 'bench'; // Reset to default
+          
+          // Reload relevant sections
+          if (currentSection === 'videos') {
+            loadVideos();
+          }
+          if (currentSection === 'leaderboard') {
+            loadLeaderboard();
+          }
+          if (currentSection === 'home') {
+            loadLeaderboard(); // For stats update
+          }
           if (currentUser) {
             loadProgressCharts();
           }
         }
       })
       .catch(err => {
-        alert('Upload failed. Please try again.');
+        console.error('PR submission error:', err);
+        showAlert('Failed to submit PR. Please check your connection and try again.', 'error');
       })
       .finally(() => {
-        submitBtn.textContent = originalText;
+        submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
       });
     }
@@ -2027,6 +2666,37 @@
       
       if (combinedPrForm) {
         combinedPrForm.addEventListener('submit', handleCombinedPR);
+        
+        // Add real-time validation for weight input
+        const weightInput = document.getElementById('weight');
+        if (weightInput) {
+          weightInput.addEventListener('input', function() {
+            const weight = parseFloat(this.value);
+            if (this.value && (isNaN(weight) || weight < 1 || weight > 600)) {
+              this.setCustomValidity('Weight must be between 1kg and 600kg');
+            } else {
+              this.setCustomValidity('');
+            }
+          });
+        }
+        
+        // Add real-time validation for Instagram URL
+        const instagramInput = document.getElementById('instagram-url');
+        if (instagramInput) {
+          instagramInput.addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url) {
+              const instagramPattern = /^https:\/\/www\.instagram\.com\/(reel|p|tv)\/[A-Za-z0-9_-]+\/?(\?.*)?$/;
+              if (!instagramPattern.test(url)) {
+                this.setCustomValidity('Please enter a valid Instagram URL (reel, post, or IGTV)');
+              } else {
+                this.setCustomValidity('');
+              }
+            } else {
+              this.setCustomValidity('');
+            }
+          });
+        }
       }
       
       if (profileSettingsForm) {
