@@ -1136,9 +1136,9 @@ body {
 }
 
 .btn-icon {
-  padding: 0.5rem;
-  min-height: 2.5rem;
-  width: 2.5rem;
+  padding: 0.375rem;
+  min-height: 2.25rem;
+  width: 2.25rem;
 }
 
 /* Leaderboard item hover effect */
@@ -1211,7 +1211,7 @@ body {
   background-color: var(--background);
   border: 1px solid var(--border);
   border-radius: 0.75rem;
-  padding: 1.5rem;
+  padding: 1.25rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
   position: relative;
@@ -1305,7 +1305,7 @@ body {
 .navbar {
   background-color: var(--background);
   border-bottom: 2px solid var(--border);
-  padding: 1rem 0;
+  padding: 0.5rem 0;
   position: sticky;
   top: 0;
   z-index: 50;
@@ -1327,19 +1327,27 @@ body {
 .navbar-nav {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0;
   flex-wrap: wrap;
+  background-color: var(--background-alt);
+  padding: 0.15rem;
+  border-radius: 9999px;
+  overflow: hidden;
 }
+
+/* Create spacing between pills without offsetting the first one */
+.navbar-nav .nav-link { margin-right: 0.375rem; }
+.navbar-nav .nav-link:last-child { margin-right: 0; }
 
 .nav-link {
   color: var(--text-secondary);
   text-decoration: none;
   font-weight: 500;
   transition: all 0.2s ease;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
   border: 2px solid transparent;
-  min-height: 2.5rem;
+  min-height: 2.25rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1347,8 +1355,7 @@ body {
 
 .nav-link:hover {
   color: var(--primary-color);
-  background-color: var(--background-alt);
-  transform: translateY(-1px);
+  background-color: transparent;
 }
 
 .nav-link.active {
@@ -1974,6 +1981,8 @@ body {
     width: 100%;
   }
 
+  .navbar-nav .nav-link { margin-right: 0; }
+
   .nav-link {
     width: 100%;
     text-align: center;
@@ -2098,6 +2107,27 @@ body {
 /* Subtle card hover lift already exists; add border glow */
 .card:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+/* Modernized card styling */
+.card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--background) 0%, var(--background-alt) 100%);
+}
+
+/* Section spacing */
+.section {
+  scroll-margin-top: 80px;
+}
+
+/* Footer */
+.site-footer {
+  margin-top: 3rem;
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 /* Hero section */

@@ -75,10 +75,8 @@
     }
     
     .nav-link:hover {
-      background-color: var(--background-alt);
+      background-color: transparent;
       color: var(--primary-color) !important;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(234, 88, 12, 0.15);
     }
     
     .nav-link.active {
@@ -305,7 +303,7 @@
     <!-- Home Section -->
     <div id="home-section" class="section" style="padding-top: 1rem;">
       <!-- Hero Section -->
-      <section class="hero mb-8">
+      <section class="hero mb-6">
         <div class="container">
           <div class="flex items-center justify-between" style="gap: 1.25rem; flex-wrap: wrap;">
             <div style="flex: 1 1 420px; min-width: 280px;">
@@ -340,7 +338,7 @@
         </div>
       </section>
 
-      <div class="text-center mb-8">
+      <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2">Welcome to GymRank</h2>
         <p style="color: var(--text-secondary)">Competitive lifting platform inspired by Bakugan rankings</p>
       </div>
@@ -360,6 +358,48 @@
           <p class="text-3xl font-bold" style="color: var(--primary-color)" id="top-elo">-</p>
         </div>
       </div>
+
+      <!-- Discover Section: Previews for quick browsing -->
+      <section id="discover-section" class="mb-8">
+        <div class="flex items-baseline justify-between mb-4" style="gap: 1rem; flex-wrap: wrap;">
+          <h3 class="text-2xl font-bold">Discover</h3>
+          <div class="text-sm" style="color: var(--text-secondary)">Fresh content and top rankings at a glance</div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Latest Videos Preview -->
+          <div class="lg:col-span-2 card">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-lg font-semibold">Latest Videos</h4>
+              <button onclick="showSection('videos')" class="btn btn-outline btn-sm">View all</button>
+            </div>
+            <div id="video-preview-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Filled by loadHomePreviews() -->
+            </div>
+          </div>
+
+          <!-- Top Lists Preview -->
+          <div class="flex flex-col gap-6">
+            <div class="card">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-lg font-semibold">Top Lifters</h4>
+                <button onclick="showSection('leaderboard')" class="btn btn-outline btn-sm">View all</button>
+              </div>
+              <div id="leaderboard-preview" class="space-y-3">
+                <!-- Filled by loadHomePreviews() -->
+              </div>
+            </div>
+            <div class="card">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-lg font-semibold">Top Teams</h4>
+                <button onclick="showSection('teams')" class="btn btn-outline btn-sm">View all</button>
+              </div>
+              <div id="team-preview" class="space-y-3">
+                <!-- Filled by loadHomePreviews() -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <!-- PR Submission Section (Only for logged-in users) -->
       <div id="pr-section" class="card hidden">
@@ -430,7 +470,7 @@
 
     <!-- Videos Section -->
     <div id="videos-section" class="section hidden" style="padding-top: 1rem;">
-      <div class="text-center mb-8">
+      <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2">📹 PR Videos</h2>
         <p style="color: var(--text-secondary)">Watch incredible lifts from our community</p>
       </div>
@@ -454,7 +494,7 @@
 
     <!-- Leaderboard Section -->
     <div id="leaderboard-section" class="section hidden" style="padding-top: 1rem;">
-      <div class="text-center mb-8">
+      <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2">🏆 Leaderboard</h2>
         <p style="color: var(--text-secondary)">Top lifters ranked by DOTS score (Bodyweight adjusted)</p>
       </div>
@@ -535,7 +575,7 @@
 
     <!-- Teams Section -->
     <div id="teams-section" class="section hidden" style="padding-top: 1rem;">
-      <div class="text-center mb-8">
+      <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2">🏟️ Team Competition</h2>
         <p style="color: var(--text-secondary)">Team rankings and competitions</p>
       </div>
@@ -699,7 +739,7 @@
 
     <!-- Profile Section -->
     <div id="profile-section" class="section hidden" style="padding-top: 1rem;">
-      <div class="text-center mb-8">
+      <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2">👤 My Profile</h2>
         <p style="color: var(--text-secondary)">Manage your posts and profile settings</p>
       </div>
@@ -1063,6 +1103,7 @@
           loadUserProfile();
         } else if (sectionName === 'home') {
           loadLeaderboardCached(); // For stats
+          loadHomePreviews();
         }
       }, 250);
     }
@@ -1593,6 +1634,124 @@
         displayTeams(cached.data);
         return;
       }
+
+  // Home Discover Previews
+  function loadHomePreviews() {
+    try {
+      // Videos preview
+      const videosEntry = dataCache.videos;
+      if (isCacheValid(videosEntry)) {
+        renderVideoPreview(videosEntry.data);
+      } else {
+        fetch(`${API_BASE}/api/videos`)
+          .then(res => res.json())
+          .then(data => {
+            setCacheData('videos', data);
+            renderVideoPreview(data);
+          })
+          .catch(() => {
+            const grid = document.getElementById('video-preview-grid');
+            if (grid) grid.innerHTML = '<div class="text-sm" style="color: var(--text-secondary)">Unable to load videos.</div>';
+          });
+      }
+
+      // Leaderboard preview
+      const lbEntry = dataCache.leaderboard;
+      if (isCacheValid(lbEntry)) {
+        renderLeaderboardPreview(lbEntry.data);
+      } else {
+        fetch(`${API_BASE}/api/leaderboard`)
+          .then(res => res.json())
+          .then(data => {
+            setCacheData('leaderboard', data);
+            renderLeaderboardPreview(data);
+          })
+          .catch(() => {
+            const cont = document.getElementById('leaderboard-preview');
+            if (cont) cont.innerHTML = '<div class="text-sm" style="color: var(--text-secondary)">Unable to load leaderboard.</div>';
+          });
+      }
+
+      // Teams preview
+      const teamsEntry = dataCache.teamLeaderboard;
+      if (isCacheValid(teamsEntry)) {
+        renderTeamPreview(teamsEntry.data);
+      } else {
+        fetch(`${API_BASE}/api/team_leaderboard`)
+          .then(res => res.json())
+          .then(data => {
+            setCacheData('teamLeaderboard', data);
+            renderTeamPreview(data);
+          })
+          .catch(() => {
+            const cont = document.getElementById('team-preview');
+            if (cont) cont.innerHTML = '<div class="text-sm" style="color: var(--text-secondary)">Unable to load teams.</div>';
+          });
+      }
+    } catch (e) {
+      // noop
+    }
+  }
+
+  function renderVideoPreview(data) {
+    const grid = document.getElementById('video-preview-grid');
+    if (!grid) return;
+    if (!data || data.length === 0) {
+      grid.innerHTML = '<div class="text-sm" style="color: var(--text-secondary)">No videos yet.</div>';
+      return;
+    }
+    const items = data.slice(0, 4).map(video => {
+      const liftEmoji = { bench: '🏋️', deadlift: '🏋️‍♂️', squat: '🦵' }[video.lift_type] || '🎬';
+      return `
+        <div class="card p-3">
+          <div class="relative" style="aspect-ratio: 16/9; background: var(--background-alt); border-radius: 12px; overflow: hidden;">
+            <div class="flex items-center justify-center w-full h-full text-3xl cursor-pointer"
+                 onclick="window.open('${video.video_url}', '_blank')">${liftEmoji}</div>
+          </div>
+          <div class="mt-3 flex items-center justify-between text-sm">
+            <div class="font-medium">${video.username || 'Unknown'}</div>
+            <div style="color: var(--text-secondary)">${(video.weight || '?')}kg</div>
+          </div>
+        </div>`;
+    }).join('');
+    grid.innerHTML = items;
+  }
+
+  function renderLeaderboardPreview(data) {
+    const cont = document.getElementById('leaderboard-preview');
+    if (!cont) return;
+    if (!data || data.length === 0) {
+      cont.innerHTML = '<div class="text-sm" style="color: var(--text-secondary)">No lifters yet.</div>';
+      return;
+    }
+    cont.innerHTML = data.slice(0, 3).map((user, idx) => `
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-xl font-bold" style="color: ${idx===0?'#FFD700':idx===1?'#C0C0C0':idx===2?'#CD7F32':'var(--primary-color)'}">#${idx+1}</span>
+          <span class="font-medium">${user.username}</span>
+        </div>
+        <div class="text-sm font-semibold">${(user.dots_score||0).toFixed(0)} DOTS</div>
+      </div>
+    `).join('');
+  }
+
+  function renderTeamPreview(data) {
+    const cont = document.getElementById('team-preview');
+    if (!cont) return;
+    if (!data || data.length === 0) {
+      cont.innerHTML = '<div class="text-sm" style="color: var(--text-secondary)">No teams yet.</div>';
+      return;
+    }
+    cont.innerHTML = data.slice(0, 3).map((team, idx) => `
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-xl font-bold" style="color: ${idx===0?'#FFD700':idx===1?'#C0C0C0':idx===2?'#CD7F32':'var(--primary-color)'}">#${idx+1}</span>
+          <span class="font-medium">${team.team}</span>
+        </div>
+        <div class="text-sm font-semibold">${(team.avg_elo||0).toFixed(0)} avg</div>
+      </div>
+    `).join('');
+  }
       
       loadTeams();
     }
