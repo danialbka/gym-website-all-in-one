@@ -1,0 +1,4 @@
+fix: Adjust nav text color and remove search icon
+
+- Changed the active navigation link text to black in light mode.
+- Removed the magnifying glass icon from the team search bar.

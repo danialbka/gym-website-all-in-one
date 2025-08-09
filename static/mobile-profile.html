@@ -7,140 +7,37 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏋️</text></svg>">
   <link href="./src/output.css" rel="stylesheet">
   <script src="./src/device-detection.js" data-no-redirect></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      padding-bottom: 80px; /* Space for bottom navigation */
-      background-color: var(--background-alt);
+    :root {
+      --primary-color: #ea580c;
+      --primary-dark: #c2410c;
+      --secondary-color: #1f2937;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --background: #ffffff;
+      --background-alt: #f9fafb;
+      --border: #e5e7eb;
+      --success: #10b981;
+      --error: #ef4444;
     }
-    
-    .mobile-header {
-      background-color: var(--background);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .dark {
+      --secondary-color: #f9fafb;
+      --text-primary: #f9fafb;
+      --text-secondary: #d1d5db;
+      --background: #111827;
+      --background-alt: #1f2937;
+      --border: #374151;
     }
-    
-    .mobile-back-btn {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      color: var(--text-primary);
-      cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 8px;
-      transition: background-color 0.2s ease;
-    }
-    
-    .mobile-back-btn:active {
-      background-color: var(--background-alt);
-    }
-    
+    body { padding-bottom: 80px; background-color: var(--background-alt); }
+    .mobile-header { background: rgba(255,255,255,0.75); backdrop-filter: saturate(180%) blur(12px); -webkit-backdrop-filter: saturate(180%) blur(12px); border-bottom: 1px solid rgba(229,231,235,0.8); box-shadow: 0 6px 18px rgba(0,0,0,0.08); padding: 0.8rem 1rem; position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; }
     .mobile-title {
       font-size: 1.25rem;
       font-weight: bold;
-      color: var(--text-primary);
     }
-    
-    .mobile-desktop-btn {
-      background: none;
-      border: none;
-      font-size: 1rem;
-      color: var(--text-secondary);
-      cursor: pointer;
-      padding: 0.5rem;
-    }
-    
-    .mobile-content {
-      padding: 1rem;
-    }
-    
-    .mobile-card {
-      background-color: var(--background);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    .mobile-profile-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    
-    .mobile-profile-avatar {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-    }
-    
-    .mobile-profile-name {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: var(--text-primary);
-      margin-bottom: 0.5rem;
-    }
-    
-    .mobile-profile-team {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-    
-    .mobile-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    
-    .mobile-stat-card {
-      background-color: var(--background-alt);
-      border-radius: 8px;
-      padding: 1rem;
-      text-align: center;
-    }
-    
-    .mobile-stat-number {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: var(--primary-color);
-      margin-bottom: 0.25rem;
-    }
-    
-    .mobile-stat-label {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-    }
-    
-    .mobile-form-input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 1rem;
-      margin-bottom: 1rem;
-      background-color: var(--background);
-      color: var(--text-primary);
-    }
-    
-    .mobile-form-input:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
-    }
-    
-    .mobile-form-label {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 0.5rem;
-    }
-    
+    .mobile-content { padding: 1rem; }
+    .mobile-card { background-color: var(--background); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; margin-bottom: 0.875rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .mobile-section-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; letter-spacing: -0.01em; }
     .mobile-btn {
       width: 100%;
       padding: 0.75rem;
@@ -150,438 +47,543 @@
       font-size: 0.9rem;
       cursor: pointer;
       transition: all 0.2s ease;
-      touch-action: manipulation;
     }
-    
-    .mobile-btn-primary {
-      background-color: var(--primary-color);
-      color: white;
-    }
-    
-    .mobile-btn-primary:active {
-      transform: scale(0.98);
-      background-color: var(--primary-dark);
-    }
-    
+    .mobile-btn-primary { color: white; background-image: linear-gradient(135deg, #f97316 0%, #ea580c 60%, #d946ef 100%); box-shadow: 0 10px 20px rgba(234,88,12,0.25), 0 6px 6px rgba(217,70,239,0.15); }
+    .mobile-btn-ghost { background-color: var(--background-alt); color: var(--text-primary); }
     .mobile-btn-danger {
       background-color: var(--error);
       color: white;
       margin-top: 1rem;
     }
-    
-    .mobile-btn-danger:active {
-      transform: scale(0.98);
-      opacity: 0.8;
-    }
-    
-    .mobile-pr-list {
-      margin-top: 1rem;
-    }
-    
-    .mobile-pr-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem;
-      background-color: var(--background-alt);
-      border-radius: 8px;
-      margin-bottom: 0.75rem;
-    }
-    
-    .mobile-pr-info {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    
-    .mobile-pr-icon {
-      font-size: 1.5rem;
-    }
-    
-    .mobile-pr-details {
-      flex: 1;
-    }
-    
-    .mobile-pr-weight {
-      font-weight: bold;
-      color: var(--primary-color);
-      font-size: 1.1rem;
-    }
-    
-    .mobile-pr-type {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      text-transform: capitalize;
-    }
-    
-    .mobile-pr-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-    
-    .mobile-btn-sm {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.75rem;
-      width: auto;
-    }
-    
     .mobile-alert {
       padding: 0.75rem 1rem;
       border-radius: 8px;
       margin-bottom: 1rem;
       font-size: 0.9rem;
     }
-    
     .mobile-alert-error {
       background-color: rgba(239, 68, 68, 0.1);
       border: 1px solid var(--error);
       color: var(--error);
     }
-    
     .mobile-alert-success {
       background-color: rgba(16, 185, 129, 0.1);
       border: 1px solid var(--success);
       color: var(--success);
     }
-    
-    .mobile-progress-chart {
-      height: 120px;
-      background-color: var(--background-alt);
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-    
-    .mobile-section-title {
-      font-size: 1.1rem;
-      font-weight: bold;
+    .mobile-pr-item { display: flex; justify-content: space-between; align-items: center; padding: 0.625rem; margin-bottom: 0.5rem; background-color: var(--background-alt); border: 1px solid var(--border); border-radius: 10px; }
+    .mobile-pr-item button {
+      margin-left: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background-color: var(--background);
       color: var(--text-primary);
-      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .mobile-pr-item button:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .flex {
       display: flex;
+    }
+    .items-center {
       align-items: center;
+    }
+    .gap-2 {
       gap: 0.5rem;
     }
-    
-    .mobile-login-prompt {
-      text-align: center;
-      padding: 2rem;
-      color: var(--text-secondary);
+    .gap-3 {
+      gap: 0.75rem;
     }
-    
-    .mobile-login-actions {
+    .flex-1 {
+      flex: 1;
+    }
+    .flex-wrap {
+      flex-wrap: wrap;
+    }
+    .mb-4 {
+      margin-bottom: 1rem;
+    }
+    .mt-2 {
+      margin-top: 0.5rem;
+    }
+    .text-xl {
+      font-size: 1.25rem;
+    }
+    .text-lg {
+      font-size: 1.125rem;
+    }
+    .text-sm {
+      font-size: 0.875rem;
+    }
+    .font-bold {
+      font-weight: bold;
+    }
+    .mobile-video-item {
       display: flex;
-      gap: 0.5rem;
-      margin-top: 1rem;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background-color: var(--background-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .mobile-history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background-color: var(--background-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <!-- Mobile Header -->
   <div class="mobile-header">
     <button class="mobile-back-btn" onclick="goBack()">←</button>
-    <div class="mobile-title">Profile</div>
-    <button class="mobile-desktop-btn" onclick="switchToDesktop()">💻</button>
+    <div class="mobile-title" id="mobile-profile-title">Profile</div>
+    <button class="mobile-desktop-btn" onclick="DeviceDetection.forceDesktopVersion()">💻</button>
   </div>
 
-  <!-- Mobile Content -->
   <div class="mobile-content">
-    <!-- Not Logged In State -->
-    <div id="mobile-login-prompt" class="mobile-card mobile-login-prompt">
+    <div id="mobile-login-prompt" class="mobile-card" style="text-align: center; padding: 2rem;">
       <div style="font-size: 3rem; margin-bottom: 1rem;">👤</div>
-      <h2 style="margin-bottom: 1rem; color: var(--text-primary);">Sign In Required</h2>
+      <h2 style="margin-bottom: 1rem;">Sign In Required</h2>
       <p style="margin-bottom: 1.5rem;">Please log in to view and manage your profile.</p>
-      <div class="mobile-login-actions">
-        <a href="mobile-login.html" class="mobile-btn mobile-btn-primary" style="text-decoration: none; display: block; text-align: center;">
-          Sign In
-        </a>
-        <a href="mobile-register.html" class="mobile-btn" style="text-decoration: none; display: block; text-align: center; background-color: var(--background-alt); color: var(--text-primary);">
-          Register
-        </a>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="mobile-login.html" class="mobile-btn mobile-btn-primary" style="text-decoration: none; text-align: center;">Sign In</a>
+        <a href="mobile-register.html" class="mobile-btn mobile-btn-ghost" style="text-decoration: none; text-align: center;">Register</a>
       </div>
     </div>
 
-    <!-- Logged In State -->
     <div id="mobile-profile-content" style="display: none;">
-      <!-- Profile Header -->
+      <!-- User Profile Header -->
       <div class="mobile-card">
-        <div class="mobile-profile-header">
-          <div class="mobile-profile-avatar" id="mobile-profile-flag">🌍</div>
-          <div class="mobile-profile-name" id="mobile-profile-name">Loading...</div>
-          <div class="mobile-profile-team" id="mobile-profile-team">Loading...</div>
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="mobile-stats-grid">
-          <div class="mobile-stat-card">
-            <div class="mobile-stat-number" id="mobile-bench-pr">-</div>
-            <div class="mobile-stat-label">Bench (kg)</div>
-          </div>
-          <div class="mobile-stat-card">
-            <div class="mobile-stat-number" id="mobile-squat-pr">-</div>
-            <div class="mobile-stat-label">Squat (kg)</div>
-          </div>
-          <div class="mobile-stat-card">
-            <div class="mobile-stat-number" id="mobile-deadlift-pr">-</div>
-            <div class="mobile-stat-label">Deadlift (kg)</div>
+        <div class="flex items-center gap-3 mb-4">
+          <span id="mobile-user-flag" class="text-4xl"></span>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <h1 id="mobile-user-username" class="text-xl font-bold"></h1>
+              <span id="mobile-user-gender" class="text-lg"></span>
+            </div>
+            <p id="mobile-user-team" style="color: var(--text-secondary)" class="text-sm"></p>
+            <div class="flex items-center gap-2 mt-2 flex-wrap">
+              <span id="mobile-user-dots" class="mobile-btn mobile-btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; width: auto;"></span>
+              <span id="mobile-user-total" style="color: var(--text-secondary); font-size: 0.8rem;"></span>
+              <span id="mobile-user-bodyweight" style="color: var(--text-secondary); font-size: 0.8rem;"></span>
+            </div>
           </div>
         </div>
-
-        <button class="mobile-btn mobile-btn-danger" onclick="logout()">
-          🚪 Sign Out
-        </button>
       </div>
 
-      <!-- Profile Settings -->
+      <!-- PR Records -->
       <div class="mobile-card">
-        <div class="mobile-section-title">
-          ⚙️ Profile Settings
+        <div class="mobile-section-title">🏆 Personal Records</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+          <div style="text-align: center; padding: 1rem; background-color: var(--background-alt); border-radius: 8px;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏋️</div>
+            <div style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.25rem;">Bench</div>
+            <div id="mobile-user-bench" style="color: var(--primary-color); font-weight: bold;"></div>
+          </div>
+          <div style="text-align: center; padding: 1rem; background-color: var(--background-alt); border-radius: 8px;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🦵</div>
+            <div style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.25rem;">Squat</div>
+            <div id="mobile-user-squat" style="color: var(--primary-color); font-weight: bold;"></div>
+          </div>
+          <div style="text-align: center; padding: 1rem; background-color: var(--background-alt); border-radius: 8px;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏋️‍♂️</div>
+            <div style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.25rem;">Deadlift</div>
+            <div id="mobile-user-deadlift" style="color: var(--primary-color); font-weight: bold;"></div>
+          </div>
         </div>
+      </div>
 
+      <!-- PR Videos -->
+      <div class="mobile-card">
+        <div class="mobile-section-title">📹 PR Videos</div>
+        <div id="mobile-user-videos" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Videos will be loaded here -->
+        </div>
+      </div>
+
+      <!-- PR History -->
+      <div class="mobile-card">
+        <div class="mobile-section-title">📈 PR History</div>
+        <div id="mobile-user-history" style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <!-- PR history will be loaded here -->
+        </div>
+      </div>
+
+      <div class="mobile-card">
+        <div class="mobile-section-title">📈 Progress Charts</div>
+        <div id="mobile-charts-container" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+      </div>
+      <div class="mobile-card">
+        <div class="mobile-section-title">⚙️ Profile Settings</div>
         <div id="mobile-alert-container"></div>
-
-        <form id="mobile-profile-form">
-          <div style="margin-bottom: 1rem;">
-            <label class="mobile-form-label">Username</label>
-            <input type="text" id="mobile-profile-username" class="mobile-form-input" placeholder="Username" required>
-          </div>
-
-          <div style="margin-bottom: 1rem;">
-            <label class="mobile-form-label">Team/Gym</label>
-            <input type="text" id="mobile-profile-team-input" class="mobile-form-input" placeholder="Team or gym name" required>
-          </div>
-
-          <div style="margin-bottom: 1rem;">
-            <label class="mobile-form-label">Weight (kg)</label>
-            <input type="number" id="mobile-profile-weight" class="mobile-form-input" placeholder="Your weight" step="0.1" min="0">
-          </div>
-
-          <div style="margin-bottom: 1.5rem;">
-            <label class="mobile-form-label">Gender</label>
-            <select id="mobile-profile-gender" class="mobile-form-input" required>
-              <option value="">Select gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
-          </div>
-
-          <button type="submit" class="mobile-btn mobile-btn-primary" id="mobile-profile-update-btn">
-            Update Profile
-          </button>
+        <form id="mobile-profile-form" style="display: flex; flex-direction: column; gap: 1rem;">
+          <input type="text" id="mobile-profile-username" class="mobile-form-input" placeholder="Username" required>
+          <input type="text" id="mobile-profile-team-input" class="mobile-form-input" placeholder="Team or gym name" required>
+          <input type="number" id="mobile-profile-weight" class="mobile-form-input" placeholder="Your weight (kg)" step="0.1" min="0">
+          <select id="mobile-profile-gender" class="mobile-form-input" required>
+            <option value="">Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+          <button type="submit" class="mobile-btn mobile-btn-primary" id="mobile-profile-update-btn">Update Profile</button>
         </form>
       </div>
-
-      <!-- Progress Charts -->
       <div class="mobile-card">
-        <div class="mobile-section-title">
-          📈 Progress Charts
-        </div>
-        <div class="mobile-progress-chart">
-          Progress charts coming soon
-        </div>
+        <div class="mobile-section-title">🏆 My Personal Records</div>
+        <div id="mobile-pr-list"></div>
       </div>
-
-      <!-- My PRs -->
-      <div class="mobile-card">
-        <div class="mobile-section-title">
-          🏆 My Personal Records
-        </div>
-        <div id="mobile-pr-list" class="mobile-pr-list">
-          <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
-            Loading your PRs...
-          </div>
-        </div>
-      </div>
+      <button class="mobile-btn mobile-btn-danger" onclick="logout()">🚪 Sign Out</button>
     </div>
   </div>
 
   <script>
-    const API_BASE = 'https://gymbakugan.onrender.com';
+    const API_BASE = (['localhost','127.0.0.1'].includes(window.location.hostname) ? '' : 'https://gymbakugan.onrender.com');
     let currentUser = null;
+    let charts = {};
+    let viewingUsername = null; // Username of the profile being viewed
 
-    // Navigation functions
+    // Get username from URL parameters
+    function getUsernameFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('username');
+    }
+
     function goBack() {
-      if (window.history.length > 1) {
+      // Go back to mobile.html or use history if available
+      if (document.referrer && document.referrer.includes('mobile.html')) {
+        window.location.href = 'mobile.html';
+      } else if (window.history.length > 1) {
         window.history.back();
       } else {
         window.location.href = 'mobile.html';
       }
     }
 
-    function switchToDesktop() {
-      DeviceDetection.forceDesktopVersion();
-    }
-
-    // Alert functions
-    function showMobileAlert(message, type = 'error') {
-      const container = document.getElementById('mobile-alert-container');
-      container.innerHTML = `
-        <div class="mobile-alert mobile-alert-${type}">
-          ${message}
+    function profileSkeleton() {
+      return `
+        <div class="mobile-card">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="skeleton" style="width:36px;height:28px;border-radius:6px;"></div>
+            <div>
+              <div class="skeleton" style="width:120px;height:12px;border-radius:8px;margin-bottom:6px;"></div>
+              <div class="skeleton" style="width:80px;height:10px;border-radius:8px;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="mobile-card">
+          <div class="skeleton" style="width:160px;height:12px;border-radius:8px;margin-bottom:10px;"></div>
+          <div class="skeleton" style="width:100%;height:48px;border-radius:10px;"></div>
         </div>
       `;
-      
-      if (type === 'success') {
-        setTimeout(() => {
-          container.innerHTML = '';
-        }, 3000);
-      }
     }
 
-    function hideMobileAlert() {
-      document.getElementById('mobile-alert-container').innerHTML = '';
-    }
-
-    // User session management
     function checkUserSession() {
       const savedUser = localStorage.getItem('gymrank_user');
-      if (savedUser) {
-        try {
-          currentUser = JSON.parse(savedUser);
-          showProfileContent();
-          loadUserProfile();
-        } catch (e) {
-          localStorage.removeItem('gymrank_user');
-          showLoginPrompt();
+      viewingUsername = getUsernameFromURL();
+      
+      if (viewingUsername) {
+        // Viewing another user's profile
+        document.getElementById('mobile-profile-title').textContent = `${viewingUsername}'s Profile`;
+        const content = document.getElementById('mobile-profile-content');
+        content.style.display = 'block';
+        content.innerHTML = profileSkeleton();
+        document.getElementById('mobile-login-prompt').style.display = 'none';
+        
+        // Hide profile settings section when viewing another user
+        const settingsSection = document.querySelector('.mobile-card:has(#mobile-profile-form)');
+        if (settingsSection) {
+          settingsSection.style.display = 'none';
         }
+        
+        // Hide sign out button when viewing another user
+        const signOutButton = document.querySelector('.mobile-btn-danger');
+        if (signOutButton) {
+          signOutButton.style.display = 'none';
+        }
+        
+        loadOtherUserProfile(viewingUsername);
+      } else if (savedUser) {
+        // Viewing own profile
+        currentUser = JSON.parse(savedUser);
+        const content = document.getElementById('mobile-profile-content');
+        content.style.display = 'block';
+        content.innerHTML = profileSkeleton();
+        document.getElementById('mobile-login-prompt').style.display = 'none';
+        loadUserProfile();
       } else {
-        showLoginPrompt();
+        // Not logged in and no username specified
+        document.getElementById('mobile-profile-content').style.display = 'none';
+        document.getElementById('mobile-login-prompt').style.display = 'block';
       }
     }
 
-    function showLoginPrompt() {
-      document.getElementById('mobile-login-prompt').style.display = 'block';
-      document.getElementById('mobile-profile-content').style.display = 'none';
-    }
-
-    function showProfileContent() {
-      document.getElementById('mobile-login-prompt').style.display = 'none';
-      document.getElementById('mobile-profile-content').style.display = 'block';
-    }
-
-    // Load user profile data
     function loadUserProfile() {
       if (!currentUser) return;
-
-      // Update profile header
-      document.getElementById('mobile-profile-flag').textContent = currentUser.flag || '🌍';
-      document.getElementById('mobile-profile-name').textContent = currentUser.display_name || currentUser.username;
-      document.getElementById('mobile-profile-team').textContent = currentUser.team || 'Independent';
-
-      // Load profile form
+      
+      // Load full profile data from API
+      fetch(`${API_BASE}/api/user/${currentUser.username}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            console.error('Error loading profile:', data.error);
+            return;
+          }
+          
+          displayFullUserProfile(data);
+        })
+        .catch(err => {
+          console.error('Error loading user profile:', err);
+        });
+      
+      // Load form data for settings
       document.getElementById('mobile-profile-username').value = currentUser.username || '';
       document.getElementById('mobile-profile-team-input').value = currentUser.team || 'Independent';
       document.getElementById('mobile-profile-weight').value = currentUser.weight || '';
       document.getElementById('mobile-profile-gender').value = currentUser.gender || '';
-
-      // Load user PRs
       loadUserPRs();
-      loadUserStats();
+      loadProgressCharts();
     }
 
-    // Load user statistics
-    function loadUserStats() {
-      if (!currentUser) return;
-
-      fetch(`${API_BASE}/api/user/${currentUser.username}/progress`)
+    function loadOtherUserProfile(username) {
+      console.log('Loading profile for user:', username);
+      
+      // Load full profile data from API
+      fetch(`${API_BASE}/api/user/${username}`)
         .then(res => res.json())
         .then(data => {
-          // Update stats cards
-          const latestBench = data.bench && data.bench.length > 0 ? data.bench[data.bench.length - 1].weight : '-';
-          const latestSquat = data.squat && data.squat.length > 0 ? data.squat[data.squat.length - 1].weight : '-';
-          const latestDeadlift = data.deadlift && data.deadlift.length > 0 ? data.deadlift[data.deadlift.length - 1].weight : '-';
-
-          document.getElementById('mobile-bench-pr').textContent = latestBench;
-          document.getElementById('mobile-squat-pr').textContent = latestSquat;
-          document.getElementById('mobile-deadlift-pr').textContent = latestDeadlift;
+          if (data.error) {
+            console.error('Error loading profile:', data.error);
+            showProfileError();
+            return;
+          }
+          
+          displayFullUserProfile(data);
+          
+          // Load progress charts for the viewed user
+          loadProgressChartsForUser(username);
         })
         .catch(err => {
-          console.error('Error loading stats:', err);
+          console.error('Error loading user profile:', err);
+          showProfileError();
         });
     }
 
-    // Load user PRs
-    function loadUserPRs() {
-      if (!currentUser) return;
+    function showProfileError() {
+      document.getElementById('mobile-profile-content').innerHTML = `
+        <div class="mobile-card" style="text-align: center; padding: 2rem;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">😵</div>
+          <h2 style="margin-bottom: 1rem;">Profile Not Found</h2>
+          <p style="margin-bottom: 1.5rem;">The user profile you're looking for doesn't exist.</p>
+          <button onclick="goBack()" class="mobile-btn mobile-btn-primary">Go Back</button>
+        </div>
+      `;
+    }
 
+    function displayFullUserProfile(data) {
+      const user = data.user;
+      const prs = data.current_prs;
+      const genderEmoji = user.gender === 'male' ? '♂️' : '♀️';
+      
+      // Populate user header
+      document.getElementById('mobile-user-flag').textContent = user.flag;
+      document.getElementById('mobile-user-username').textContent = user.username;
+      document.getElementById('mobile-user-gender').textContent = genderEmoji;
+      document.getElementById('mobile-user-team').textContent = user.team || 'Independent';
+      document.getElementById('mobile-user-dots').textContent = data.dots_score ? `${data.dots_score} DOTS` : 'N/A';
+      document.getElementById('mobile-user-total').textContent = `${data.total_lifted}kg Total`;
+      document.getElementById('mobile-user-bodyweight').textContent = user.weight ? `${user.weight}kg BW` : 'N/A';
+      
+      // Populate PR records
+      document.getElementById('mobile-user-bench').textContent = prs.bench ? `${prs.bench}kg` : 'N/A';
+      document.getElementById('mobile-user-squat').textContent = prs.squat ? `${prs.squat}kg` : 'N/A';
+      document.getElementById('mobile-user-deadlift').textContent = prs.deadlift ? `${prs.deadlift}kg` : 'N/A';
+      
+      // Populate videos
+      const videosContainer = document.getElementById('mobile-user-videos');
+      if (data.videos.length === 0) {
+        videosContainer.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">No videos available</p>';
+      } else {
+        videosContainer.innerHTML = data.videos.map(video => {
+          const liftEmoji = video.lift_type === 'bench' ? '🏋️' : video.lift_type === 'squat' ? '🦵' : '🏋️‍♂️';
+          return `
+            <div class="mobile-video-item">
+              <div class="flex items-center gap-2">
+                <span style="font-size: 1.5rem;">${liftEmoji}</span>
+                <div>
+                  <div style="font-weight: bold;">${video.weight}kg</div>
+                  <div style="color: var(--text-secondary); font-size: 0.8rem; text-transform: capitalize;">${video.lift_type}</div>
+                  <div style="color: var(--text-secondary); font-size: 0.7rem;">${new Date(video.created_at).toLocaleDateString()}</div>
+                </div>
+              </div>
+              <a href="${video.video_url}" target="_blank" rel="noopener noreferrer" 
+                 style="padding: 0.25rem 0.5rem; background-color: var(--primary-color); color: white; border-radius: 4px; text-decoration: none; font-size: 0.8rem;">
+                Watch →
+              </a>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // Populate PR history
+      const historyContainer = document.getElementById('mobile-user-history');
+      if (data.history.length === 0) {
+        historyContainer.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">No PR history available</p>';
+      } else {
+        historyContainer.innerHTML = data.history.map(record => {
+          const liftEmoji = record.lift_type === 'bench' ? '🏋️' : record.lift_type === 'squat' ? '🦵' : '🏋️‍♂️';
+          return `
+            <div class="mobile-history-item">
+              <div class="flex items-center gap-2">
+                <span style="font-size: 1.5rem;">${liftEmoji}</span>
+                <div>
+                  <div style="font-weight: bold;">${record.weight}kg ${record.lift_type}</div>
+                  <div style="color: var(--text-secondary); font-size: 0.8rem;">${new Date(record.created_at).toLocaleDateString()}</div>
+                </div>
+              </div>
+              ${record.video_url ? `
+                <a href="${record.video_url}" target="_blank" rel="noopener noreferrer" 
+                   style="padding: 0.25rem 0.5rem; background-color: var(--primary-color); color: white; border-radius: 4px; text-decoration: none; font-size: 0.8rem;">
+                  Video →
+                </a>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function loadProgressCharts() {
+        if (!currentUser) return;
+        loadProgressChartsForUser(currentUser.username);
+    }
+
+    function loadProgressChartsForUser(username) {
+        fetch(`${API_BASE}/api/user/${username}/progress`)
+            .then(res => res.json())
+            .then(data => {
+                const chartsContainer = document.getElementById('mobile-charts-container');
+                chartsContainer.innerHTML = ''; 
+                const lifts = ['bench', 'squat', 'deadlift'];
+                lifts.forEach(lift => {
+                    const chartData = data[lift] || [];
+                    if (chartData.length === 0) return; // Skip if no data
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.style.height = '200px';
+                    canvas.style.marginBottom = '1rem';
+                    chartsContainer.appendChild(canvas);
+                    
+                    if (charts[lift]) {
+                        charts[lift].destroy();
+                    }
+                    charts[lift] = new Chart(canvas.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: chartData.map(d => new Date(d.date).toLocaleDateString()),
+                            datasets: [{
+                                label: `${lift.charAt(0).toUpperCase() + lift.slice(1)} (kg)`,
+                                data: chartData.map(d => d.weight),
+                                borderColor: '#ea580c',
+                                tension: 0.1,
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: false
+                                }
+                            }
+                        }
+                    });
+                });
+                
+                if (chartsContainer.innerHTML === '') {
+                    chartsContainer.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">No progress data available</p>';
+                }
+            })
+            .catch(err => {
+                console.error('Error loading progress charts:', err);
+                const chartsContainer = document.getElementById('mobile-charts-container');
+                chartsContainer.innerHTML = '<p style="color: var(--error); text-align: center; padding: 1rem;">Failed to load progress charts</p>';
+            });
+    }
+
+    function loadUserPRs() {
+      if (!currentUser) {
+        console.log('No current user found');
+        return;
+      }
+      console.log('Loading PRs for user:', currentUser.username);
       fetch(`${API_BASE}/api/user/${currentUser.username}/posts`)
         .then(res => res.json())
         .then(data => {
+          console.log('Received PR data:', data);
           const prList = document.getElementById('mobile-pr-list');
           
-          if (data.length === 0) {
-            prList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">No PRs submitted yet. Go to Home to submit your first PR!</div>';
+          // Check if the response is an error
+          if (data.error) {
+            prList.innerHTML = `<p style="color: var(--error);">Error loading PRs: ${data.error}</p>`;
             return;
           }
-
-          const liftEmojis = {
-            'bench': '🏋️',
-            'deadlift': '🏋️‍♂️',
-            'squat': '🦵'
-          };
-
+          
+          if (data.length === 0) {
+            prList.innerHTML = '<p>No PRs submitted yet.</p>';
+            return;
+          }
           prList.innerHTML = data.map(pr => `
             <div class="mobile-pr-item">
-              <div class="mobile-pr-info">
-                <div class="mobile-pr-icon">${liftEmojis[pr.lift_type] || '🏋️'}</div>
-                <div class="mobile-pr-details">
-                  <div class="mobile-pr-weight">${pr.weight}kg</div>
-                  <div class="mobile-pr-type">${pr.lift_type}</div>
-                </div>
-              </div>
-              <div class="mobile-pr-actions">
-                <button class="mobile-btn mobile-btn-sm" onclick="editPR(${pr.id}, '${pr.lift_type}', ${pr.weight})" style="background-color: var(--primary-color); color: white;">
-                  Edit
-                </button>
-                <button class="mobile-btn mobile-btn-sm" onclick="deletePR(${pr.id})" style="background-color: var(--error); color: white;">
-                  Delete
-                </button>
+              <span>${pr.lift_type}: ${pr.weight}kg</span>
+              <div>
+                <button onclick="editPR(${pr.id}, '${pr.lift_type}', ${pr.weight})">Edit</button>
+                <button onclick="deletePR(${pr.id})">Delete</button>
               </div>
             </div>
           `).join('');
         })
         .catch(err => {
-          document.getElementById('mobile-pr-list').innerHTML = 
-            '<div style="text-align: center; padding: 2rem; color: var(--error);">Error loading PRs.</div>';
+          console.error('Error loading user PRs:', err);
+          const prList = document.getElementById('mobile-pr-list');
+          prList.innerHTML = '<p style="color: var(--error);">Failed to load PRs. Please try again.</p>';
         });
     }
 
-    // Handle profile update
-    function handleProfileUpdate(e) {
+    document.getElementById('mobile-profile-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      
       const newUsername = document.getElementById('mobile-profile-username').value.trim();
       const team = document.getElementById('mobile-profile-team-input').value.trim();
       const weight = document.getElementById('mobile-profile-weight').value;
       const gender = document.getElementById('mobile-profile-gender').value;
-      
-      if (!newUsername || !team || !gender) {
-        showMobileAlert('Username, team, and gender are required');
-        return;
-      }
-      
-      const submitBtn = document.getElementById('mobile-profile-update-btn');
-      const originalText = submitBtn.textContent;
-      submitBtn.textContent = 'Updating...';
-      submitBtn.disabled = true;
-      
-      hideMobileAlert();
-      
+
       fetch(`${API_BASE}/api/profile/update`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${currentUser.access_token}`
         },
         body: JSON.stringify({
           username: currentUser.username,
           new_username: newUsername,
-          team: team,
+          team,
           weight: weight ? parseFloat(weight) : null,
-          gender: gender
+          gender
         })
       })
       .then(res => res.json())
@@ -589,35 +591,21 @@
         if (data.error) {
           showMobileAlert(data.error);
         } else {
-          // Update currentUser with new data
           currentUser = { ...currentUser, ...data };
           localStorage.setItem('gymrank_user', JSON.stringify(currentUser));
-          
           showMobileAlert('Profile updated successfully!', 'success');
           loadUserProfile();
         }
-      })
-      .catch(err => {
-        showMobileAlert('Update failed. Please try again.');
-      })
-      .finally(() => {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
       });
-    }
+    });
 
-    // Edit PR function
     function editPR(prId, currentType, currentWeight) {
       const newWeight = prompt(`Edit ${currentType} weight (kg):`, currentWeight);
       if (newWeight && !isNaN(newWeight) && parseFloat(newWeight) > 0) {
         fetch(`${API_BASE}/api/posts/${prId}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: currentUser.username,
-            lift_type: currentType,
-            weight: parseFloat(newWeight)
-          })
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.access_token}` },
+          body: JSON.stringify({ weight: parseFloat(newWeight) })
         })
         .then(res => res.json())
         .then(data => {
@@ -626,25 +614,17 @@
           } else {
             showMobileAlert('PR updated successfully!', 'success');
             loadUserPRs();
-            loadUserStats();
+            loadProgressCharts();
           }
-        })
-        .catch(err => {
-          showMobileAlert('Error updating PR.');
         });
       }
     }
 
-    // Delete PR function
     function deletePR(prId) {
-      if (confirm('Are you sure you want to delete this PR? This action cannot be undone.')) {
+      if (confirm('Are you sure you want to delete this PR?')) {
         fetch(`${API_BASE}/api/posts/${prId}`, {
           method: 'DELETE',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${currentUser.access_token}`
-          },
-          body: JSON.stringify({ username: currentUser.username })
+          headers: { 'Authorization': `Bearer ${currentUser.access_token}` }
         })
         .then(res => res.json())
         .then(data => {
@@ -653,34 +633,27 @@
           } else {
             showMobileAlert('PR deleted successfully!', 'success');
             loadUserPRs();
-            loadUserStats();
+            loadProgressCharts();
           }
-        })
-        .catch(err => {
-          showMobileAlert('Error deleting PR.');
         });
       }
     }
 
-    // Logout function
     function logout() {
       if (confirm('Are you sure you want to sign out?')) {
         currentUser = null;
         localStorage.removeItem('gymrank_user');
-        showLoginPrompt();
-        showMobileAlert('Signed out successfully!', 'success');
+        checkUserSession();
       }
     }
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-      checkUserSession();
-      
-      const profileForm = document.getElementById('mobile-profile-form');
-      if (profileForm) {
-        profileForm.addEventListener('submit', handleProfileUpdate);
-      }
-    });
+    function showMobileAlert(message, type = 'error') {
+      const container = document.getElementById('mobile-alert-container');
+      container.innerHTML = `<div class="mobile-alert mobile-alert-${type}">${message}</div>`;
+      setTimeout(() => container.innerHTML = '', 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', checkUserSession);
   </script>
 </body>
 </html>

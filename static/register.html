@@ -10,20 +10,20 @@
 </head>
 <body class="min-h-screen">
   <!-- Navigation Header -->
-  <nav class="navbar">
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
     <div class="container">
       <div class="flex justify-between items-center">
         <div class="flex items-center gap-2">
           <h1 class="navbar-brand">🏋️ GymRank</h1>
         </div>
         <div class="flex items-center gap-4">
-          <a href="index.html" class="nav-link">
+          <a href="index.html" class="nav-link" aria-label="Go to home page">
             Home
           </a>
-          <a href="login.html" class="nav-link">
+          <a href="login.html" class="nav-link" aria-label="Go to login page">
             Login
           </a>
-          <button id="theme-toggle" onclick="toggleTheme()" class="btn btn-ghost btn-icon" title="Toggle dark mode">
+          <button id="theme-toggle" onclick="toggleTheme()" class="btn btn-ghost btn-icon" title="Toggle dark mode" aria-label="Toggle between light and dark theme">
             <span id="theme-icon">🌙</span>
           </button>
         </div>
@@ -31,7 +31,7 @@
     </div>
   </nav>
 
-  <div class="container py-16">
+  <main class="container py-16" role="main">
     <div class="max-w-md mx-auto">
       <!-- Registration Card -->
       <div class="card">
@@ -40,116 +40,444 @@
           <p style="color: var(--text-secondary)">Create your GymRank account and start competing</p>
         </div>
 
-        <form id="register-form" class="space-y-6">
+        <!-- Error Message Container -->
+        <div id="error-container" class="hidden mb-4 p-4 rounded-md border-l-4" style="background-color: #fef2f2; border-color: #ef4444; color: #dc2626;" role="alert" aria-live="polite">
+          <div class="flex items-center">
+            <span class="mr-2">❌</span>
+            <span id="error-message"></span>
+          </div>
+        </div>
+
+        <!-- Success Message Container -->
+        <div id="success-container" class="hidden mb-4 p-4 rounded-md border-l-4" style="background-color: #f0fdf4; border-color: #10b981; color: #065f46;" role="alert" aria-live="polite">
+          <div class="flex items-center">
+            <span class="mr-2">✅</span>
+            <span id="success-message"></span>
+          </div>
+        </div>
+
+        <form id="register-form" class="space-y-6" role="form" aria-label="Registration form">
           <div>
-            <label class="form-label">Username</label>
+            <label for="username" class="form-label">Username</label>
             <input 
               type="text" 
               id="username" 
+              name="username"
               class="form-input" 
               placeholder="Choose a username"
               required
+              aria-describedby="username-help"
+              autocomplete="username"
+              minlength="3"
+              maxlength="30"
             >
+            <small id="username-help" class="text-sm text-gray-600 mt-1">3-30 characters, letters, numbers, and underscores only</small>
           </div>
           
           <div>
-            <label class="form-label">Password</label>
-            <input 
-              type="password" 
-              id="password" 
-              class="form-input" 
-              placeholder="Create a password"
-              required
-            >
-            <p class="text-sm mt-1" style="color: var(--text-secondary)">Must be at least 6 characters</p>
+            <label for="password" class="form-label">Password</label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="password" 
+                name="password"
+                class="form-input pr-10" 
+                placeholder="Create a password"
+                required
+                aria-describedby="password-help"
+                autocomplete="new-password"
+                minlength="6"
+              >
+              <button 
+                type="button" 
+                id="toggle-password"
+                class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                style="background: none; border: none; color: var(--text-secondary);"
+                aria-label="Toggle password visibility"
+                tabindex="0"
+              >
+                <span class="text-lg">👁️</span>
+              </button>
+            </div>
+            <small id="password-help" class="text-sm text-gray-600 mt-1">Must be at least 6 characters with letters and numbers</small>
           </div>
 
           <div>
-            <label class="form-label">Email</label>
+            <label for="confirm-password" class="form-label">Confirm Password</label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="confirm-password" 
+                name="confirm-password"
+                class="form-input pr-10" 
+                placeholder="Confirm your password"
+                required
+                aria-describedby="confirm-password-help"
+                autocomplete="new-password"
+                minlength="6"
+              >
+              <button 
+                type="button" 
+                id="toggle-confirm-password"
+                class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                style="background: none; border: none; color: var(--text-secondary);"
+                aria-label="Toggle confirm password visibility"
+                tabindex="0"
+              >
+                <span class="text-lg">👁️</span>
+              </button>
+            </div>
+            <small id="confirm-password-help" class="text-sm text-gray-600 mt-1">Must match your password exactly</small>
+          </div>
+
+          <div>
+            <label for="email" class="form-label">Email</label>
             <input 
               type="email" 
               id="email" 
+              name="email"
               class="form-input" 
               placeholder="your@email.com"
               required
+              aria-describedby="email-help"
+              autocomplete="email"
             >
+            <small id="email-help" class="text-sm text-gray-600 mt-1">We'll use this for password resets and important updates</small>
           </div>
 
           <div>
-            <label class="form-label">Display Name (Optional)</label>
+            <label for="display-name" class="form-label">Display Name (Optional)</label>
             <input 
               type="text" 
               id="display-name" 
+              name="display-name"
               class="form-input" 
               placeholder="How you want to be displayed"
+              aria-describedby="display-name-help"
+              maxlength="50"
             >
+            <small id="display-name-help" class="text-sm text-gray-600 mt-1">Leave empty to use your username</small>
           </div>
 
           <div>
-            <label class="form-label">Team/Gym</label>
+            <label for="team" class="form-label">Team/Gym</label>
             <input 
               type="text" 
               id="team" 
+              name="team"
               class="form-input"
               placeholder="Enter your team/gym name"
+              aria-describedby="team-help"
+              maxlength="100"
             >
-            <p class="text-sm mt-1" style="color: var(--text-secondary)">Enter your team/gym affiliation</p>
+            <small id="team-help" class="text-sm text-gray-600 mt-1">Your gym or team affiliation (optional)</small>
           </div>
 
           <div>
-            <label class="form-label">Gender</label>
+            <label for="gender" class="form-label">Gender</label>
             <select 
               id="gender" 
+              name="gender"
               class="form-input"
               required
+              aria-describedby="gender-help"
             >
               <option value="">Select gender</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>
-            <p class="text-sm mt-1" style="color: var(--text-secondary)">Required for DOTS score calculation</p>
+            <small id="gender-help" class="text-sm text-gray-600 mt-1">Required for DOTS score calculation</small>
           </div>
 
           <div>
-            <label class="form-label">Country</label>
+            <label for="flag-search" class="form-label">Country</label>
             <div class="custom-dropdown">
               <input 
                 type="text" 
                 id="flag-search" 
+                name="country-search"
                 class="form-input" 
                 placeholder="Search for your country..."
                 autocomplete="off"
                 onclick="showCountryDropdown()"
                 oninput="filterCountries()"
                 required
+                aria-describedby="country-help"
+                aria-expanded="false"
+                aria-haspopup="listbox"
+                role="combobox"
               >
               <input type="hidden" id="flag" name="flag">
-              <div id="country-dropdown" class="dropdown-content hidden"></div>
+              <div id="country-dropdown" class="dropdown-content hidden" role="listbox" aria-label="Country options"></div>
             </div>
+            <small id="country-help" class="text-sm text-gray-600 mt-1">Select your country for leaderboard filtering</small>
           </div>
 
           <button 
             type="submit" 
+            id="register-submit"
             class="btn btn-primary w-full btn-lg mt-6"
+            aria-describedby="register-status"
           >
-            Create Account
+            <span class="mr-2">🚀</span>
+            <span id="register-text">Create Account</span>
+            <span id="register-spinner" class="hidden ml-2">
+              <div class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            </span>
           </button>
+          <div id="register-status" class="sr-only" aria-live="polite"></div>
         </form>
 
         <div class="mt-6 text-center">
           <p style="color: var(--text-secondary)">
             Already have an account? 
-            <a href="login.html" class="font-medium hover:underline" style="color: var(--primary-color)">
+            <a href="login.html" class="font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary" style="color: var(--primary-color)">
               Sign in here
             </a>
           </p>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script>
-    const API_BASE = 'https://gymbakugan.onrender.com';
+    const API_BASE = (['localhost','127.0.0.1'].includes(window.location.hostname) ? '' : 'https://gymbakugan.onrender.com');
+
+    // Enhanced error/success message functions
+    function showError(message) {
+      const errorContainer = document.getElementById('error-container');
+      const errorMessage = document.getElementById('error-message');
+      const successContainer = document.getElementById('success-container');
+      
+      // Hide success message if visible
+      successContainer.classList.add('hidden');
+      
+      // Show error message
+      errorMessage.textContent = message;
+      errorContainer.classList.remove('hidden');
+      
+      // Announce to screen readers
+      document.getElementById('register-status').textContent = `Error: ${message}`;
+      
+      // Auto-hide after 10 seconds
+      setTimeout(() => {
+        errorContainer.classList.add('hidden');
+      }, 10000);
+    }
+
+    function showSuccess(message) {
+      const successContainer = document.getElementById('success-container');
+      const successMessage = document.getElementById('success-message');
+      const errorContainer = document.getElementById('error-container');
+      
+      // Hide error message if visible
+      errorContainer.classList.add('hidden');
+      
+      // Show success message
+      successMessage.textContent = message;
+      successContainer.classList.remove('hidden');
+      
+      // Announce to screen readers
+      document.getElementById('register-status').textContent = `Success: ${message}`;
+    }
+
+    function hideMessages() {
+      document.getElementById('error-container').classList.add('hidden');
+      document.getElementById('success-container').classList.add('hidden');
+    }
+
+    // Password visibility toggles
+    document.getElementById('toggle-password').addEventListener('click', function() {
+      togglePasswordVisibility('password', this);
+    });
+
+    document.getElementById('toggle-confirm-password').addEventListener('click', function() {
+      togglePasswordVisibility('confirm-password', this);
+    });
+
+    function togglePasswordVisibility(inputId, toggleButton) {
+      const passwordInput = document.getElementById(inputId);
+      const icon = toggleButton.querySelector('span');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.textContent = '🙈';
+        toggleButton.setAttribute('aria-label', 'Hide password');
+      } else {
+        passwordInput.type = 'password';
+        icon.textContent = '👁️';
+        toggleButton.setAttribute('aria-label', 'Show password');
+      }
+    }
+
+    // Enhanced form validation
+    function validateForm() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const email = document.getElementById('email').value.trim();
+      const gender = document.getElementById('gender').value;
+      const flag = document.getElementById('flag').value;
+      
+      // Username validation
+      if (!username) {
+        showError('Username is required');
+        document.getElementById('username').focus();
+        return false;
+      }
+      
+      if (username.length < 3) {
+        showError('Username must be at least 3 characters long');
+        document.getElementById('username').focus();
+        return false;
+      }
+      
+      if (username.length > 30) {
+        showError('Username must be less than 30 characters');
+        document.getElementById('username').focus();
+        return false;
+      }
+      
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        showError('Username can only contain letters, numbers, and underscores');
+        document.getElementById('username').focus();
+        return false;
+      }
+      
+      // Password validation
+      if (!password) {
+        showError('Password is required');
+        document.getElementById('password').focus();
+        return false;
+      }
+      
+      if (password.length < 6) {
+        showError('Password must be at least 6 characters long');
+        document.getElementById('password').focus();
+        return false;
+      }
+      
+      if (!/(?=.*[a-zA-Z])(?=.*[0-9])/.test(password)) {
+        showError('Password must contain at least one letter and one number');
+        document.getElementById('password').focus();
+        return false;
+      }
+      
+      // Confirm password validation
+      if (!confirmPassword) {
+        showError('Please confirm your password');
+        document.getElementById('confirm-password').focus();
+        return false;
+      }
+      
+      if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        document.getElementById('confirm-password').focus();
+        return false;
+      }
+      
+      // Email validation
+      if (!email) {
+        showError('Email is required');
+        document.getElementById('email').focus();
+        return false;
+      }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showError('Please enter a valid email address');
+        document.getElementById('email').focus();
+        return false;
+      }
+      
+      // Gender validation
+      if (!gender) {
+        showError('Please select your gender');
+        document.getElementById('gender').focus();
+        return false;
+      }
+      
+      // Country validation
+      if (!flag) {
+        showError('Please select your country');
+        document.getElementById('flag-search').focus();
+        return false;
+      }
+      
+      return true;
+    }
+
+    // Real-time input validation
+    document.getElementById('username').addEventListener('input', function() {
+      const username = this.value.trim();
+      if (username.length > 0) {
+        if (username.length < 3) {
+          this.setCustomValidity('Username must be at least 3 characters long');
+        } else if (username.length > 30) {
+          this.setCustomValidity('Username must be less than 30 characters');
+        } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+          this.setCustomValidity('Username can only contain letters, numbers, and underscores');
+        } else {
+          this.setCustomValidity('');
+        }
+      } else {
+        this.setCustomValidity('');
+      }
+    });
+
+    document.getElementById('password').addEventListener('input', function() {
+      const password = this.value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      
+      if (password.length > 0) {
+        if (password.length < 6) {
+          this.setCustomValidity('Password must be at least 6 characters long');
+        } else if (!/(?=.*[a-zA-Z])(?=.*[0-9])/.test(password)) {
+          this.setCustomValidity('Password must contain at least one letter and one number');
+        } else {
+          this.setCustomValidity('');
+        }
+      } else {
+        this.setCustomValidity('');
+      }
+      
+      // Check confirm password match
+      const confirmPasswordInput = document.getElementById('confirm-password');
+      if (confirmPassword && password !== confirmPassword) {
+        confirmPasswordInput.setCustomValidity('Passwords do not match');
+      } else {
+        confirmPasswordInput.setCustomValidity('');
+      }
+    });
+
+    document.getElementById('confirm-password').addEventListener('input', function() {
+      const password = document.getElementById('password').value;
+      const confirmPassword = this.value;
+      
+      if (confirmPassword.length > 0) {
+        if (password !== confirmPassword) {
+          this.setCustomValidity('Passwords do not match');
+        } else {
+          this.setCustomValidity('');
+        }
+      } else {
+        this.setCustomValidity('');
+      }
+    });
+
+    document.getElementById('email').addEventListener('input', function() {
+      const email = this.value.trim();
+      if (email.length > 0) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          this.setCustomValidity('Please enter a valid email address');
+        } else {
+          this.setCustomValidity('');
+        }
+      } else {
+        this.setCustomValidity('');
+      }
+    });
 
     // Country data with all countries
     const countries = [
@@ -351,8 +679,10 @@
     // Country dropdown functionality
     function showCountryDropdown() {
       const dropdown = document.getElementById('country-dropdown');
+      const flagSearch = document.getElementById('flag-search');
       filterCountries();
       dropdown.classList.remove('hidden');
+      flagSearch.setAttribute('aria-expanded', 'true');
     }
 
     function filterCountries() {
@@ -364,22 +694,27 @@
       );
       
       dropdown.innerHTML = filteredCountries.map(country => 
-        `<div class="dropdown-item" onclick="selectCountry('${country.code}', '${country.name}')">
+        `<div class="dropdown-item" onclick="selectCountry('${country.code}', '${country.name}')" role="option" tabindex="0">
           ${country.code} ${country.name}
         </div>`
       ).join('');
     }
 
     function selectCountry(code, name) {
-      document.getElementById('flag-search').value = `${code} ${name}`;
+      const flagSearch = document.getElementById('flag-search');
+      flagSearch.value = `${code} ${name}`;
       document.getElementById('flag').value = code;
       document.getElementById('country-dropdown').classList.add('hidden');
+      flagSearch.setAttribute('aria-expanded', 'false');
     }
 
     // Hide dropdown when clicking outside
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.custom-dropdown')) {
-        document.getElementById('country-dropdown').classList.add('hidden');
+        const dropdown = document.getElementById('country-dropdown');
+        const flagSearch = document.getElementById('flag-search');
+        dropdown.classList.add('hidden');
+        flagSearch.setAttribute('aria-expanded', 'false');
       }
     });
 
@@ -387,25 +722,40 @@
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const username = document.getElementById('username').value;
+      // Hide any existing messages
+      hideMessages();
+      
+      // Validate form
+      if (!validateForm()) {
+        return;
+      }
+      
+      const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
-      const email = document.getElementById('email').value;
-      const displayName = document.getElementById('display-name').value;
-      const team = document.getElementById('team').value;
+      const email = document.getElementById('email').value.trim();
+      const displayName = document.getElementById('display-name').value.trim();
+      const team = document.getElementById('team').value.trim();
       const flag = document.getElementById('flag').value;
       const gender = document.getElementById('gender').value;
       
-      if (!username || !password || !email || !flag || !gender) {
-        alert('Username, password, email, country, and gender are required');
-        return;
-      }
-      
-      if (password.length < 6) {
-        alert('Password must be at least 6 characters long');
-        return;
-      }
+      const submitBtn = document.getElementById('register-submit');
+      const registerText = document.getElementById('register-text');
+      const registerSpinner = document.getElementById('register-spinner');
 
-      const registrationData = { username, password, email, flag, team, gender };
+      // Show loading state
+      submitBtn.disabled = true;
+      registerText.textContent = 'Creating account...';
+      registerSpinner.classList.remove('hidden');
+      document.getElementById('register-status').textContent = 'Creating your account, please wait...';
+
+      const registrationData = { 
+        username, 
+        password, 
+        email, 
+        flag, 
+        team: team || 'Independent', 
+        gender 
+      };
       if (displayName) registrationData.display_name = displayName;
 
       try {
@@ -418,16 +768,34 @@
         const data = await response.json();
 
         if (data.error) {
-          alert('Registration failed: ' + data.error);
+          // Show specific error messages
+          let errorMessage = data.error;
+          if (errorMessage.includes('Username already exists')) {
+            errorMessage = 'This username is already taken. Please choose a different one.';
+          } else if (errorMessage.includes('Email already exists')) {
+            errorMessage = 'An account with this email already exists. Please use a different email or try logging in.';
+          }
+          showError(errorMessage);
         } else {
-          alert('Registration successful! You can now login.');
+          showSuccess('Account created successfully! You can now sign in with your credentials.');
           
-          // Redirect to main page and show login modal
-          window.location.href = 'index.html#login-modal';
+          // Clear form
+          document.getElementById('register-form').reset();
+          document.getElementById('flag').value = '';
+          
+          // Redirect to login after delay
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 2000);
         }
       } catch (error) {
-        alert('Registration failed. Please try again.');
         console.error('Registration error:', error);
+        showError('Unable to connect to the server. Please check your internet connection and try again.');
+      } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        registerText.textContent = 'Create Account';
+        registerSpinner.classList.add('hidden');
       }
     });
 
@@ -466,6 +834,9 @@
     // Initialize theme on page load
     document.addEventListener('DOMContentLoaded', function() {
       initializeTheme();
+      
+      // Focus username field for better accessibility
+      document.getElementById('username').focus();
     });
 
     // Check if user is already logged in
@@ -477,6 +848,31 @@
       // Redirect to main page and show register modal
       window.location.href = 'index.html#register-modal';
     }
+
+    // Add interactive effects with accessibility considerations
+    document.querySelectorAll('.form-input').forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 0 0 3px rgba(234, 88, 12, 0.1)';
+      });
+      
+      input.addEventListener('blur', function() {
+        this.parentElement.style.transform = 'translateY(0)';
+        this.style.boxShadow = '';
+      });
+    });
+
+    // Keyboard navigation improvements
+    document.addEventListener('keydown', function(e) {
+      // Allow Escape to clear error messages and close dropdowns
+      if (e.key === 'Escape') {
+        hideMessages();
+        const dropdown = document.getElementById('country-dropdown');
+        const flagSearch = document.getElementById('flag-search');
+        dropdown.classList.add('hidden');
+        flagSearch.setAttribute('aria-expanded', 'false');
+      }
+    });
   </script>
 </body>
 </html>

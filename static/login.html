@@ -10,76 +10,122 @@
 </head>
 <body class="min-h-screen" style="background: linear-gradient(135deg, var(--background-alt) 0%, var(--background) 100%);">
   <!-- Navigation Header -->
-  <nav class="navbar">
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
     <div class="container">
       <div class="flex justify-between items-center">
         <div class="flex items-center gap-2">
           <h1 class="navbar-brand">🏋️ GymRank</h1>
         </div>
         <div class="flex items-center gap-4">
-          <a href="index.html" class="nav-link">
+          <a href="index.html" class="nav-link" aria-label="Go to home page">
             Home
           </a>
-          <a href="register.html" class="btn btn-primary">
+          <a href="register.html" class="btn btn-primary" aria-label="Go to registration page">
             Register
           </a>
+          <button id="theme-toggle" onclick="toggleTheme()" class="btn btn-ghost btn-icon" title="Toggle dark mode" aria-label="Toggle between light and dark theme">
+            <span id="theme-icon">🌙</span>
+          </button>
         </div>
       </div>
     </div>
   </nav>
 
-  <div class="container py-8">
+  <main class="container py-8" role="main">
     <div class="flex justify-center items-center min-h-screen">
       <div class="w-full max-w-md">
         <!-- Login Card -->
         <div class="card" style="box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
           <div class="text-center mb-8">
-            <div class="text-6xl mb-4">🏋️</div>
+            <div class="text-6xl mb-4" role="img" aria-label="Weightlifting emoji">🏋️</div>
             <h2 class="text-3xl font-bold mb-2">Welcome Back</h2>
             <p style="color: var(--text-secondary)">Sign in to your GymRank account</p>
           </div>
 
-          <form id="login-form">
+          <!-- Error Message Container -->
+          <div id="error-container" class="hidden mb-4 p-4 rounded-md border-l-4" style="background-color: #fef2f2; border-color: #ef4444; color: #dc2626;" role="alert" aria-live="polite">
+            <div class="flex items-center">
+              <span class="mr-2">❌</span>
+              <span id="error-message"></span>
+            </div>
+          </div>
+
+          <!-- Success Message Container -->
+          <div id="success-container" class="hidden mb-4 p-4 rounded-md border-l-4" style="background-color: #f0fdf4; border-color: #10b981; color: #065f46;" role="alert" aria-live="polite">
+            <div class="flex items-center">
+              <span class="mr-2">✅</span>
+              <span id="success-message"></span>
+            </div>
+          </div>
+
+          <form id="login-form" role="form" aria-label="Login form">
             <div class="form-group">
-              <label class="form-label">Username</label>
+              <label for="username" class="form-label">Username</label>
               <input 
                 type="text" 
                 id="username" 
+                name="username"
                 class="form-input" 
                 placeholder="Enter your username"
                 required
+                aria-describedby="username-help"
+                autocomplete="username"
               >
+              <small id="username-help" class="text-sm text-gray-600 mt-1">Enter your GymRank username</small>
             </div>
             
             <div class="form-group">
-              <label class="form-label">Password</label>
-              <input 
-                type="password" 
-                id="password" 
-                class="form-input" 
-                placeholder="Enter your password"
-                required
-              >
+              <label for="password" class="form-label">Password</label>
+              <div class="relative">
+                <input 
+                  type="password" 
+                  id="password" 
+                  name="password"
+                  class="form-input pr-10" 
+                  placeholder="Enter your password"
+                  required
+                  aria-describedby="password-help"
+                  autocomplete="current-password"
+                  minlength="6"
+                >
+                <button 
+                  type="button" 
+                  id="toggle-password"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                  style="background: none; border: none; color: var(--text-secondary);"
+                  aria-label="Toggle password visibility"
+                  tabindex="0"
+                >
+                  <span class="text-lg">👁️</span>
+                </button>
+              </div>
+              <small id="password-help" class="text-sm text-gray-600 mt-1">Enter your account password</small>
             </div>
 
             <button 
               type="submit" 
+              id="login-submit"
               class="btn btn-primary w-full btn-lg mb-6"
+              aria-describedby="login-status"
             >
               <span class="mr-2">🔑</span>
-              Sign In
+              <span id="login-text">Sign In</span>
+              <span id="login-spinner" class="hidden ml-2">
+                <div class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              </span>
             </button>
+            <div id="login-status" class="sr-only" aria-live="polite"></div>
           </form>
 
           <div class="text-center">
             <p style="color: var(--text-secondary)" class="mb-2">
-              <a href="forgot-password.html" class="font-medium hover:underline" style="color: var(--primary-color)">
+              <a href="forgot-password.html" class="font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary" style="color: var(--primary-color)">
                 Forgot your password?
               </a>
             </p>
             <p style="color: var(--text-secondary)">
               Don't have an account? 
-              <a href="register.html" class="font-medium hover:underline" style="color: var(--primary-color)">
+              <a href="register.html" class="font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary" style="color: var(--primary-color)">
                 Sign up here
               </a>
             </p>
@@ -89,19 +135,19 @@
         <!-- Features showcase -->
         <div class="mt-8 grid grid-cols-1 gap-4">
           <div class="card card-compact text-center">
-            <div class="text-2xl mb-2">📊</div>
+            <div class="text-2xl mb-2" role="img" aria-label="Chart emoji">📊</div>
             <h3 class="font-semibold text-sm">Track Your Progress</h3>
             <p class="text-xs" style="color: var(--text-secondary)">Monitor your lifting journey</p>
           </div>
           
           <div class="flex gap-4">
             <div class="card card-compact text-center flex-1">
-              <div class="text-2xl mb-2">🏆</div>
+              <div class="text-2xl mb-2" role="img" aria-label="Trophy emoji">🏆</div>
               <h3 class="font-semibold text-sm">Compete</h3>
               <p class="text-xs" style="color: var(--text-secondary)">Rise in rankings</p>
             </div>
             <div class="card card-compact text-center flex-1">
-              <div class="text-2xl mb-2">🎯</div>
+              <div class="text-2xl mb-2" role="img" aria-label="Target emoji">🎯</div>
               <h3 class="font-semibold text-sm">Share PRs</h3>
               <p class="text-xs" style="color: var(--text-secondary)">Post your victories</p>
             </div>
@@ -109,10 +155,184 @@
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script>
-    const API_BASE = 'https://gymbakugan.onrender.com';
+    const API_BASE = (['localhost','127.0.0.1'].includes(window.location.hostname) ? '' : 'https://gymbakugan.onrender.com');
+
+    // Enhanced error/success message functions
+    function showError(message) {
+      const errorContainer = document.getElementById('error-container');
+      const errorMessage = document.getElementById('error-message');
+      const successContainer = document.getElementById('success-container');
+      
+      // Hide success message if visible
+      successContainer.classList.add('hidden');
+      
+      // Show error message
+      errorMessage.textContent = message;
+      errorContainer.classList.remove('hidden');
+      
+      // Announce to screen readers
+      document.getElementById('login-status').textContent = `Error: ${message}`;
+      
+      // Auto-hide after 10 seconds
+      setTimeout(() => {
+        errorContainer.classList.add('hidden');
+      }, 10000);
+    }
+
+    function showSuccess(message) {
+      const successContainer = document.getElementById('success-container');
+      const successMessage = document.getElementById('success-message');
+      const errorContainer = document.getElementById('error-container');
+      
+      // Hide error message if visible
+      errorContainer.classList.add('hidden');
+      
+      // Show success message
+      successMessage.textContent = message;
+      successContainer.classList.remove('hidden');
+      
+      // Announce to screen readers
+      document.getElementById('login-status').textContent = `Success: ${message}`;
+    }
+
+    function hideMessages() {
+      document.getElementById('error-container').classList.add('hidden');
+      document.getElementById('success-container').classList.add('hidden');
+    }
+
+    // Password visibility toggle
+    document.getElementById('toggle-password').addEventListener('click', function() {
+      const passwordInput = document.getElementById('password');
+      const toggleButton = this;
+      const icon = toggleButton.querySelector('span');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.textContent = '🙈';
+        toggleButton.setAttribute('aria-label', 'Hide password');
+      } else {
+        passwordInput.type = 'password';
+        icon.textContent = '👁️';
+        toggleButton.setAttribute('aria-label', 'Show password');
+      }
+    });
+
+    // Form validation
+    function validateForm() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      
+      if (!username) {
+        showError('Username is required');
+        document.getElementById('username').focus();
+        return false;
+      }
+      
+      if (username.length < 3) {
+        showError('Username must be at least 3 characters long');
+        document.getElementById('username').focus();
+        return false;
+      }
+      
+      if (!password) {
+        showError('Password is required');
+        document.getElementById('password').focus();
+        return false;
+      }
+      
+      if (password.length < 6) {
+        showError('Password must be at least 6 characters long');
+        document.getElementById('password').focus();
+        return false;
+      }
+      
+      return true;
+    }
+
+    // Enhanced form submission with better UX
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Hide any existing messages
+      hideMessages();
+      
+      // Validate form
+      if (!validateForm()) {
+        return;
+      }
+      
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const submitBtn = document.getElementById('login-submit');
+      const loginText = document.getElementById('login-text');
+      const loginSpinner = document.getElementById('login-spinner');
+
+      // Show loading state
+      submitBtn.disabled = true;
+      loginText.textContent = 'Signing in...';
+      loginSpinner.classList.remove('hidden');
+      document.getElementById('login-status').textContent = 'Signing in, please wait...';
+
+      try {
+        const response = await fetch(`${API_BASE}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          // Show specific error messages
+          let errorMessage = data.error;
+          if (errorMessage.includes('Invalid username or password')) {
+            errorMessage = 'Incorrect username or password. Please check your credentials and try again.';
+          } else if (errorMessage.includes('User not found')) {
+            errorMessage = 'Account not found. Please check your username or register for a new account.';
+          }
+          showError(errorMessage);
+        } else {
+          // Store user session
+          localStorage.setItem('gymrank_user', JSON.stringify(data));
+          showSuccess('Login successful! Redirecting to your dashboard...');
+          
+          // Redirect to main app after short delay
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        showError('Unable to connect to the server. Please check your internet connection and try again.');
+      } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        loginText.textContent = 'Sign In';
+        loginSpinner.classList.add('hidden');
+      }
+    });
+
+    // Real-time input validation
+    document.getElementById('username').addEventListener('input', function() {
+      const username = this.value.trim();
+      if (username.length > 0 && username.length < 3) {
+        this.setCustomValidity('Username must be at least 3 characters long');
+      } else {
+        this.setCustomValidity('');
+      }
+    });
+
+    document.getElementById('password').addEventListener('input', function() {
+      const password = this.value;
+      if (password.length > 0 && password.length < 6) {
+        this.setCustomValidity('Password must be at least 6 characters long');
+      } else {
+        this.setCustomValidity('');
+      }
+    });
 
     // Theme management
     function toggleTheme() {
@@ -146,83 +366,6 @@
       themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
     }
 
-    // Enhanced form submission with better UX
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const submitBtn = e.target.querySelector('button[type="submit"]');
-      
-      if (!username || !password) {
-        showAlert('Please fill in all fields', 'error');
-        return;
-      }
-
-      // Show loading state
-      const originalText = submitBtn.innerHTML;
-      submitBtn.innerHTML = '<span class="mr-2">⏳</span>Signing in...';
-      submitBtn.disabled = true;
-
-      try {
-        const response = await fetch(`${API_BASE}/api/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-
-        const data = await response.json();
-
-        if (data.error) {
-          showAlert('Login failed: ' + data.error, 'error');
-        } else {
-          // Store user session
-          localStorage.setItem('gymrank_user', JSON.stringify(data));
-          showAlert('Login successful! Redirecting...', 'success');
-          
-          // Redirect to main app after short delay
-          setTimeout(() => {
-            window.location.href = 'index.html';
-          }, 1500);
-        }
-      } catch (error) {
-        showAlert('Login failed. Please check your connection.', 'error');
-        console.error('Login error:', error);
-      } finally {
-        // Reset button state
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-      }
-    });
-
-    // Enhanced alert function
-    function showAlert(message, type = 'info') {
-      // Remove existing alerts
-      const existingAlert = document.querySelector('.alert');
-      if (existingAlert) {
-        existingAlert.remove();
-      }
-
-      const alertDiv = document.createElement('div');
-      alertDiv.className = `alert alert-${type} fixed top-4 right-4 z-50 max-w-sm`;
-      alertDiv.style.zIndex = '9999';
-      
-      const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
-      alertDiv.innerHTML = `
-        <div class="flex items-center gap-2">
-          <span>${icon}</span>
-          <span>${message}</span>
-        </div>
-      `;
-      
-      document.body.appendChild(alertDiv);
-      
-      // Auto remove after 5 seconds
-      setTimeout(() => {
-        alertDiv.remove();
-      }, 5000);
-    }
-
     // Check if user is already logged in
     const savedUser = localStorage.getItem('gymrank_user');
     if (savedUser) {
@@ -236,17 +379,30 @@
     // Initialize theme on page load
     document.addEventListener('DOMContentLoaded', function() {
       initializeTheme();
+      
+      // Focus username field for better accessibility
+      document.getElementById('username').focus();
     });
 
-    // Add some interactive effects
+    // Add interactive effects with accessibility considerations
     document.querySelectorAll('.form-input').forEach(input => {
       input.addEventListener('focus', function() {
         this.parentElement.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 0 0 3px rgba(234, 88, 12, 0.1)';
       });
       
       input.addEventListener('blur', function() {
         this.parentElement.style.transform = 'translateY(0)';
+        this.style.boxShadow = '';
       });
+    });
+
+    // Keyboard navigation improvements
+    document.addEventListener('keydown', function(e) {
+      // Allow Escape to clear error messages
+      if (e.key === 'Escape') {
+        hideMessages();
+      }
     });
   </script>
 </body>

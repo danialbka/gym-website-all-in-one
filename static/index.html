@@ -162,10 +162,7 @@
       border-color: var(--secondary-color) transparent transparent transparent;
     }
 
-    .tooltip:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
-    }
+    .tooltip:hover .tooltiptext { visibility: hidden; opacity: 0; }
 
     /* Team member item hover effects */
     .team-member-item {
@@ -214,6 +211,43 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    /* Skip link for accessibility */
+    .skip-link {
+      position: absolute;
+      left: -10000px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip-link:focus {
+      left: 1rem;
+      top: 1rem;
+      width: auto;
+      height: auto;
+      padding: 0.5rem 0.75rem;
+      background: var(--primary-color);
+      color: white;
+      border-radius: 0.375rem;
+      z-index: 1000;
+    }
+    /* Back-to-top button */
+    #back-to-top {
+      position: fixed;
+      right: 1rem;
+      bottom: 1rem;
+      display: none;
+      border-radius: 9999px;
+      padding: 0.6rem 0.75rem;
+      background: var(--primary-color);
+      color: black;
+      border: none;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+      cursor: pointer;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; }
+    }
   </style>
   <link href="./src/output.css" rel="stylesheet">
   
@@ -222,13 +256,14 @@
 </head>
 <body class="min-h-screen">
   <!-- Navigation Header -->
+  <a href="#main" class="skip-link">Skip to content</a>
   <nav class="navbar">
     <div class="container">
       <div class="flex justify-between items-center">
         <div class="flex items-center gap-2">
           <h1 class="navbar-brand">🏋️ GymRank</h1>
         </div>
-        <div class="navbar-nav">
+        <div class="navbar-nav flex items-center">
           <button onclick="showSection('home')" id="nav-home" class="nav-link active" aria-label="Go to home page" title="Home - Dashboard and PR submission">
             🏠 Home
           </button>
@@ -241,25 +276,18 @@
           <button onclick="showSection('teams')" id="nav-teams" class="nav-link" aria-label="View team rankings" title="Teams - Team competitions">
             🏟️ Teams
           </button>
-          <div id="user-info" class="hidden nav-link tooltip" onclick="showSection('profile')" aria-label="View your profile" title="Profile - Manage your account">
+          <div id="user-info" class="hidden nav-link" onclick="showSection('profile')" aria-label="View your profile" style="display: flex; align-items: center;">
             <div id="logged-in-user" class="flex items-center gap-2"></div>
-            <span class="tooltiptext">My Profile</span>
           </div>
           <button id="logout-btn" onclick="logout()" class="hidden btn btn-outline btn-sm" aria-label="Sign out of your account" title="Sign out">
             Logout
           </button>
-          <div class="tooltip">
-            <button id="theme-toggle" onclick="toggleTheme()" class="btn btn-ghost btn-icon" aria-label="Toggle between light and dark theme">
-              <span id="theme-icon">🌙</span>
-            </button>
-            <span class="tooltiptext">Toggle theme</span>
-          </div>
-          <div class="tooltip">
-            <button onclick="switchToMobile()" class="btn btn-ghost btn-sm" aria-label="Switch to mobile view">
-              📱
-            </button>
-            <span class="tooltiptext">Mobile view</span>
-          </div>
+          <button id="theme-toggle" onclick="toggleTheme()" class="btn btn-ghost btn-icon" aria-label="Toggle between light and dark theme">
+            <span id="theme-icon">🌙</span>
+          </button>
+          <button onclick="switchToMobile()" class="btn btn-ghost btn-sm" aria-label="Switch to mobile view">
+            📱
+          </button>
           <div id="auth-buttons" class="flex items-center gap-2">
             <button onclick="showLoginModal()" class="btn btn-outline" aria-label="Sign in to your account">
               Login
@@ -273,9 +301,45 @@
     </div>
   </nav>
 
-  <div class="container" style="padding-top: 2rem;">
+  <div id="main" class="container" style="padding-top: 2rem;">
     <!-- Home Section -->
     <div id="home-section" class="section" style="padding-top: 1rem;">
+      <!-- Hero Section -->
+      <section class="hero mb-8">
+        <div class="container">
+          <div class="flex items-center justify-between" style="gap: 1.25rem; flex-wrap: wrap;">
+            <div style="flex: 1 1 420px; min-width: 280px;">
+              <h2 class="hero-title mb-2">
+                Compete. Improve. <span class="gradient-text">Rank Up</span>.
+              </h2>
+              <p class="hero-subtitle mb-4">
+                Track your PRs, watch elite lifts, and climb the DOTS leaderboard. Built for lifters who love progress.
+              </p>
+              <div class="flex items-center" style="gap: 0.75rem; flex-wrap: wrap;">
+                <button onclick="showRegisterModal()" class="btn btn-gradient btn-lg">🚀 Get Started</button>
+                <button onclick="showSection('leaderboard')" class="btn btn-outline btn-lg">🏆 View Leaderboard</button>
+              </div>
+            </div>
+            <div class="card" style="flex: 1 1 340px; min-width: 260px;">
+              <div class="flex" style="gap: 1rem; align-items: center;">
+                <div class="text-4xl" aria-hidden="true">📈</div>
+                <div>
+                  <div class="font-semibold">Live Rankings</div>
+                  <div style="color: var(--text-secondary);">Auto-updated DOTS and team scores</div>
+                </div>
+              </div>
+              <div class="flex mt-4" style="gap: 1rem; align-items: center;">
+                <div class="text-4xl" aria-hidden="true">📹</div>
+                <div>
+                  <div class="font-semibold">Verified PRs</div>
+                  <div style="color: var(--text-secondary);">Submit Instagram-linked lifts with ease</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold mb-2">Welcome to GymRank</h2>
         <p style="color: var(--text-secondary)">Competitive lifting platform inspired by Bakugan rankings</p>
@@ -354,7 +418,7 @@
         <h2 class="text-2xl font-semibold mb-4">Welcome to GymRank!</h2>
         <p class="mb-6" style="color: var(--text-secondary)">Join the competitive lifting platform inspired by Bakugan rankings</p>
         <div class="flex justify-center gap-4">
-          <button onclick="showRegisterModal()" class="btn btn-primary btn-lg">
+          <button onclick="showRegisterModal()" class="btn btn-gradient btn-lg">
             Get Started
           </button>
           <button onclick="showLoginModal()" class="btn btn-outline btn-lg">
@@ -371,7 +435,7 @@
         <p style="color: var(--text-secondary)">Watch incredible lifts from our community</p>
       </div>
       
-      <div id="videos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 videos-grid-mobile">
+      <div id="videos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6 videos-grid-mobile">
         <div class="flex justify-center items-center py-8 col-span-full">
           <div class="dot-matrix-spinner">
             <div class="dot"></div>
@@ -661,7 +725,7 @@
                   <div id="bench-trend" class="text-sm font-semibold">--</div>
                 </div>
               </div>
-              <div class="h-32 relative">
+              <div class="relative" style="height: 240px;">
                 <canvas id="bench-chart" class="w-full h-full"></canvas>
               </div>
             </div>
@@ -681,7 +745,7 @@
                   <div id="squat-trend" class="text-sm font-semibold">--</div>
                 </div>
               </div>
-              <div class="h-32 relative">
+              <div class="relative" style="height: 240px;">
                 <canvas id="squat-chart" class="w-full h-full"></canvas>
               </div>
             </div>
@@ -701,7 +765,7 @@
                   <div id="deadlift-trend" class="text-sm font-semibold">--</div>
                 </div>
               </div>
-              <div class="h-32 relative">
+              <div class="relative" style="height: 240px;">
                 <canvas id="deadlift-chart" class="w-full h-full"></canvas>
               </div>
             </div>
@@ -890,7 +954,7 @@
   </div>
 
   <script>
-    const API_BASE = 'https://gymbakugan.onrender.com';
+    const API_BASE = (['localhost','127.0.0.1'].includes(window.location.hostname) ? '' : 'https://gymbakugan.onrender.com');
 
     // Data caching system
     const dataCache = {
@@ -1651,12 +1715,66 @@
       document.getElementById('user-profile-content').classList.remove('hidden');
     }
 
+    // Skeleton renderers (desktop)
+    function renderLeaderboardSkeleton(n = 8) {
+      return Array.from({ length: n }).map(() => `
+        <div class=\"skel-row\">
+          <div class=\"skel-left\">
+            <div class=\"skel-rank skeleton\"></div>
+            <div class=\"skel-flag skeleton\"></div>
+            <div>
+              <div class=\"skel-line skeleton\" style=\"width: 140px;\"></div>
+              <div class=\"skel-sub skeleton\" style=\"width: 120px;\"></div>
+            </div>
+          </div>
+          <div style=\"text-align:right;\">
+            <div class=\"skel-badge skeleton\" style=\"width: 100px;\"></div>
+            <div class=\"skel-sub skeleton\" style=\"width: 80px;\"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderVideoSkeleton(n = 6) {
+      return Array.from({ length: n }).map(() => `
+        <div class=\"card\" style=\"min-height: 320px; padding: 1.5rem;\">
+          <div class=\"skeleton\" style=\"width: 60%; height: 14px; border-radius: 8px; margin-bottom: 10px;\"></div>
+          <div class=\"skeleton\" style=\"width: 40%; height: 12px; border-radius: 8px; margin-bottom: 16px;\"></div>
+          <div class=\"skeleton\" style=\"width: 100%; height: 140px; border-radius: 10px; margin-bottom: 16px;\"></div>
+          <div style=\"display:flex; justify-content: space-between; align-items: center;\">
+            <div class=\"skeleton\" style=\"width: 140px; height: 20px; border-radius: 8px;\"></div>
+            <div class=\"skeleton\" style=\"width: 80px; height: 32px; border-radius: 8px;\"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderTeamsSkeleton(n = 8) {
+      return Array.from({ length: n }).map(() => `
+        <div class=\"skel-row\">
+          <div class=\"skel-left\">
+            <div class=\"skel-rank skeleton\"></div>
+            <div>
+              <div class=\"skel-line skeleton\" style=\"width: 160px;\"></div>
+              <div class=\"skel-sub skeleton\" style=\"width: 100px;\"></div>
+            </div>
+          </div>
+          <div style=\"text-align:right;\">
+            <div class=\"skel-badge skeleton\" style=\"width: 110px;\"></div>
+            <div class=\"skel-sub skeleton\" style=\"width: 80px;\"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
     // Original loading functions (updated to cache data)
     function loadLeaderboard(gender = '', country = '') {
       const params = new URLSearchParams();
       if (gender) params.append('gender', gender);
       if (country) params.append('country', country);
       const url = `${API_BASE}/api/leaderboard${params.toString() ? '?' + params.toString() : ''}`;
+      // show skeleton
+      document.getElementById('leaderboard').innerHTML = renderLeaderboardSkeleton(8);
       
       fetch(url)
         .then(res => res.json())
@@ -1758,6 +1876,8 @@
 
     // Load videos
     function loadVideos() {
+      // show skeleton
+      document.getElementById('videos-grid').innerHTML = renderVideoSkeleton(6);
       fetch(`${API_BASE}/api/videos`)
         .then(res => res.json())
         .then(data => {
@@ -1812,13 +1932,12 @@
                 </div>
 
                 <!-- Video Preview/Embed Section -->
-                <div class="mb-4 bg-gray-100 rounded-lg overflow-hidden" style="background: var(--background-alt); min-height: 120px;">
+                <div class="mb-4 bg-gray-100 rounded-lg overflow-hidden" style="background: var(--background-alt); min-height: 380px;">
                   ${canEmbed ? `
                     <div class="relative">
                       <div class="instagram-embed-placeholder" 
-                           data-instagram-id="${instagramId}" 
-                           style="min-height: 120px; display: flex; align-items: center; justify-content: center; cursor: pointer;"
-                           onclick="loadInstagramEmbed(this, '${instagramId}')">
+                           style="min-height: 360px; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+                           onclick="loadInstagramEmbed(this, '${video.video_url}')">
                         <div class="text-center">
                           <div class="text-4xl mb-2">📱</div>
                           <div class="text-sm font-medium">Click to load Instagram video</div>
@@ -1899,9 +2018,27 @@
       }
     }
 
-    // Load Instagram embed (lazy loading)
-    function loadInstagramEmbed(element, instagramId) {
-      if (!instagramId) return;
+    // Parse Instagram URL into type and id (supports p/reel/tv)
+    function parseInstagramInfo(url) {
+      try {
+        const match = url.match(/instagram\.com\/(p|reel|tv)\/([A-Za-z0-9_-]+)/);
+        if (match) {
+          return { type: match[1], id: match[2] };
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Load Instagram embed (lazy loading, responsive and larger)
+    function loadInstagramEmbed(element, instagramUrl) {
+      if (!instagramUrl) return;
+      const info = parseInstagramInfo(instagramUrl);
+      if (!info) {
+        element.innerHTML = '<div class="text-center py-8" style="color: var(--text-secondary)">Unable to load Instagram embed</div>';
+        return;
+      }
       
       // Show loading state
       element.innerHTML = `
@@ -1914,22 +2051,22 @@
         </div>
       `;
       
-      // Create Instagram embed
-      const embedUrl = `https://www.instagram.com/p/${instagramId}/embed/`;
+      // Create Instagram embed with responsive 9:16 aspect ratio
+      const embedUrl = `https://www.instagram.com/${info.type}/${info.id}/embed/`;
       
       element.innerHTML = `
-        <iframe 
-          src="${embedUrl}" 
-          width="100%" 
-          height="200" 
-          frameborder="0" 
-          scrolling="no" 
-          allowtransparency="true"
-          style="border-radius: 8px;"
-          onload="this.style.opacity=1"
-          style="opacity: 0; transition: opacity 0.3s ease;"
-          onerror="this.parentElement.innerHTML='<div class=\\'text-center py-8\\' style=\\'color: var(--text-secondary)\\'>Unable to load Instagram embed</div>'"
-        ></iframe>
+        <div class="ig-embed-wrapper" style="position: relative; width: 100%; aspect-ratio: 9 / 16; max-height: 720px; background: #000;">
+          <iframe 
+            src="${embedUrl}"
+            frameborder="0"
+            scrolling="no"
+            allowtransparency="true"
+            allowfullscreen="true"
+            onload="this.style.opacity=1"
+            onerror="this.parentElement.innerHTML='<div class=\\'text-center py-8\\' style=\\'color: var(--text-secondary)\\'>Unable to load Instagram embed</div>'"
+            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 12px; opacity: 0; transition: opacity 0.3s ease;"
+          ></iframe>
+        </div>
       `;
     }
 
@@ -2005,6 +2142,8 @@
 
     // Load teams
     function loadTeams() {
+      // show skeleton
+      document.getElementById('team-leaderboard').innerHTML = renderTeamsSkeleton(8);
       fetch(`${API_BASE}/api/team_leaderboard`)
         .then(res => res.json())
         .then(data => {
@@ -2234,71 +2373,53 @@
     // Load user profile
     function loadUserProfile() {
       if (!currentUser) return;
-      
-      // Load profile settings
-      document.getElementById('profile-username').value = currentUser.username;
+
+      // Load profile form
+      document.getElementById('profile-username').value = currentUser.username || '';
       document.getElementById('profile-team').value = currentUser.team || 'Independent';
       document.getElementById('profile-weight').value = currentUser.weight || '';
       document.getElementById('profile-gender').value = currentUser.gender || '';
-      
-      // Load progress charts
+
+      // Load user PRs and progress charts
+      loadUserPRs();
       loadProgressCharts();
-      
-      // Load user posts
+    }
+
+    function loadUserPRs() {
+      if (!currentUser) return;
+
       fetch(`${API_BASE}/api/user/${currentUser.username}/posts`)
         .then(res => res.json())
         .then(data => {
           const postsContainer = document.getElementById('user-posts');
           if (data.length === 0) {
-            postsContainer.innerHTML = '<p class="text-center py-8" style="color: var(--text-secondary)">No posts yet.</p>';
+            postsContainer.innerHTML = '<p style="color: var(--text-secondary)" class="text-center py-8">No posts yet. Submit your first PR!</p>';
             return;
           }
-          
+
           postsContainer.innerHTML = data.map(post => {
-            const liftEmoji = {
-              'bench': '🏋️',
-              'deadlift': '🏋️‍♂️',
-              'squat': '🦵'
-            };
-            
-            const date = new Date(post.created_at).toLocaleDateString();
-            
+            const liftEmoji = post.lift_type === 'bench' ? '🏋️' : post.lift_type === 'squat' ? '🦵' : '🏋️‍♂️';
             return `
-              <div class="card hover:shadow-lg transition-shadow">
-                <div class="flex items-center justify-between mb-6">
-                  <div class="flex items-center gap-3">
-                    <span class="text-2xl">${liftEmoji[post.lift_type] || '🏋️'}</span>
-                    <div>
-                      <span class="font-semibold capitalize text-lg">${post.lift_type}</span>
-                      <div class="font-bold text-xl" style="color: var(--primary-color)">${post.weight}kg</div>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-4">
-                    <button onclick="editPost(${post.id}, '${post.lift_type}', ${post.weight})" class="btn btn-outline btn-sm">
-                      Edit
-                    </button>
-                    <button onclick="deletePost(${post.id})" class="btn btn-outline btn-sm" style="color: var(--error)" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--error)'">
-                      Delete
-                    </button>
+              <div class="flex items-center justify-between p-4 border" style="border-color: var(--border); border-radius: 0.5rem;">
+                <div class="flex items-center gap-4">
+                  <span class="text-2xl">${liftEmoji}</span>
+                  <div>
+                    <div class="font-semibold text-lg">${post.weight}kg ${post.lift_type}</div>
+                    <div class="text-sm" style="color: var(--text-secondary)">${new Date(post.created_at).toLocaleDateString()}</div>
                   </div>
                 </div>
-                ${post.video_url ? `
-                  <div class="mb-6">
-                    <a href="${post.video_url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary w-full">
-                      View on Instagram
-                    </a>
-                  </div>
-                ` : ''}
-                <div class="text-sm pt-4" style="color: var(--text-secondary); border-top: 1px solid var(--border)">
-                  Posted on ${date}
+                <div class="flex items-center gap-2">
+                  <a href="${post.video_url}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">Watch</a>
+                  <button onclick="deletePost(${post.id})" class="btn btn-danger btn-sm">Delete</button>
                 </div>
               </div>
             `;
           }).join('');
         })
         .catch(err => {
-          document.getElementById('user-posts').innerHTML = 
-            '<div class="text-center py-8" style="color: var(--error)">Error loading posts.</div>';
+          console.error('Error loading user posts:', err);
+          const postsContainer = document.getElementById('user-posts');
+          postsContainer.innerHTML = '<p style="color: var(--error)" class="text-center py-8">Error loading posts.</p>';
         });
     }
 
@@ -2319,16 +2440,17 @@
         });
     }
 
-    // Render progress chart
+    // Render progress chart (smoother curve, gradient fill, gridlines)
     function renderProgressChart(liftType, progressData) {
       const canvas = document.getElementById(`${liftType}-chart`);
       if (!canvas) return;
       
       const ctx = canvas.getContext('2d');
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * devicePixelRatio;
-      canvas.height = rect.height * devicePixelRatio;
-      ctx.scale(devicePixelRatio, devicePixelRatio);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       
       const width = rect.width;
       const height = rect.height;
@@ -2337,13 +2459,10 @@
       ctx.clearRect(0, 0, width, height);
       
       if (!progressData || progressData.length === 0) {
-        // Show "No data" message
         ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary');
-        ctx.font = '12px system-ui';
+        ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial';
         ctx.textAlign = 'center';
         ctx.fillText('No data yet', width / 2, height / 2);
-        
-        // Update current weight display
         document.getElementById(`${liftType}-current`).textContent = 'Current: --kg';
         document.getElementById(`${liftType}-trend`).textContent = '--';
         return;
@@ -2355,49 +2474,108 @@
       const maxWeight = Math.max(...weights);
       const weightRange = maxWeight - minWeight || 1;
       
-      const padding = 20;
+      const padding = 28;
       const chartWidth = width - 2 * padding;
       const chartHeight = height - 2 * padding;
       
-      // Calculate trend
       const currentWeight = weights[weights.length - 1];
       const previousWeight = weights.length > 1 ? weights[weights.length - 2] : currentWeight;
-      const trend = currentWeight > previousWeight ? '+' + (currentWeight - previousWeight).toFixed(1) + 'kg' : 
-                   currentWeight < previousWeight ? (currentWeight - previousWeight).toFixed(1) + 'kg' : 
-                   '0kg';
-      
-      // Update current weight and trend displays
+      const delta = currentWeight - previousWeight;
+      const trend = `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}kg`;
       document.getElementById(`${liftType}-current`).textContent = `Current: ${currentWeight}kg`;
       document.getElementById(`${liftType}-trend`).textContent = trend;
       
-      // Draw chart
-      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
-      ctx.lineWidth = 2;
+      // Colors
+      const rootStyle = getComputedStyle(document.documentElement);
+      const primary = (rootStyle.getPropertyValue('--primary-color') || '#ea580c').trim();
+      const textSecondary = (rootStyle.getPropertyValue('--text-secondary') || '#6b7280').trim();
+      const border = (rootStyle.getPropertyValue('--border') || '#e5e7eb').trim();
       
-      // Draw line
+      // Gridlines
+      ctx.strokeStyle = border;
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      progressData.forEach((point, index) => {
-        const x = padding + (index / (progressData.length - 1 || 1)) * chartWidth;
-        const y = padding + (1 - (point.weight - minWeight) / weightRange) * chartHeight;
-        
-        if (index === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-      });
+      const gridLines = 4;
+      for (let i = 0; i <= gridLines; i++) {
+        const y = padding + (i / gridLines) * chartHeight;
+        ctx.moveTo(padding, y);
+        ctx.lineTo(padding + chartWidth, y);
+      }
       ctx.stroke();
       
-      // Draw points
-      progressData.forEach((point, index) => {
+      // Points as coordinates
+      const linePoints = progressData.map((point, index) => {
         const x = padding + (index / (progressData.length - 1 || 1)) * chartWidth;
         const y = padding + (1 - (point.weight - minWeight) / weightRange) * chartHeight;
-        
+        return { x, y };
+      });
+      
+      // Gradient under curve
+      const gradient = ctx.createLinearGradient(0, padding, 0, padding + chartHeight);
+      gradient.addColorStop(0, primary + '33');
+      gradient.addColorStop(1, primary + '00');
+      
+      // Catmull-Rom to Bezier smoothing
+      function getControlPoints(p0, p1, p2, p3, t = 0.2) {
+        const d1 = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+        const d2 = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        const d3 = Math.hypot(p3.x - p2.x, p3.y - p2.y);
+        const b1 = d1 ? t * d1 / (d1 + d2) : 0;
+        const b2 = d3 ? t * d3 / (d2 + d3) : 0;
+        const cp1x = p1.x + b1 * (p2.x - p0.x);
+        const cp1y = p1.y + b1 * (p2.y - p0.y);
+        const cp2x = p2.x - b2 * (p3.x - p1.x);
+        const cp2y = p2.y - b2 * (p3.y - p1.y);
+        return { cp1x, cp1y, cp2x, cp2y };
+      }
+      
+      // Filled area
+      ctx.beginPath();
+      ctx.moveTo(linePoints[0].x, linePoints[0].y);
+      for (let i = 0; i < linePoints.length - 1; i++) {
+        const p0 = linePoints[Math.max(0, i - 1)];
+        const p1 = linePoints[i];
+        const p2 = linePoints[i + 1];
+        const p3 = linePoints[Math.min(linePoints.length - 1, i + 2)];
+        const { cp1x, cp1y, cp2x, cp2y } = getControlPoints(p0, p1, p2, p3);
+        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+      }
+      ctx.lineTo(padding + chartWidth, padding + chartHeight);
+      ctx.lineTo(padding, padding + chartHeight);
+      ctx.closePath();
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      
+      // Stroke curve
+      ctx.beginPath();
+      ctx.moveTo(linePoints[0].x, linePoints[0].y);
+      for (let i = 0; i < linePoints.length - 1; i++) {
+        const p0 = linePoints[Math.max(0, i - 1)];
+        const p1 = linePoints[i];
+        const p2 = linePoints[i + 1];
+        const p3 = linePoints[Math.min(linePoints.length - 1, i + 2)];
+        const { cp1x, cp1y, cp2x, cp2y } = getControlPoints(p0, p1, p2, p3);
+        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+      }
+      ctx.strokeStyle = primary;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Points
+      ctx.fillStyle = primary;
+      linePoints.forEach(({ x, y }) => {
         ctx.beginPath();
         ctx.arc(x, y, 3, 0, 2 * Math.PI);
         ctx.fill();
       });
+      
+      // Min/Max labels
+      ctx.fillStyle = textSecondary;
+      ctx.font = '11px system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${minWeight}kg`, 8, height - 6);
+      ctx.textAlign = 'right';
+      ctx.fillText(`${maxWeight}kg`, width - 8, 14);
     }
 
     // Edit post function
